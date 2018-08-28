@@ -232,7 +232,9 @@ void Chip::onSideChanged(int value) {
 #define TYPE_H 3
 #define TYPE_H_MID 4
 #define TYPE_INPUT 5
-#define TYPE_OUTPUT 6
+#define TYPE_INPUT_MID 6
+#define TYPE_OUTPUT 7
+#define TYPE_OUTPUT_MID 8
 
 int Chip::convertPos(int x, int y, int &res_i, int &res_j) {
   const int THRESHOLD = 50;
@@ -285,7 +287,11 @@ int Chip::convertPos(int x, int y, int &res_i, int &res_j) {
         (yy + MIN_WIDTH / 2) * SCALE <= y &&
         y <= (yy + LENGTH - MIN_WIDTH / 2) * SCALE) {
       res_i = i;
-      return TYPE_INPUT;
+      if (fabs((xx - inputWidth[i] / 2) - x / SCALE) <= THRESHOLD ||
+          fabs((xx + inputWidth[i] / 2) - x / SCALE) <= THRESHOLD) {
+        return TYPE_INPUT;
+      }
+      return TYPE_INPUT_MID;
     }
   }
 
@@ -298,7 +304,11 @@ int Chip::convertPos(int x, int y, int &res_i, int &res_j) {
         (yy + MIN_WIDTH / 2) * SCALE <= y &&
         y <= (yy + LENGTH - MIN_WIDTH / 2) * SCALE) {
       res_i = i;
-      return TYPE_OUTPUT;
+      if (fabs((xx - outputWidth[i] / 2) - x / SCALE) <= THRESHOLD ||
+          fabs((xx + outputWidth[i] / 2) - x / SCALE) <= THRESHOLD) {
+        return TYPE_OUTPUT;
+      }
+      return TYPE_OUTPUT_MID;
     }
   }
 
@@ -313,12 +323,20 @@ void Chip::mouseMoveEvent(QMouseEvent *event) {
     // if dragging input/output
     // find nearest available place
     if (isHoldingInput) {
-      int min_xoff = 0x7fffffff, min_place;
+      int min_xoff = 0x7fffffff, min_place = -1;
       for (int i = 0; i <= side; i++) {
         int j;
         for (j = 0; j < INPUT_NUM; j++) {
-          if (inputCol[j] == i && j != holdingInputIndex) {
+          if (j == holdingInputIndex) {
+            continue;
+          }
+          if (inputCol[j] == i) {
             // this is occupied.
+            break;
+          }
+          int gap = (LENGTH + MIN_WIDTH) * abs(inputCol[j] - i) - MIN_WIDTH;
+          if ((inputWidth[holdingInputIndex] + inputWidth[j]) / 2 >= gap) {
+            // no enough space.
             break;
           }
         }
@@ -332,16 +350,26 @@ void Chip::mouseMoveEvent(QMouseEvent *event) {
           }
         }
       }
-      // min_place must exist
-      inputCol[holdingInputIndex] = min_place;
-      update();
+
+      if (min_place != -1) {
+        inputCol[holdingInputIndex] = min_place;
+        update();
+      }
     } else if (isHoldingOutput) {
       int min_xoff = 0x7fffffff, min_place;
       for (int i = 0; i <= side; i++) {
         int j;
         for (j = 0; j < OUTPUT_NUM; j++) {
-          if (outputCol[j] == i && j != holdingOutputIndex) {
+          if (j == holdingOutputIndex) {
+            continue;
+          }
+          if (outputCol[j] == i) {
             // this is occupied.
+            break;
+          }
+          int gap = (LENGTH + MIN_WIDTH) * abs(outputCol[j] - i) - MIN_WIDTH;
+          if ((outputWidth[holdingOutputIndex] + outputWidth[j]) / 2 >= gap) {
+            // no enough space.
             break;
           }
         }
@@ -355,15 +383,18 @@ void Chip::mouseMoveEvent(QMouseEvent *event) {
           }
         }
       }
-      // min_place must exist
-      outputCol[holdingOutputIndex] = min_place;
-      update();
+
+      if (min_place != -1) {
+        outputCol[holdingOutputIndex] = min_place;
+        update();
+      }
     } else if (isResizing) {
       // resize to cursor
       int xx = OFFSET + resizingX * (LENGTH + MIN_WIDTH);
       int yy = OFFSET + resizingY * (LENGTH + MIN_WIDTH);
       float off = 0;
-      if (resizingVertical) {
+      switch (resizingType) {
+      case TYPE_V:
         off = abs(pos.x() / SCALE - xx);
         off = fmax(off, MIN_WIDTH / 2);
         if (resizingX > 0) {
@@ -373,7 +404,8 @@ void Chip::mouseMoveEvent(QMouseEvent *event) {
           off = fmin(off, LENGTH - width_v[resizingX + 1][resizingY] / 2);
         }
         width_v[resizingX][resizingY] = off * 2;
-      } else {
+        break;
+      case TYPE_H:
         off = fabs(pos.y() / SCALE - yy);
         off = fmax(off, MIN_WIDTH / 2);
         if (resizingY > 0) {
@@ -383,29 +415,80 @@ void Chip::mouseMoveEvent(QMouseEvent *event) {
           off = fmin(off, LENGTH - width_h[resizingX][resizingY + 1] / 2);
         }
         width_h[resizingX][resizingY] = off * 2;
+        break;
+      case TYPE_INPUT:
+        xx = OFFSET + inputCol[resizingX] * (LENGTH + MIN_WIDTH);
+        off = abs(pos.x() / SCALE - xx);
+        off = fmax(off, MIN_WIDTH / 2);
+        for (int i = 0; i < INPUT_NUM; i++) {
+          if (inputCol[resizingX] != inputCol[i]) {
+            int gap =
+                (LENGTH + MIN_WIDTH) * abs(inputCol[resizingX] - inputCol[i]) -
+                MIN_WIDTH;
+            off = fmin(off, gap - inputWidth[i] / 2);
+          }
+        }
+        inputWidth[resizingX] = off * 2;
+        break;
+      case TYPE_OUTPUT:
+        xx = OFFSET + outputCol[resizingX] * (LENGTH + MIN_WIDTH);
+        off = abs(pos.x() / SCALE - xx);
+        off = fmax(off, MIN_WIDTH / 2);
+        for (int i = 0; i < OUTPUT_NUM; i++) {
+          if (outputCol[resizingX] != outputCol[i]) {
+            int gap = (LENGTH + MIN_WIDTH) *
+                          abs(outputCol[resizingX] - outputCol[i]) -
+                      MIN_WIDTH;
+            off = fmin(off, gap - outputWidth[i] / 2);
+          }
+        }
+        outputWidth[resizingX] = off * 2;
+        break;
+      default:
+        break;
       }
+      emit statusChanged(tr("Resizing to width %1").arg((int)(off * 2)));
       update();
     }
   } else {
     int i = 0, j = 0;
     int result = convertPos(pos.x(), pos.y(), i, j);
+
+    int width = 0;
+    if (result == TYPE_H) {
+      width = width_h[i][j];
+    } else if (result == TYPE_V) {
+      width = width_v[i][j];
+    } else if (result == TYPE_INPUT) {
+      width = inputWidth[i];
+    } else if (result == TYPE_OUTPUT) {
+      width = outputWidth[i];
+    }
+
     switch (result) {
     case TYPE_V_MID:
     case TYPE_H_MID:
       setCursor(Qt::PointingHandCursor);
+      emit statusChanged(tr("Click to toggle"));
       break;
     case TYPE_V:
+    case TYPE_INPUT:
+    case TYPE_OUTPUT:
       setCursor(Qt::SizeHorCursor);
+      emit statusChanged(tr("Drag to resize, current width is %1").arg(width));
       break;
     case TYPE_H:
       setCursor(Qt::SizeVerCursor);
+      emit statusChanged(tr("Drag to resize, current width is %1").arg(width));
       break;
-    case TYPE_INPUT:
-    case TYPE_OUTPUT:
+    case TYPE_INPUT_MID:
+    case TYPE_OUTPUT_MID:
       setCursor(Qt::OpenHandCursor);
+      emit statusChanged(tr("Drag to move"));
       break;
     default:
       setCursor(Qt::ArrowCursor);
+      emit statusChanged(tr(""));
       break;
     }
   }
@@ -419,20 +502,23 @@ void Chip::mousePressEvent(QMouseEvent *event) {
   int i = 0, j = 0;
   int result = convertPos(pos.x(), pos.y(), i, j);
   if (result) {
-    qWarning() << "press" << convertPos(pos.x(), pos.y(), i, j) << i << j;
-    isHoldingInput = (result == TYPE_INPUT);
+    isHoldingInput = (result == TYPE_INPUT_MID);
     holdingInputIndex = i;
-    isHoldingOutput = (result == TYPE_OUTPUT);
+    isHoldingOutput = (result == TYPE_OUTPUT_MID);
     holdingOutputIndex = i;
     if (isHoldingInput || isHoldingOutput) {
       setCursor(Qt::ClosedHandCursor);
     }
-    if (result == TYPE_V) {
+    resizingType = result;
+    if (result == TYPE_V || result == TYPE_H) {
       isResizing = true;
-      resizingVertical = true;
-    } else if (result == TYPE_H) {
+    } else if (result == TYPE_INPUT || result == TYPE_OUTPUT) {
       isResizing = true;
-      resizingVertical = false;
+      if (result == TYPE_INPUT) {
+        j = -1;
+      } else if (result == TYPE_OUTPUT) {
+        j = side;
+      }
     } else {
       isResizing = false;
     }

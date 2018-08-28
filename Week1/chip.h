@@ -14,6 +14,9 @@ public:
 public slots:
   void onSideChanged(int);
 
+signals:
+  void statusChanged(QString);
+
 protected:
   void paintEvent(QPaintEvent *event) override;
   void mouseMoveEvent(QMouseEvent *event) override;
@@ -30,7 +33,7 @@ private:
   bool isHoldingOutput;
   int holdingOutputIndex;
   bool isResizing;
-  bool resizingVertical;
+  int resizingType;
   int resizingX;
   int resizingY;
 

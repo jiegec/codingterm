@@ -76,7 +76,7 @@
       <x>190</x>
       <y>20</y>
       <width>861</width>
-      <height>661</height>
+      <height>641</height>
      </rect>
     </property>
    </widget>
@@ -100,6 +100,7 @@
    <header>chip.h</header>
    <container>1</container>
    <slots>
+    <signal>statusChanged(QString)</signal>
     <slot>onSideChanged(int)</slot>
    </slots>
   </customwidget>
@@ -135,6 +136,22 @@
     <hint type="destinationlabel">
      <x>263</x>
      <y>405</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>chip</sender>
+   <signal>statusChanged(QString)</signal>
+   <receiver>statusbar</receiver>
+   <slot>showMessage(QString)</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>314</x>
+     <y>542</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>124</x>
+     <y>739</y>
     </hint>
    </hints>
   </connection>
