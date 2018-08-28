@@ -42,6 +42,7 @@
 #include <sstream>
 #include <time.h>
 #include <vector>
+#include <QMutex>
 
 using namespace std;
 #define NAX 0.000000001
@@ -425,6 +426,8 @@ void getans() {
 //				分别表示两个输入管道与三个输出管道在第几列。
 vector<double> caluconspeed(int num, vector<double> &length, int i1, int i2,
                             int o1, int o2, int o3) {
+  static QMutex mutex;
+  mutex.lock();
   rect.clear();
   n = num;
   EDGESUM = 2 * n * n - 2 * n + 5;
@@ -489,6 +492,7 @@ vector<double> caluconspeed(int num, vector<double> &length, int i1, int i2,
   edges[EDGESUM - 5].v = 200;
 
   if (!initrect()) {
+    mutex.unlock();
     return vector<double>(3, 0);
   }
   getans();
@@ -496,6 +500,7 @@ vector<double> caluconspeed(int num, vector<double> &length, int i1, int i2,
   v[0] = edges[EDGESUM - 3].v;
   v[1] = edges[EDGESUM - 2].v;
   v[2] = edges[EDGESUM - 1].v;
+  mutex.unlock();
   return v;
 }
 

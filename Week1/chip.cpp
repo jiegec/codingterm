@@ -17,11 +17,13 @@
 //
 
 #include "chip.h"
+#include "algo.h"
 #include "worker.h"
 #include <QDebug>
 #include <QMouseEvent>
 #include <QPainter>
 #include <QThread>
+#include <algorithm>
 #include <cmath>
 
 #define MIN_WIDTH 200
@@ -51,6 +53,7 @@ Chip::Chip(QWidget *parent, int side) : QWidget(parent), side(side) {
     }
   }
 
+  findTargetThread = nullptr;
   isResizing = false;
   isMouseDown = false;
   setMouseTracking(true);
@@ -603,6 +606,7 @@ void Chip::onResultChanged(QVector<double> result) {
   for (int i = 0; i < OUTPUT_NUM; i++) {
     this->result[i] = result[i];
   }
+  update();
   emit resultChanged(result[0], result[1], result[2]);
 }
 
@@ -614,4 +618,183 @@ void Chip::onTargetOutputFlow2Changed(int value) {
 }
 void Chip::onTargetOutputFlow3Changed(int value) {
   target_output_flow[2] = value;
+}
+
+Chip *chip;
+struct {
+  int side;
+  int width_v[9][9];
+  bool disabled_v[9][9];
+  int width_h[9][9];
+  bool disabled_h[9][9];
+  int inputCol[INPUT_NUM];
+  int inputWidth[INPUT_NUM];
+  int outputCol[OUTPUT_NUM];
+  int outputWidth[OUTPUT_NUM];
+  int target_output_flow[OUTPUT_NUM];
+  double result[OUTPUT_NUM];
+} workerData;
+
+struct State {
+  bool disabled_v[9][9];
+  bool disabled_h[9][9];
+  double loss;
+};
+
+bool operator<(const struct State &a, const struct State &b) {
+  return a.loss < b.loss;
+}
+
+void workerThread() {
+  const int eliteLen = 10;
+  const int bufferLen = 128;
+  struct State elite[eliteLen];
+  struct State buffer[bufferLen];
+  for (int i = 0; i <= workerData.side; i++) {
+    for (int j = 0; j <= workerData.side; j++) {
+      elite[0].disabled_v[i][j] = workerData.disabled_v[i][j];
+      elite[0].disabled_h[i][j] = workerData.disabled_h[i][j];
+    }
+  }
+  elite[0].loss = 0.0;
+  for (int i = 0; i < OUTPUT_NUM; i++) {
+    elite[0].loss += (workerData.target_output_flow[i] - workerData.result[i]) *
+                     (workerData.target_output_flow[i] - workerData.result[i]);
+  }
+
+  double min_loss = elite[0].loss;
+  int eliteCount = 1;
+  int minSolutionCount = 1;
+  const int maxRound = 1000;
+  for (int round = 0; round < maxRound; round++) {
+    int buffer_num = 0;
+    for (int i = 0; i < eliteCount; i++) {
+      for (int j = 0; j < eliteCount; j++) {
+        struct State &newstate = buffer[buffer_num++];
+        for (int x = 0; x <= workerData.side; x++) {
+          for (int y = 0; y <= workerData.side; y++) {
+            newstate.disabled_v[x][y] = (rand() % 2)
+                                            ? elite[i].disabled_v[x][y]
+                                            : elite[j].disabled_v[x][y];
+            if (rand() % 10 == 0) {
+              newstate.disabled_v[x][y] = !newstate.disabled_v[x][y];
+            }
+
+            newstate.disabled_h[x][y] = (rand() % 2)
+                                            ? elite[i].disabled_h[x][y]
+                                            : elite[j].disabled_h[x][y];
+            if (rand() % 10 == 0) {
+              newstate.disabled_h[x][y] = !newstate.disabled_h[x][y];
+            }
+          }
+        }
+
+        std::vector<double> result;
+        std::vector<double> length;
+        for (int i = 0; i <= workerData.side; i++) {
+          for (int j = 0; j < workerData.side; j++) {
+            if (newstate.disabled_v[i][j]) {
+              length.push_back(0);
+            } else {
+              length.push_back(workerData.width_v[i][j]);
+            }
+          }
+        }
+        for (int i = 0; i < workerData.side; i++) {
+          for (int j = 0; j <= workerData.side; j++) {
+            if (newstate.disabled_h[i][j]) {
+              length.push_back(0);
+            } else {
+              length.push_back(workerData.width_h[i][j]);
+            }
+          }
+        }
+        for (int i = 0; i < INPUT_NUM; i++) {
+          length.push_back(workerData.inputWidth[i]);
+        }
+        for (int i = 0; i < OUTPUT_NUM; i++) {
+          length.push_back(workerData.outputWidth[i]);
+        }
+        result =
+            caluconspeed(workerData.side + 1, length, workerData.inputCol[0],
+                         workerData.inputCol[1], workerData.outputCol[0],
+                         workerData.outputCol[1], workerData.outputCol[2]);
+        newstate.loss = 0;
+        for (int i = 0; i < OUTPUT_NUM; i++) {
+          newstate.loss += (result[i] - workerData.target_output_flow[i]) *
+                           (result[i] - workerData.target_output_flow[i]);
+        }
+
+        if (newstate.loss < min_loss) {
+          qWarning() << newstate.loss;
+          min_loss = newstate.loss;
+          emit chip->statusChanged(QString("Found a solution #%1 of loss %2.(%3/%4)")
+                                       .arg(minSolutionCount++)
+                                       .arg(newstate.loss)
+                                       .arg(round + 1)
+                                       .arg(maxRound));
+        }
+      }
+    }
+
+    for (int i = 0; i < eliteCount; i++) {
+      buffer[buffer_num++] = elite[i];
+    }
+
+    std::sort(buffer, buffer + buffer_num);
+    for (int i = 0; i < eliteCount; i++) {
+      elite[i] = buffer[i];
+    }
+  }
+
+  emit chip->statusChanged(QString("Done"));
+  emit chip->updateDisabledMatrix(elite[0].disabled_v, elite[0].disabled_h);
+}
+
+void Chip::beginFindTarget() {
+  if (findTargetThread != nullptr) {
+    emit statusChanged(tr("Don't push me now. I am working on it."));
+    return;
+  }
+
+  chip = this;
+
+  workerData.side = side;
+  for (int i = 0; i <= side; i++) {
+    for (int j = 0; j <= side; j++) {
+      workerData.width_v[i][j] = width_v[i][j];
+      workerData.disabled_v[i][j] = disabled_v[i][j];
+      workerData.width_h[i][j] = width_h[i][j];
+      workerData.disabled_h[i][j] = disabled_h[i][j];
+    }
+  }
+  for (int i = 0; i < INPUT_NUM; i++) {
+    workerData.inputCol[i] = inputCol[i];
+    workerData.inputWidth[i] = inputWidth[i];
+  }
+  for (int i = 0; i < OUTPUT_NUM; i++) {
+    workerData.outputCol[i] = outputCol[i];
+    workerData.outputWidth[i] = outputWidth[i];
+    workerData.target_output_flow[i] = target_output_flow[i];
+    workerData.result[i] = result[i];
+  }
+
+  findTargetThread = QThread::create(workerThread);
+  findTargetThread->start();
+}
+
+void Chip::updateDisabledMatrix(bool new_disabled_v[9][9],
+                                bool new_disabled_h[9][9]) {
+
+  for (int i = 0; i <= side; i++) {
+    for (int j = 0; j <= side; j++) {
+      disabled_v[i][j] = new_disabled_v[i][j];
+      disabled_h[i][j] = new_disabled_h[i][j];
+    }
+  }
+
+  findTargetThread = nullptr;
+
+  update();
+  emit dataChanged();
 }

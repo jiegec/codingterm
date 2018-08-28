@@ -30,11 +30,14 @@ public:
   Chip(QWidget *parent = nullptr, int side = 5);
 
 public slots:
-  void onSideChanged(int);
-  void onResultChanged(QVector<double>);
-  void onTargetOutputFlow1Changed(int);
-  void onTargetOutputFlow2Changed(int);
-  void onTargetOutputFlow3Changed(int);
+  void onSideChanged(int value);
+  void onResultChanged(QVector<double> result);
+  void onTargetOutputFlow1Changed(int value);
+  void onTargetOutputFlow2Changed(int value);
+  void onTargetOutputFlow3Changed(int value);
+  void beginFindTarget();
+  void updateDisabledMatrix(bool new_disabled_v[9][9],
+                            bool new_disabled_h[9][9]);
 
 signals:
   void statusChanged(QString);
@@ -74,6 +77,8 @@ private:
   bool disabled_h[9][9];
 
   double target_output_flow[3];
+  QThread *findTargetThread;
+  friend void workerThread();
 };
 
 #endif

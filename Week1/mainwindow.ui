@@ -84,7 +84,7 @@
     <property name="geometry">
      <rect>
       <x>10</x>
-      <y>330</y>
+      <y>380</y>
       <width>171</width>
       <height>151</height>
      </rect>
@@ -118,7 +118,7 @@
       <x>10</x>
       <y>150</y>
       <width>171</width>
-      <height>181</height>
+      <height>211</height>
      </rect>
     </property>
     <property name="title">
@@ -130,7 +130,7 @@
        <x>10</x>
        <y>30</y>
        <width>154</width>
-       <height>118</height>
+       <height>159</height>
       </rect>
      </property>
      <layout class="QVBoxLayout" name="verticalLayout_2">
@@ -204,6 +204,13 @@
         </item>
        </layout>
       </item>
+      <item>
+       <widget class="QPushButton" name="startFindTarget">
+        <property name="text">
+         <string>Run</string>
+        </property>
+       </widget>
+      </item>
      </layout>
     </widget>
    </widget>
@@ -233,6 +240,7 @@
     <slot>onTargetOutputFlow1Changed(int)</slot>
     <slot>onTargetOutputFlow2Changed(int)</slot>
     <slot>onTargetOutputFlow3Changed(int)</slot>
+    <slot>beginFindTarget()</slot>
    </slots>
   </customwidget>
  </customwidgets>
@@ -395,6 +403,22 @@
     <hint type="destinationlabel">
      <x>50</x>
      <y>575</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>startFindTarget</sender>
+   <signal>clicked()</signal>
+   <receiver>chip</receiver>
+   <slot>beginFindTarget()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>126</x>
+     <y>344</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>324</x>
+     <y>254</y>
     </hint>
    </hints>
   </connection>
