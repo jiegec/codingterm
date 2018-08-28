@@ -49,7 +49,6 @@ void Worker::calculate() {
   for (int i = 0; i < OUTPUT_NUM; i++) {
     length.push_back(chip->outputWidth[i]);
   }
-  qWarning() << "length of size" << length.size();
   result =
       caluconspeed(chip->side + 1, length, chip->inputCol[0], chip->inputCol[1],
                    chip->outputCol[0], chip->outputCol[1], chip->outputCol[2]);

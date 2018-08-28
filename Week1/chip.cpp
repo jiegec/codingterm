@@ -38,7 +38,9 @@ Chip::Chip(QWidget *parent, int side) : QWidget(parent), side(side) {
   for (int i = 0; i < OUTPUT_NUM; i++) {
     outputCol[i] = i;
     outputWidth[i] = MIN_WIDTH;
+    result[i] = 0.0;
   }
+
   for (int i = 0; i <= 8; i++) {
     for (int j = 0; j <= 8; j++) {
       width_v[i][j] = MIN_WIDTH;
@@ -158,6 +160,7 @@ void Chip::paintEvent(QPaintEvent *) {
   QPainter painter(this);
   painter.setRenderHint(QPainter::Antialiasing);
   painter.scale(SCALE, SCALE);
+  QPen origPen = painter.pen();
   painter.setPen(Qt::NoPen);
   painter.translate(OFFSET, OFFSET);
 
@@ -209,11 +212,18 @@ void Chip::paintEvent(QPaintEvent *) {
     }
   }
 
+  QFont font = painter.font();
+  font.setPixelSize(300);
+  painter.setFont(font);
   for (int i = 0; i < OUTPUT_NUM; i++) {
     painter.save();
     painter.translate(outputCol[i] * (LENGTH + MIN_WIDTH),
                       side * (LENGTH + MIN_WIDTH));
     draw_vertical(painter, outputWidth[i]);
+    painter.setPen(origPen);
+    painter.drawText(-LENGTH / 2, LENGTH + MIN_WIDTH, LENGTH, LENGTH,
+                     Qt::AlignHCenter | Qt::AlignTop, tr("%1").arg(result[i]));
+    painter.setPen(Qt::NoPen);
     painter.restore();
   }
 }
@@ -269,7 +279,7 @@ void Chip::onSideChanged(int value) {
 #define TYPE_OUTPUT_MID 8
 
 int Chip::convertPos(int x, int y, int &res_i, int &res_j) {
-  const int THRESHOLD = 50;
+  const int THRESHOLD = 30;
   // vertical
   for (int i = 0; i <= side; i++) {
     for (int j = 0; j < side; j++) {
@@ -588,6 +598,8 @@ void Chip::mouseReleaseEvent(QMouseEvent *event) {
 }
 
 void Chip::onResultChanged(QVector<double> result) {
-  qWarning() << result;
+  for (int i = 0; i < OUTPUT_NUM; i++) {
+    this->result[i] = result[i];
+  }
   emit resultChanged(result[0], result[1], result[2]);
 }
