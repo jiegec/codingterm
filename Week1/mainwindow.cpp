@@ -41,5 +41,9 @@ void MainWindow::onSideChanged(int value) {
 }
 
 void MainWindow::onResultChanged(double r1, double r2, double r3) {
-  resultLabel->setText(tr("%1 %2 %3").arg(r1).arg(r2).arg(r3));
+  if (r1 == 0 && r2 == 0 && r3 == 0) {
+    resultLabel->setText(tr("Please ensure there is a path from input to output."));
+  } else {
+    resultLabel->setText(tr("Calculation completed."));
+  }
 }

@@ -434,7 +434,6 @@ vector<double> caluconspeed(int num, vector<double> &length, int i1, int i2,
   }
   int n1 = 0;
   int n2 = 1;
-  fr = new bool[EDGESUM];
   for (int i = 0; i < n * n - n; i++) {
     edges[i].n1 = n1;
     edges[i].n2 = n2;
