@@ -33,7 +33,7 @@
 /*
  *Created on 2018-8-27
  *Author:Weiqing_Ji
- *Version 1.2
+ *Version 1.3.1
  *Title: 流速计算程序
  */
 #include <fstream>
@@ -107,8 +107,6 @@ int getdirline(int x, int y, int dir) {
       e = EDGESUM;
     else
       e = n * n - n + (x - 1) * n + y;
-  } else {
-    assert(0);
   }
   return e;
 }
@@ -169,6 +167,8 @@ bool recursionrect(int x, int y, vector<double> &tmp, int end) {
     int e = getdirline(x, y, i % 4);
     int dir = i % 4;
     // cout<<"recursionrect  "<<x<<" "<<y<<" "<<e<<"  "<<i%4<<endl;
+    if (e >= EDGESUM)
+      continue;
     if (fr[e])
       continue;
     if (edges[e].leng == 0)
@@ -187,7 +187,7 @@ bool recursionrect(int x, int y, vector<double> &tmp, int end) {
       // cout<<"alsdhjkagjkdhasdhasjkld"<<endl;
       return true;
     }
-    if (e > EDGESUM - 5) {
+    if (e >= EDGESUM - 5) {
       tmp[e] = 0;
       continue;
     }
@@ -221,19 +221,25 @@ void findline(int x, int y, int t) {
 
 //函数功能：计算从一个输入端口，到三个输出管道的“电压降”，从而计算得到输出管道两两之间的“电势差”，根据电势差为0，加入方程组
 //参数含义：x1，输入管道编号。
-void findrect(int x1) {
+bool findrect(int x1) {
   vector<double> tmp(EDGESUM + 1, 0);
   for (int i = 0; i < EDGESUM; i++)
     fr[i] = false;
-  recursionrect(edges[x1].n2 / n, 0, tmp, EDGESUM - 1);
+  if (!recursionrect(edges[x1].n2 / n, 0, tmp, EDGESUM - 1)) {
+    return false;
+  }
   vector<double> temp(EDGESUM + 1, 0);
   for (int i = 0; i < EDGESUM; i++)
     fr[i] = false;
-  recursionrect(edges[x1].n2 / n, 0, temp, EDGESUM - 2);
+  if (!recursionrect(edges[x1].n2 / n, 0, temp, EDGESUM - 2)) {
+    return false;
+  }
   vector<double> tep(EDGESUM + 1, 0);
   for (int i = 0; i < EDGESUM; i++)
     fr[i] = false;
-  recursionrect(edges[x1].n2 / n, 0, tep, EDGESUM - 3);
+  if (!recursionrect(edges[x1].n2 / n, 0, tep, EDGESUM - 3)) {
+    return false;
+  }
   vector<double> emp(EDGESUM + 1, 0);
   for (int i = 0; i < EDGESUM + 1; i++)
     emp[i] = tmp[i] - temp[i];
@@ -242,10 +248,11 @@ void findrect(int x1) {
   for (int i = 0; i < EDGESUM + 1; i++)
     tem[i] = tep[i] - temp[i];
   rect.push_back(tem);
+  return true;
 }
 
 //函数功能：初始化方程组（行列式）的值
-void initrect() {
+bool initrect() {
   for (int i = 0; i < EDGESUM - 5; i++) //不存在的管道液体流速为0
     if (edges[i].leng == 0) {
       // cout<<"exist  "<<i<<endl;
@@ -282,7 +289,9 @@ void initrect() {
   // cout<<rect.size()<<endl;
 
   //三个输出端口之间的电势差为0
-  findrect(EDGESUM - 4);
+  if (!findrect(EDGESUM - 4)) {
+    return false;
+  }
   //两个输入端口的流速相同且已知，构成两个方程
   vector<double> tmp(EDGESUM + 1, 0);
   tmp[EDGESUM - 5] = 1;
@@ -294,6 +303,7 @@ void initrect() {
   addrect(temp);
 
   // cout<<rect.size()<<endl;
+  return true;
 }
 
 //函数功能：确定a和b之前的最小数。
@@ -419,9 +429,12 @@ vector<double> caluconspeed(int num, vector<double> &length, int i1, int i2,
   n = num;
   EDGESUM = 2 * n * n - 2 * n + 5;
   NODESUM = n * n + 2;
+  for (int i = 0; i < 200; i++) {
+    nodes[i].elist.clear();
+  }
   int n1 = 0;
   int n2 = 1;
-  fr = new bool[200];
+  fr = new bool[EDGESUM];
   for (int i = 0; i < n * n - n; i++) {
     edges[i].n1 = n1;
     edges[i].n2 = n2;
@@ -476,12 +489,16 @@ vector<double> caluconspeed(int num, vector<double> &length, int i1, int i2,
   edges[EDGESUM - 4].v = 200;
   edges[EDGESUM - 5].v = 200;
 
-  initrect();
+  if (!initrect()) {
+    delete fr;
+    return vector<double>(3, 0);
+  }
   getans();
   vector<double> v(3, 0);
   v[0] = edges[EDGESUM - 3].v;
   v[1] = edges[EDGESUM - 2].v;
   v[2] = edges[EDGESUM - 1].v;
+  delete fr;
   return v;
 }
 
@@ -498,5 +515,4 @@ int main(int argc, char **argv) {
     cout << ans[i] << endl;
   return 0;
 }
-
 */

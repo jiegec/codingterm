@@ -386,6 +386,7 @@ void Chip::mouseMoveEvent(QMouseEvent *event) {
       if (min_place != -1) {
         inputCol[holdingInputIndex] = min_place;
         update();
+        emit dataChanged();
       }
     } else if (isHoldingOutput) {
       int min_xoff = 0x7fffffff, min_place;
@@ -419,6 +420,7 @@ void Chip::mouseMoveEvent(QMouseEvent *event) {
       if (min_place != -1) {
         outputCol[holdingOutputIndex] = min_place;
         update();
+        emit dataChanged();
       }
     } else if (isResizing) {
       // resize to cursor

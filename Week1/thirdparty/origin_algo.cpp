@@ -32,7 +32,7 @@
  /*
  *Created on 2018-8-27  
  *Author:Weiqing_Ji
- *Version 1.2 
+ *Version 1.3.1
  *Title: 流速计算程序
  */
 #include <iostream>
@@ -179,6 +179,8 @@ bool recursionrect(int x, int y, vector<double> &tmp,int end){
 		int e =  getdirline(x,y,i%4);
 		int dir = i%4;
 		// cout<<"recursionrect  "<<x<<" "<<y<<" "<<e<<"  "<<i%4<<endl;
+		if (e>=EDGESUM)
+			continue;
 		if (fr[e])
 			continue;
 		if (edges[e].leng==0)
