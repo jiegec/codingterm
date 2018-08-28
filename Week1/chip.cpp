@@ -733,6 +733,7 @@ void workerThread() {
                                        .arg(newstate.loss)
                                        .arg(round + 1)
                                        .arg(maxRound));
+          emit chip->updateDisabledMatrix(newstate.disabled_v, newstate.disabled_h);
         }
       }
     }
