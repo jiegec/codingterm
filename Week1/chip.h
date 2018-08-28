@@ -32,6 +32,9 @@ public:
 public slots:
   void onSideChanged(int);
   void onResultChanged(QVector<double>);
+  void onTargetOutputFlow1Changed(int);
+  void onTargetOutputFlow2Changed(int);
+  void onTargetOutputFlow3Changed(int);
 
 signals:
   void statusChanged(QString);
@@ -69,6 +72,8 @@ private:
   bool disabled_v[9][9];
   int width_h[9][9];
   bool disabled_h[9][9];
+
+  double target_output_flow[3];
 };
 
 #endif

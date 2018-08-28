@@ -39,6 +39,7 @@ Chip::Chip(QWidget *parent, int side) : QWidget(parent), side(side) {
     outputCol[i] = i;
     outputWidth[i] = MIN_WIDTH;
     result[i] = 0.0;
+    target_output_flow[i] = 0;
   }
 
   for (int i = 0; i <= 8; i++) {
@@ -49,6 +50,7 @@ Chip::Chip(QWidget *parent, int side) : QWidget(parent), side(side) {
       disabled_h[i][j] = false;
     }
   }
+
   isResizing = false;
   isMouseDown = false;
   setMouseTracking(true);
@@ -602,4 +604,14 @@ void Chip::onResultChanged(QVector<double> result) {
     this->result[i] = result[i];
   }
   emit resultChanged(result[0], result[1], result[2]);
+}
+
+void Chip::onTargetOutputFlow1Changed(int value) {
+  target_output_flow[0] = value;
+}
+void Chip::onTargetOutputFlow2Changed(int value) {
+  target_output_flow[1] = value;
+}
+void Chip::onTargetOutputFlow3Changed(int value) {
+  target_output_flow[2] = value;
 }

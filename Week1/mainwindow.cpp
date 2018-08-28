@@ -21,6 +21,9 @@
 MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent) {
   setupUi(this);
   onSideChanged(5);
+  onTargetOutputFlow1Changed(0);
+  onTargetOutputFlow2Changed(0);
+  onTargetOutputFlow3Changed(0);
 }
 
 void MainWindow::changeEvent(QEvent *e) {
@@ -46,4 +49,14 @@ void MainWindow::onResultChanged(double r1, double r2, double r3) {
   } else {
     resultLabel->setText(tr("Calculation completed."));
   }
+}
+
+void MainWindow::onTargetOutputFlow1Changed(int value) {
+  output1Label->setText(tr("%1").arg(value));
+}
+void MainWindow::onTargetOutputFlow2Changed(int value) {
+  output2Label->setText(tr("%1").arg(value));
+}
+void MainWindow::onTargetOutputFlow3Changed(int value) {
+  output3Label->setText(tr("%1").arg(value));
 }

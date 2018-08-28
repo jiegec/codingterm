@@ -84,7 +84,7 @@
     <property name="geometry">
      <rect>
       <x>10</x>
-      <y>150</y>
+      <y>330</y>
       <width>171</width>
       <height>151</height>
      </rect>
@@ -112,6 +112,101 @@
      </property>
     </widget>
    </widget>
+   <widget class="QGroupBox" name="groupBox_3">
+    <property name="geometry">
+     <rect>
+      <x>10</x>
+      <y>150</y>
+      <width>171</width>
+      <height>181</height>
+     </rect>
+    </property>
+    <property name="title">
+     <string>Target</string>
+    </property>
+    <widget class="QWidget" name="">
+     <property name="geometry">
+      <rect>
+       <x>10</x>
+       <y>30</y>
+       <width>154</width>
+       <height>118</height>
+      </rect>
+     </property>
+     <layout class="QVBoxLayout" name="verticalLayout_2">
+      <item>
+       <widget class="QLabel" name="label">
+        <property name="text">
+         <string>Output flow</string>
+        </property>
+       </widget>
+      </item>
+      <item>
+       <layout class="QHBoxLayout" name="horizontalLayout_2">
+        <item>
+         <widget class="QSlider" name="output1Silder">
+          <property name="maximum">
+           <number>200</number>
+          </property>
+          <property name="orientation">
+           <enum>Qt::Horizontal</enum>
+          </property>
+         </widget>
+        </item>
+        <item>
+         <widget class="QLabel" name="output1Label">
+          <property name="text">
+           <string>TextLabel</string>
+          </property>
+         </widget>
+        </item>
+       </layout>
+      </item>
+      <item>
+       <layout class="QHBoxLayout" name="horizontalLayout_3">
+        <item>
+         <widget class="QSlider" name="output2Silder">
+          <property name="maximum">
+           <number>200</number>
+          </property>
+          <property name="orientation">
+           <enum>Qt::Horizontal</enum>
+          </property>
+         </widget>
+        </item>
+        <item>
+         <widget class="QLabel" name="output2Label">
+          <property name="text">
+           <string>TextLabel</string>
+          </property>
+         </widget>
+        </item>
+       </layout>
+      </item>
+      <item>
+       <layout class="QHBoxLayout" name="horizontalLayout_4">
+        <item>
+         <widget class="QSlider" name="output3Silder">
+          <property name="maximum">
+           <number>200</number>
+          </property>
+          <property name="orientation">
+           <enum>Qt::Horizontal</enum>
+          </property>
+         </widget>
+        </item>
+        <item>
+         <widget class="QLabel" name="output3Label">
+          <property name="text">
+           <string>TextLabel</string>
+          </property>
+         </widget>
+        </item>
+       </layout>
+      </item>
+     </layout>
+    </widget>
+   </widget>
   </widget>
   <widget class="QMenuBar" name="menubar">
    <property name="geometry">
@@ -135,6 +230,9 @@
     <signal>statusChanged(QString)</signal>
     <signal>resultChanged(double,double,double)</signal>
     <slot>onSideChanged(int)</slot>
+    <slot>onTargetOutputFlow1Changed(int)</slot>
+    <slot>onTargetOutputFlow2Changed(int)</slot>
+    <slot>onTargetOutputFlow3Changed(int)</slot>
    </slots>
   </customwidget>
  </customwidgets>
@@ -204,10 +302,109 @@
     </hint>
    </hints>
   </connection>
+  <connection>
+   <sender>output1Silder</sender>
+   <signal>valueChanged(int)</signal>
+   <receiver>chip</receiver>
+   <slot>onTargetOutputFlow1Changed(int)</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>34</x>
+     <y>234</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>270</x>
+     <y>303</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>output2Silder</sender>
+   <signal>valueChanged(int)</signal>
+   <receiver>chip</receiver>
+   <slot>onTargetOutputFlow2Changed(int)</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>72</x>
+     <y>275</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>273</x>
+     <y>445</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>output3Silder</sender>
+   <signal>valueChanged(int)</signal>
+   <receiver>chip</receiver>
+   <slot>onTargetOutputFlow3Changed(int)</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>54</x>
+     <y>309</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>297</x>
+     <y>403</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>output1Silder</sender>
+   <signal>valueChanged(int)</signal>
+   <receiver>MainWindow</receiver>
+   <slot>onTargetOutputFlow1Changed(int)</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>85</x>
+     <y>238</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>59</x>
+     <y>615</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>output2Silder</sender>
+   <signal>valueChanged(int)</signal>
+   <receiver>MainWindow</receiver>
+   <slot>onTargetOutputFlow2Changed(int)</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>97</x>
+     <y>267</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>52</x>
+     <y>539</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>output3Silder</sender>
+   <signal>valueChanged(int)</signal>
+   <receiver>MainWindow</receiver>
+   <slot>onTargetOutputFlow3Changed(int)</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>96</x>
+     <y>311</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>50</x>
+     <y>575</y>
+    </hint>
+   </hints>
+  </connection>
  </connections>
  <slots>
   <signal>sideChanged(int)</signal>
   <slot>onSideChanged(int)</slot>
   <slot>onResultChanged(double,double,double)</slot>
+  <slot>onTargetOutputFlow1Changed(int)</slot>
+  <slot>onTargetOutputFlow2Changed(int)</slot>
+  <slot>onTargetOutputFlow3Changed(int)</slot>
  </slots>
 </ui>
