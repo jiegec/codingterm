@@ -506,6 +506,7 @@ vector<double> caluconspeed(int num, vector<double>&length, int i1, int i2, int 
 	return v;
 }
 
+/*
 int main(int argc, char ** argv)
 {
 	int n;
@@ -520,3 +521,5 @@ int main(int argc, char ** argv)
 		cout<<ans[i]<<endl;
 	return 0;
 }
+
+*/
