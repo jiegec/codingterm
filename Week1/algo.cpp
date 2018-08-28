@@ -58,7 +58,7 @@ struct node {
 
 vector<vector<double>> rect(200); //存储方程组(行列式)
 
-bool *fr; //深度搜索时判断边是否遍历过
+bool fr[200]; //深度搜索时判断边是否遍历过
 
 int n, EDGESUM, NODESUM; //记录网格边长
 
@@ -187,7 +187,7 @@ bool recursionrect(int x, int y, vector<double> &tmp, int end) {
       // cout<<"alsdhjkagjkdhasdhasjkld"<<endl;
       return true;
     }
-    if (e >= EDGESUM - 5) {
+    if (e > EDGESUM - 6) {
       tmp[e] = 0;
       continue;
     }
@@ -429,7 +429,7 @@ vector<double> caluconspeed(int num, vector<double> &length, int i1, int i2,
   n = num;
   EDGESUM = 2 * n * n - 2 * n + 5;
   NODESUM = n * n + 2;
-  for (int i = 0; i < 200; i++) {
+  for (int i = 0; i < NODESUM; i++) {
     nodes[i].elist.clear();
   }
   int n1 = 0;
@@ -490,7 +490,6 @@ vector<double> caluconspeed(int num, vector<double> &length, int i1, int i2,
   edges[EDGESUM - 5].v = 200;
 
   if (!initrect()) {
-    delete fr;
     return vector<double>(3, 0);
   }
   getans();
@@ -498,7 +497,6 @@ vector<double> caluconspeed(int num, vector<double> &length, int i1, int i2,
   v[0] = edges[EDGESUM - 3].v;
   v[1] = edges[EDGESUM - 2].v;
   v[2] = edges[EDGESUM - 1].v;
-  delete fr;
   return v;
 }
 

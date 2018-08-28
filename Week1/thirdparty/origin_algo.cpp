@@ -58,7 +58,7 @@ struct node
 
 vector< vector<double> >rect(200);//存储方程组(行列式)
 
-bool *fr; //深度搜索时判断边是否遍历过
+bool fr[200]; //深度搜索时判断边是否遍历过
 
 int n,EDGESUM,NODESUM;  //记录网格边长
 
@@ -200,7 +200,7 @@ bool recursionrect(int x, int y, vector<double> &tmp,int end){
 			// cout<<"alsdhjkagjkdhasdhasjkld"<<endl;
 			return true;
 		}
-		if (e>EDGESUM-5){
+		if (e>EDGESUM-6){
 			tmp[e] = 0;
 			continue;
 		}
@@ -436,6 +436,7 @@ void getans()
 
 }
 
+
 //函数功能：计算芯片所有管道的液体流速
 //参数含义：num，正方形网格的边长（即网格一行的节点数量，比如8X8的网格，一行有8个节点，num为8）；length，存储网格中每个管道的长度，若管道不存在用0表示；i1,i2,o1,o2,o3
 //				分别表示两个输入管道与三个输出管道在第几列。
@@ -445,9 +446,10 @@ vector<double> caluconspeed(int num, vector<double>&length, int i1, int i2, int 
 	n = num;
 	EDGESUM = 2*n*n-2*n+5;
 	NODESUM = n*n+2;
+	for (int i=0; i<NODESUM; i++)
+		nodes[i].elist.clear();
 	int n1 = 0;
 	int n2 = 1;
-	fr = new bool[EDGESUM];
 	for (int i=0; i<n*n-n; i++)
 	{
 		edges[i].n1 = n1;
