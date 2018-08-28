@@ -23,11 +23,16 @@ protected:
 private:
   int convertPos(int x, int y, int &res_i, int &res_j);
   bool isMouseDown;
+  bool movedOnMouseDown;
   QPointF mouseDownPos;
   bool isHoldingInput;
   int holdingInputIndex;
   bool isHoldingOutput;
   int holdingOutputIndex;
+  bool isResizing;
+  bool resizingVertical;
+  int resizingX;
+  int resizingY;
 
   int side;
   int inputCol[INPUT_NUM];
@@ -35,7 +40,9 @@ private:
   int outputCol[OUTPUT_NUM];
   int outputWidth[OUTPUT_NUM];
   int width_v[9][9];
+  bool disabled_v[9][9];
   int width_h[9][9];
+  bool disabled_h[9][9];
 };
 
 #endif

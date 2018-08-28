@@ -4,27 +4,31 @@
 #include <QPainter>
 #include <cmath>
 
-#define DEFAULT_WIDTH 200
+#define MIN_WIDTH 200
 #define BUFFER_HEIGHT 500
 #define LENGTH 1600
 #define SCALE 0.036
-#define OFFSET (LENGTH + DEFAULT_WIDTH)
+#define OFFSET (LENGTH + MIN_WIDTH)
 
 Chip::Chip(QWidget *parent, int side) : QWidget(parent), side(side) {
   for (int i = 0; i < INPUT_NUM; i++) {
     inputCol[i] = i;
-    inputWidth[i] = DEFAULT_WIDTH * (i + 1);
+    inputWidth[i] = MIN_WIDTH * (i + 1);
   }
   for (int i = 0; i < OUTPUT_NUM; i++) {
     outputCol[i] = i;
-    outputWidth[i] = DEFAULT_WIDTH * (i + 1);
+    outputWidth[i] = MIN_WIDTH * (i + 1);
   }
   for (int i = 0; i <= 8; i++) {
     for (int j = 0; j <= 8; j++) {
-      width_v[i][j] = DEFAULT_WIDTH * 1;
-      width_h[i][j] = DEFAULT_WIDTH * 4.2;
+      width_v[i][j] = MIN_WIDTH * (rand() % 4 + 1);
+      disabled_v[i][j] = false;
+      width_h[i][j] = MIN_WIDTH * (rand() % 4 + 1);
+      disabled_h[i][j] = false;
     }
   }
+  isResizing = false;
+  isMouseDown = false;
   setMouseTracking(true);
 }
 
@@ -32,45 +36,44 @@ void draw_vertical(QPainter &painter, int width) {
   {
     // main body
     const QPointF points[4] = {
-        QPointF(-width / 2, BUFFER_HEIGHT + DEFAULT_WIDTH / 2),
-        QPointF(-width / 2, LENGTH - BUFFER_HEIGHT + DEFAULT_WIDTH / 2),
-        QPointF(width / 2, LENGTH - BUFFER_HEIGHT + DEFAULT_WIDTH / 2),
-        QPointF(width / 2, BUFFER_HEIGHT + DEFAULT_WIDTH / 2)};
+        QPointF(-width / 2, BUFFER_HEIGHT + MIN_WIDTH / 2),
+        QPointF(-width / 2, LENGTH - BUFFER_HEIGHT + MIN_WIDTH / 2),
+        QPointF(width / 2, LENGTH - BUFFER_HEIGHT + MIN_WIDTH / 2),
+        QPointF(width / 2, BUFFER_HEIGHT + MIN_WIDTH / 2)};
     painter.drawPolygon(points, 4);
   }
   {
     // top block
     const QPointF points[4] = {
-        QPointF(-DEFAULT_WIDTH / 2, DEFAULT_WIDTH / 2),
-        QPointF(-DEFAULT_WIDTH / 2, BUFFER_HEIGHT + DEFAULT_WIDTH / 2),
-        QPointF(DEFAULT_WIDTH / 2, BUFFER_HEIGHT + DEFAULT_WIDTH / 2),
-        QPointF(DEFAULT_WIDTH / 2, DEFAULT_WIDTH / 2)};
+        QPointF(-MIN_WIDTH / 2, MIN_WIDTH / 2),
+        QPointF(-MIN_WIDTH / 2, BUFFER_HEIGHT + MIN_WIDTH / 2),
+        QPointF(MIN_WIDTH / 2, BUFFER_HEIGHT + MIN_WIDTH / 2),
+        QPointF(MIN_WIDTH / 2, MIN_WIDTH / 2)};
     painter.drawPolygon(points, 4);
   }
   {
     // bottom block
     const QPointF points[4] = {
-        QPointF(-DEFAULT_WIDTH / 2, LENGTH + DEFAULT_WIDTH / 2),
-        QPointF(-DEFAULT_WIDTH / 2, LENGTH - BUFFER_HEIGHT + DEFAULT_WIDTH / 2),
-        QPointF(DEFAULT_WIDTH / 2, LENGTH - BUFFER_HEIGHT + DEFAULT_WIDTH / 2),
-        QPointF(DEFAULT_WIDTH / 2, LENGTH + DEFAULT_WIDTH / 2)};
+        QPointF(-MIN_WIDTH / 2, LENGTH + MIN_WIDTH / 2),
+        QPointF(-MIN_WIDTH / 2, LENGTH - BUFFER_HEIGHT + MIN_WIDTH / 2),
+        QPointF(MIN_WIDTH / 2, LENGTH - BUFFER_HEIGHT + MIN_WIDTH / 2),
+        QPointF(MIN_WIDTH / 2, LENGTH + MIN_WIDTH / 2)};
     painter.drawPolygon(points, 4);
   }
   // top arc
-  painter.drawPie(QRectF(DEFAULT_WIDTH - width / 2, DEFAULT_WIDTH / 2,
-                         width - DEFAULT_WIDTH, BUFFER_HEIGHT * 2),
+  painter.drawPie(QRectF(MIN_WIDTH - width / 2, MIN_WIDTH / 2,
+                         width - MIN_WIDTH, BUFFER_HEIGHT * 2),
                   0 * 16, 90 * 16);
-  painter.drawPie(QRectF(-width / 2, DEFAULT_WIDTH / 2, width - DEFAULT_WIDTH,
-                         BUFFER_HEIGHT * 2),
-                  90 * 16, 90 * 16);
+  painter.drawPie(
+      QRectF(-width / 2, MIN_WIDTH / 2, width - MIN_WIDTH, BUFFER_HEIGHT * 2),
+      90 * 16, 90 * 16);
   // bottom arc
-  painter.drawPie(QRectF(-width / 2,
-                         LENGTH + DEFAULT_WIDTH / 2 - BUFFER_HEIGHT * 2,
-                         width - DEFAULT_WIDTH, BUFFER_HEIGHT * 2),
+  painter.drawPie(QRectF(-width / 2, LENGTH + MIN_WIDTH / 2 - BUFFER_HEIGHT * 2,
+                         width - MIN_WIDTH, BUFFER_HEIGHT * 2),
                   180 * 16, 90 * 16);
-  painter.drawPie(QRectF(DEFAULT_WIDTH - width / 2,
-                         LENGTH + DEFAULT_WIDTH / 2 - BUFFER_HEIGHT * 2,
-                         width - DEFAULT_WIDTH, BUFFER_HEIGHT * 2),
+  painter.drawPie(QRectF(MIN_WIDTH - width / 2,
+                         LENGTH + MIN_WIDTH / 2 - BUFFER_HEIGHT * 2,
+                         width - MIN_WIDTH, BUFFER_HEIGHT * 2),
                   270 * 16, 90 * 16);
 }
 
@@ -79,44 +82,44 @@ void draw_horizontal(QPainter &painter, int width) {
   {
     // main body
     const QPointF points[4] = {
-        QPointF(BUFFER_HEIGHT + DEFAULT_WIDTH / 2, -width / 2),
-        QPointF(LENGTH - BUFFER_HEIGHT + DEFAULT_WIDTH / 2, -width / 2),
-        QPointF(LENGTH - BUFFER_HEIGHT + DEFAULT_WIDTH / 2, width / 2),
-        QPointF(BUFFER_HEIGHT + DEFAULT_WIDTH / 2, width / 2)};
+        QPointF(BUFFER_HEIGHT + MIN_WIDTH / 2, -width / 2),
+        QPointF(LENGTH - BUFFER_HEIGHT + MIN_WIDTH / 2, -width / 2),
+        QPointF(LENGTH - BUFFER_HEIGHT + MIN_WIDTH / 2, width / 2),
+        QPointF(BUFFER_HEIGHT + MIN_WIDTH / 2, width / 2)};
     painter.drawPolygon(points, 4);
   }
   {
     // top block
     const QPointF points[4] = {
-        QPointF(DEFAULT_WIDTH / 2, -DEFAULT_WIDTH / 2),
-        QPointF(BUFFER_HEIGHT + DEFAULT_WIDTH / 2, -DEFAULT_WIDTH / 2),
-        QPointF(BUFFER_HEIGHT + DEFAULT_WIDTH / 2, DEFAULT_WIDTH / 2),
-        QPointF(DEFAULT_WIDTH / 2, DEFAULT_WIDTH / 2)};
+        QPointF(MIN_WIDTH / 2, -MIN_WIDTH / 2),
+        QPointF(BUFFER_HEIGHT + MIN_WIDTH / 2, -MIN_WIDTH / 2),
+        QPointF(BUFFER_HEIGHT + MIN_WIDTH / 2, MIN_WIDTH / 2),
+        QPointF(MIN_WIDTH / 2, MIN_WIDTH / 2)};
     painter.drawPolygon(points, 4);
   }
   {
     // bottom block
     const QPointF points[4] = {
-        QPointF(LENGTH + DEFAULT_WIDTH / 2, -DEFAULT_WIDTH / 2),
-        QPointF(LENGTH - BUFFER_HEIGHT + DEFAULT_WIDTH / 2, -DEFAULT_WIDTH / 2),
-        QPointF(LENGTH - BUFFER_HEIGHT + DEFAULT_WIDTH / 2, DEFAULT_WIDTH / 2),
-        QPointF(LENGTH + DEFAULT_WIDTH / 2, DEFAULT_WIDTH / 2)};
+        QPointF(LENGTH + MIN_WIDTH / 2, -MIN_WIDTH / 2),
+        QPointF(LENGTH - BUFFER_HEIGHT + MIN_WIDTH / 2, -MIN_WIDTH / 2),
+        QPointF(LENGTH - BUFFER_HEIGHT + MIN_WIDTH / 2, MIN_WIDTH / 2),
+        QPointF(LENGTH + MIN_WIDTH / 2, MIN_WIDTH / 2)};
     painter.drawPolygon(points, 4);
   }
   // top arc
-  painter.drawPie(QRectF(DEFAULT_WIDTH / 2, DEFAULT_WIDTH - width / 2,
-                         BUFFER_HEIGHT * 2, width - DEFAULT_WIDTH),
+  painter.drawPie(QRectF(MIN_WIDTH / 2, MIN_WIDTH - width / 2,
+                         BUFFER_HEIGHT * 2, width - MIN_WIDTH),
                   180 * 16, 90 * 16);
-  painter.drawPie(QRectF(DEFAULT_WIDTH / 2, -width / 2, BUFFER_HEIGHT * 2,
-                         width - DEFAULT_WIDTH),
-                  90 * 16, 90 * 16);
+  painter.drawPie(
+      QRectF(MIN_WIDTH / 2, -width / 2, BUFFER_HEIGHT * 2, width - MIN_WIDTH),
+      90 * 16, 90 * 16);
   // bottom arc
-  painter.drawPie(QRectF(LENGTH + DEFAULT_WIDTH / 2 - BUFFER_HEIGHT * 2,
-                         -width / 2, BUFFER_HEIGHT * 2, width - DEFAULT_WIDTH),
+  painter.drawPie(QRectF(LENGTH + MIN_WIDTH / 2 - BUFFER_HEIGHT * 2, -width / 2,
+                         BUFFER_HEIGHT * 2, width - MIN_WIDTH),
                   0 * 16, 90 * 16);
-  painter.drawPie(QRectF(LENGTH + DEFAULT_WIDTH / 2 - BUFFER_HEIGHT * 2,
-                         DEFAULT_WIDTH - width / 2, BUFFER_HEIGHT * 2,
-                         width - DEFAULT_WIDTH),
+  painter.drawPie(QRectF(LENGTH + MIN_WIDTH / 2 - BUFFER_HEIGHT * 2,
+                         MIN_WIDTH - width / 2, BUFFER_HEIGHT * 2,
+                         width - MIN_WIDTH),
                   270 * 16, 90 * 16);
 }
 
@@ -131,13 +134,11 @@ void Chip::paintEvent(QPaintEvent *) {
   for (int i = 0; i <= side; i++) {
     for (int j = 0; j <= side; j++) {
       painter.save();
-      painter.translate(i * (LENGTH + DEFAULT_WIDTH),
-                        j * (LENGTH + DEFAULT_WIDTH));
-      const QPointF points[4] = {
-          QPointF(-DEFAULT_WIDTH / 2, -DEFAULT_WIDTH / 2),
-          QPointF(-DEFAULT_WIDTH / 2, DEFAULT_WIDTH / 2),
-          QPointF(DEFAULT_WIDTH / 2, DEFAULT_WIDTH / 2),
-          QPointF(DEFAULT_WIDTH / 2, -DEFAULT_WIDTH / 2)};
+      painter.translate(i * (LENGTH + MIN_WIDTH), j * (LENGTH + MIN_WIDTH));
+      const QPointF points[4] = {QPointF(-MIN_WIDTH / 2, -MIN_WIDTH / 2),
+                                 QPointF(-MIN_WIDTH / 2, MIN_WIDTH / 2),
+                                 QPointF(MIN_WIDTH / 2, MIN_WIDTH / 2),
+                                 QPointF(MIN_WIDTH / 2, -MIN_WIDTH / 2)};
       painter.drawPolygon(points, 4);
       painter.restore();
     }
@@ -147,8 +148,10 @@ void Chip::paintEvent(QPaintEvent *) {
   for (int i = 0; i <= side; i++) {
     for (int j = 0; j < side; j++) {
       painter.save();
-      painter.translate(i * (LENGTH + DEFAULT_WIDTH),
-                        j * (LENGTH + DEFAULT_WIDTH));
+      painter.translate(i * (LENGTH + MIN_WIDTH), j * (LENGTH + MIN_WIDTH));
+      if (disabled_v[i][j]) {
+        painter.setBrush(QColor("#9E9E9E"));
+      }
       draw_vertical(painter, width_v[i][j]);
       painter.restore();
     }
@@ -156,8 +159,8 @@ void Chip::paintEvent(QPaintEvent *) {
 
   for (int i = 0; i < INPUT_NUM; i++) {
     painter.save();
-    painter.translate(inputCol[i] * (LENGTH + DEFAULT_WIDTH),
-                      -1 * (LENGTH + DEFAULT_WIDTH));
+    painter.translate(inputCol[i] * (LENGTH + MIN_WIDTH),
+                      -1 * (LENGTH + MIN_WIDTH));
     draw_vertical(painter, inputWidth[i]);
     painter.restore();
   }
@@ -166,8 +169,10 @@ void Chip::paintEvent(QPaintEvent *) {
   for (int i = 0; i < side; i++) {
     for (int j = 0; j <= side; j++) {
       painter.save();
-      painter.translate(i * (LENGTH + DEFAULT_WIDTH),
-                        j * (LENGTH + DEFAULT_WIDTH));
+      painter.translate(i * (LENGTH + MIN_WIDTH), j * (LENGTH + MIN_WIDTH));
+      if (disabled_h[i][j]) {
+        painter.setBrush(QColor("#9E9E9E"));
+      }
       draw_horizontal(painter, width_h[i][j]);
       painter.restore();
     }
@@ -175,8 +180,8 @@ void Chip::paintEvent(QPaintEvent *) {
 
   for (int i = 0; i < OUTPUT_NUM; i++) {
     painter.save();
-    painter.translate(outputCol[i] * (LENGTH + DEFAULT_WIDTH),
-                      side * (LENGTH + DEFAULT_WIDTH));
+    painter.translate(outputCol[i] * (LENGTH + MIN_WIDTH),
+                      side * (LENGTH + MIN_WIDTH));
     draw_vertical(painter, outputWidth[i]);
     painter.restore();
   }
@@ -223,23 +228,30 @@ void Chip::onSideChanged(int value) {
 
 #define NOTFOUND 0
 #define TYPE_V 1
-#define TYPE_H 2
-#define TYPE_INPUT 3
-#define TYPE_OUTPUT 4
+#define TYPE_V_MID 2
+#define TYPE_H 3
+#define TYPE_H_MID 4
+#define TYPE_INPUT 5
+#define TYPE_OUTPUT 6
 
 int Chip::convertPos(int x, int y, int &res_i, int &res_j) {
+  const int THRESHOLD = 50;
   // vertical
   for (int i = 0; i <= side; i++) {
     for (int j = 0; j < side; j++) {
-      int xx = OFFSET + i * (LENGTH + DEFAULT_WIDTH);
-      int yy = OFFSET + j * (LENGTH + DEFAULT_WIDTH);
+      int xx = OFFSET + i * (LENGTH + MIN_WIDTH);
+      int yy = OFFSET + j * (LENGTH + MIN_WIDTH);
       if ((xx - width_v[i][j] / 2) * SCALE <= x &&
           x <= (xx + width_v[i][j] / 2) * SCALE &&
-          (yy + DEFAULT_WIDTH / 2) * SCALE <= y &&
-          y <= (yy + LENGTH - DEFAULT_WIDTH / 2) * SCALE) {
+          (yy + MIN_WIDTH / 2) * SCALE <= y &&
+          y <= (yy + LENGTH - MIN_WIDTH / 2) * SCALE) {
         res_i = i;
         res_j = j;
-        return TYPE_V;
+        if (fabs((xx - width_v[i][j] / 2) - x / SCALE) <= THRESHOLD ||
+            fabs((xx + width_v[i][j] / 2) - x / SCALE) <= THRESHOLD) {
+          return TYPE_V;
+        }
+        return TYPE_V_MID;
       }
     }
   }
@@ -247,27 +259,31 @@ int Chip::convertPos(int x, int y, int &res_i, int &res_j) {
   // horizontal
   for (int i = 0; i < side; i++) {
     for (int j = 0; j <= side; j++) {
-      int xx = OFFSET + i * (LENGTH + DEFAULT_WIDTH);
-      int yy = OFFSET + j * (LENGTH + DEFAULT_WIDTH);
-      if ((xx + DEFAULT_WIDTH / 2) * SCALE <= x &&
-          x <= (xx + LENGTH - DEFAULT_WIDTH / 2) * SCALE &&
+      int xx = OFFSET + i * (LENGTH + MIN_WIDTH);
+      int yy = OFFSET + j * (LENGTH + MIN_WIDTH);
+      if ((xx + MIN_WIDTH / 2) * SCALE <= x &&
+          x <= (xx + LENGTH - MIN_WIDTH / 2) * SCALE &&
           (yy - width_h[i][j] / 2) * SCALE <= y &&
           y <= (yy + width_h[i][j] / 2) * SCALE) {
         res_i = i;
         res_j = j;
-        return TYPE_H;
+        if (fabs((yy - width_h[i][j] / 2) - y / SCALE) <= THRESHOLD ||
+            fabs((yy + width_h[i][j] / 2) - y / SCALE) <= THRESHOLD) {
+          return TYPE_H;
+        }
+        return TYPE_H_MID;
       }
     }
   }
 
   // input
   for (int i = 0; i < INPUT_NUM; i++) {
-    int xx = OFFSET + inputCol[i] * (LENGTH + DEFAULT_WIDTH);
-    int yy = OFFSET + (-1) * (LENGTH + DEFAULT_WIDTH);
+    int xx = OFFSET + inputCol[i] * (LENGTH + MIN_WIDTH);
+    int yy = OFFSET + (-1) * (LENGTH + MIN_WIDTH);
     if ((xx - inputWidth[i] / 2) * SCALE <= x &&
         x <= (xx + inputWidth[i] / 2) * SCALE &&
-        (yy + DEFAULT_WIDTH / 2) * SCALE <= y &&
-        y <= (yy + LENGTH - DEFAULT_WIDTH / 2) * SCALE) {
+        (yy + MIN_WIDTH / 2) * SCALE <= y &&
+        y <= (yy + LENGTH - MIN_WIDTH / 2) * SCALE) {
       res_i = i;
       return TYPE_INPUT;
     }
@@ -275,12 +291,12 @@ int Chip::convertPos(int x, int y, int &res_i, int &res_j) {
 
   // output
   for (int i = 0; i < OUTPUT_NUM; i++) {
-    int xx = OFFSET + outputCol[i] * (LENGTH + DEFAULT_WIDTH);
-    int yy = OFFSET + side * (LENGTH + DEFAULT_WIDTH);
+    int xx = OFFSET + outputCol[i] * (LENGTH + MIN_WIDTH);
+    int yy = OFFSET + side * (LENGTH + MIN_WIDTH);
     if ((xx - outputWidth[i] / 2) * SCALE <= x &&
         x <= (xx + outputWidth[i] / 2) * SCALE &&
-        (yy + DEFAULT_WIDTH / 2) * SCALE <= y &&
-        y <= (yy + LENGTH - DEFAULT_WIDTH / 2) * SCALE) {
+        (yy + MIN_WIDTH / 2) * SCALE <= y &&
+        y <= (yy + LENGTH - MIN_WIDTH / 2) * SCALE) {
       res_i = i;
       return TYPE_OUTPUT;
     }
@@ -292,6 +308,9 @@ int Chip::convertPos(int x, int y, int &res_i, int &res_j) {
 void Chip::mouseMoveEvent(QMouseEvent *event) {
   const QPointF pos = event->localPos();
   if (isMouseDown) {
+    movedOnMouseDown = true;
+
+    // if dragging input/output
     // find nearest available place
     if (isHoldingInput) {
       int min_xoff = 0x7fffffff, min_place;
@@ -305,7 +324,7 @@ void Chip::mouseMoveEvent(QMouseEvent *event) {
         }
         if (j == INPUT_NUM) {
           // empty slot
-          int xx = OFFSET + i * (LENGTH + DEFAULT_WIDTH);
+          int xx = OFFSET + i * (LENGTH + MIN_WIDTH);
           int xoff = fabs(xx * SCALE - pos.x());
           if (xoff < min_xoff) {
             min_xoff = xoff;
@@ -328,7 +347,7 @@ void Chip::mouseMoveEvent(QMouseEvent *event) {
         }
         if (j == OUTPUT_NUM) {
           // empty slot
-          int xx = OFFSET + i * (LENGTH + DEFAULT_WIDTH);
+          int xx = OFFSET + i * (LENGTH + MIN_WIDTH);
           int xoff = fabs(xx * SCALE - pos.x());
           if (xoff < min_xoff) {
             min_xoff = xoff;
@@ -339,14 +358,47 @@ void Chip::mouseMoveEvent(QMouseEvent *event) {
       // min_place must exist
       outputCol[holdingOutputIndex] = min_place;
       update();
+    } else if (isResizing) {
+      // resize to cursor
+      int xx = OFFSET + resizingX * (LENGTH + MIN_WIDTH);
+      int yy = OFFSET + resizingY * (LENGTH + MIN_WIDTH);
+      float off = 0;
+      if (resizingVertical) {
+        off = abs(pos.x() / SCALE - xx);
+        off = fmax(off, MIN_WIDTH / 2);
+        if (resizingX > 0) {
+          off = fmin(off, LENGTH - width_v[resizingX - 1][resizingY] / 2);
+        }
+        if (resizingX < side) {
+          off = fmin(off, LENGTH - width_v[resizingX + 1][resizingY] / 2);
+        }
+        width_v[resizingX][resizingY] = off * 2;
+      } else {
+        off = fabs(pos.y() / SCALE - yy);
+        off = fmax(off, MIN_WIDTH / 2);
+        if (resizingY > 0) {
+          off = fmin(off, LENGTH - width_h[resizingX][resizingY - 1] / 2);
+        }
+        if (resizingY < side) {
+          off = fmin(off, LENGTH - width_h[resizingX][resizingY + 1] / 2);
+        }
+        width_h[resizingX][resizingY] = off * 2;
+      }
+      update();
     }
   } else {
     int i = 0, j = 0;
     int result = convertPos(pos.x(), pos.y(), i, j);
     switch (result) {
-    case TYPE_V:
-    case TYPE_H:
+    case TYPE_V_MID:
+    case TYPE_H_MID:
       setCursor(Qt::PointingHandCursor);
+      break;
+    case TYPE_V:
+      setCursor(Qt::SizeHorCursor);
+      break;
+    case TYPE_H:
+      setCursor(Qt::SizeVerCursor);
       break;
     case TYPE_INPUT:
     case TYPE_OUTPUT:
@@ -360,6 +412,7 @@ void Chip::mouseMoveEvent(QMouseEvent *event) {
 }
 void Chip::mousePressEvent(QMouseEvent *event) {
   isMouseDown = true;
+  movedOnMouseDown = false;
   mouseDownPos = event->localPos();
 
   const QPointF pos = event->localPos();
@@ -374,16 +427,39 @@ void Chip::mousePressEvent(QMouseEvent *event) {
     if (isHoldingInput || isHoldingOutput) {
       setCursor(Qt::ClosedHandCursor);
     }
+    if (result == TYPE_V) {
+      isResizing = true;
+      resizingVertical = true;
+    } else if (result == TYPE_H) {
+      isResizing = true;
+      resizingVertical = false;
+    } else {
+      isResizing = false;
+    }
+    resizingX = i;
+    resizingY = j;
   }
 }
 void Chip::mouseReleaseEvent(QMouseEvent *event) {
   isMouseDown = false;
-  setCursor(Qt::ArrowCursor);
 
   const QPointF pos = event->localPos();
   int i = 0, j = 0;
   int result = convertPos(pos.x(), pos.y(), i, j);
-  if (result) {
-    qWarning() << "release" << convertPos(pos.x(), pos.y(), i, j) << i << j;
+  if (!movedOnMouseDown) {
+    switch (result) {
+    case TYPE_V:
+    case TYPE_V_MID:
+      disabled_v[i][j] = !disabled_v[i][j];
+      update();
+      break;
+    case TYPE_H:
+    case TYPE_H_MID:
+      disabled_h[i][j] = !disabled_h[i][j];
+      update();
+      break;
+    default:
+      break;
+    }
   }
 }
