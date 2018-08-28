@@ -32,7 +32,7 @@
  /*
  *Created on 2018-8-27  
  *Author:Weiqing_Ji
- *Version 1.0 
+ *Version 1.2 
  *Title: 流速计算程序
  */
 #include <iostream>
@@ -64,7 +64,7 @@ int n,EDGESUM,NODESUM;  //记录网格边长
 
 //函数功能：确定管道中某条管道的长度
 //参数含义：x，管道的编号；leng，管道的长度
-bool setedgelength(int x, double leng)
+void setedgelength(int x, double leng)
 {
 	edges[x].leng = leng;
 }
@@ -158,7 +158,7 @@ void recursionline(int x, int y, int dir, vector<double> &tmp,int end){
 	}else if (dir == 3){
 		x--;
 	}
-	for(int i=0; i<3; i++)
+	for(int i=0; i<4; i++)
 	{
 		int newdir = dir+1-i;
 		newdir = (newdir+4)%4;
@@ -261,6 +261,7 @@ void initrect(){
 			tmp[i]=1;
 			addrect(tmp);
 		}
+	// cout<<rect.size()<<endl;
 	for (int i=0; i<NODESUM-2; i++)  //首先根据基尔霍夫定律，统计所有的电流的相等关系
 	{
 		int number = 0;
@@ -278,6 +279,7 @@ void initrect(){
 		if (number>0)
 			addrect(tmp);
 	}
+	// cout<<rect.size()<<endl;
 	for (int i=0; i<n-1; i++)	//寻找电路中的最小环,对于每个环路径电势差为0
 		for (int j=0; j<n-1; j++)
 		{
@@ -286,6 +288,7 @@ void initrect(){
 			if (edges[t].leng !=0 && edges[m].leng !=0)
 					findline(i,j,t);
 		}
+	// cout<<rect.size()<<endl;
 
 	//三个输出端口之间的电势差为0
 	findrect(EDGESUM-4);
@@ -299,6 +302,7 @@ void initrect(){
 	temp[EDGESUM] = 200;
 	addrect(temp);
 
+	// cout<<rect.size()<<endl;
 }
 
 //函数功能：确定a和b之前的最小数。
@@ -431,7 +435,7 @@ void getans()
 }
 
 //函数功能：计算芯片所有管道的液体流速
-//参数含义：num，芯片的网格边长；length，存储网格中每个管道的长度，若管道不存在用0表示；i1,i2,o1,o2,o3
+//参数含义：num，正方形网格的边长（即网格一行的节点数量，比如8X8的网格，一行有8个节点，num为8）；length，存储网格中每个管道的长度，若管道不存在用0表示；i1,i2,o1,o2,o3
 //				分别表示两个输入管道与三个输出管道在第几列。
 vector<double> caluconspeed(int num, vector<double>&length, int i1, int i2, int o1, int o2, int o3)
 {

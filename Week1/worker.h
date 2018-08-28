@@ -16,30 +16,23 @@
 // along with Week1.  If not, see <http://www.gnu.org/licenses/>.
 // 
 
-#ifndef MAINWINDOW_H
-#define MAINWINDOW_H
+#ifndef WORKER_H
+#define WORKER_H
 
-#include "ui_mainwindow.h"
-#include <QMainWindow>
+#include "chip.h"
+#include <QVector>
 
-class MainWindow : public QMainWindow, private Ui::MainWindow {
-  Q_OBJECT
-
+class Worker : public QObject {
+    Q_OBJECT
 public:
-  explicit MainWindow(QWidget *parent = nullptr);
-
+    Worker(Chip *chip);
+public slots:
+    void calculate();
 signals:
-  void sideChanged(int);
-
-protected:
-  void changeEvent(QEvent *e) override;
-
-private slots:
-  void onSideChanged(int);
-  void onResultChanged(double, double, double);
-
+    void finished(QVector<double>);
 private:
-  int side;
+    Chip *chip;
 };
 
-#endif // MAINWINDOW_H
+#endif
+

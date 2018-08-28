@@ -19,8 +19,8 @@
      <rect>
       <x>10</x>
       <y>10</y>
-      <width>171</width>
-      <height>151</height>
+      <width>174</width>
+      <height>131</height>
      </rect>
     </property>
     <property name="title">
@@ -32,7 +32,7 @@
        <x>10</x>
        <y>30</y>
        <width>154</width>
-       <height>108</height>
+       <height>71</height>
       </rect>
      </property>
      <layout class="QVBoxLayout" name="verticalLayout">
@@ -80,6 +80,32 @@
      </rect>
     </property>
    </widget>
+   <widget class="QGroupBox" name="groupBox_2">
+    <property name="geometry">
+     <rect>
+      <x>10</x>
+      <y>150</y>
+      <width>171</width>
+      <height>151</height>
+     </rect>
+    </property>
+    <property name="title">
+     <string>Result</string>
+    </property>
+    <widget class="QLabel" name="resultLabel">
+     <property name="geometry">
+      <rect>
+       <x>10</x>
+       <y>30</y>
+       <width>151</width>
+       <height>16</height>
+      </rect>
+     </property>
+     <property name="text">
+      <string>TextLabel</string>
+     </property>
+    </widget>
+   </widget>
   </widget>
   <widget class="QMenuBar" name="menubar">
    <property name="geometry">
@@ -101,6 +127,7 @@
    <container>1</container>
    <slots>
     <signal>statusChanged(QString)</signal>
+    <signal>resultChanged(double,double,double)</signal>
     <slot>onSideChanged(int)</slot>
    </slots>
   </customwidget>
@@ -115,7 +142,7 @@
    <hints>
     <hint type="sourcelabel">
      <x>93</x>
-     <y>139</y>
+     <y>112</y>
     </hint>
     <hint type="destinationlabel">
      <x>77</x>
@@ -155,9 +182,26 @@
     </hint>
    </hints>
   </connection>
+  <connection>
+   <sender>chip</sender>
+   <signal>resultChanged(double,double,double)</signal>
+   <receiver>MainWindow</receiver>
+   <slot>onResultChanged(double,double,double)</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>262</x>
+     <y>324</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>110</x>
+     <y>363</y>
+    </hint>
+   </hints>
+  </connection>
  </connections>
  <slots>
   <signal>sideChanged(int)</signal>
   <slot>onSideChanged(int)</slot>
+  <slot>onResultChanged(double,double,double)</slot>
  </slots>
 </ui>

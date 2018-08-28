@@ -33,17 +33,15 @@
 /*
  *Created on 2018-8-27
  *Author:Weiqing_Ji
- *Version 1.0
+ *Version 1.2
  *Title: 流速计算程序
  */
-#include "algo.h"
 #include <fstream>
 #include <iostream>
 #include <math.h>
 #include <sstream>
 #include <time.h>
 #include <vector>
-
 
 using namespace std;
 #define NAX 0.000000001
@@ -75,7 +73,7 @@ void addrect(vector<double> &tmp) { rect.push_back(tmp); }
 //函数功能：计算节点(x,y)的dir方向的管道编号。dir为0表示上方，1表示右侧，2表示下方，3表示左侧。若管道存在(不论长度是否为0)则返回对应管道编号，不存在(即不在原始网格内)则返回EDGESUM
 //参数含义：x，节点的横坐标；y节点的纵坐标；dir，询问的节点方向。
 int getdirline(int x, int y, int dir) {
-  int e = 0;
+  int e;
   int sum = x * n + y;
   if (dir == 0) {
     if (y == 0) {
@@ -109,6 +107,8 @@ int getdirline(int x, int y, int dir) {
       e = EDGESUM;
     else
       e = n * n - n + (x - 1) * n + y;
+  } else {
+    assert(0);
   }
   return e;
 }
@@ -151,7 +151,7 @@ void recursionline(int x, int y, int dir, vector<double> &tmp, int end) {
   } else if (dir == 3) {
     x--;
   }
-  for (int i = 0; i < 3; i++) {
+  for (int i = 0; i < 4; i++) {
     int newdir = dir + 1 - i;
     newdir = (newdir + 4) % 4;
     if (existdir(x, y, newdir)) {
@@ -253,12 +253,13 @@ void initrect() {
       tmp[i] = 1;
       addrect(tmp);
     }
+  // cout<<rect.size()<<endl;
   for (int i = 0; i < NODESUM - 2;
        i++) //首先根据基尔霍夫定律，统计所有的电流的相等关系
   {
     int number = 0;
     vector<double> tmp(EDGESUM + 1, 0);
-    for (size_t j = 0; j < nodes[i].elist.size(); j++)
+    for (int j = 0; j < nodes[i].elist.size(); j++)
       if (edges[nodes[i].elist[j]].leng != 0) {
         number++;
         if (edges[nodes[i].elist[j]].n1 == i)
@@ -270,6 +271,7 @@ void initrect() {
     if (number > 0)
       addrect(tmp);
   }
+  // cout<<rect.size()<<endl;
   for (int i = 0; i < n - 1; i++) //寻找电路中的最小环,对于每个环路径电势差为0
     for (int j = 0; j < n - 1; j++) {
       int t = i * (n - 1) + j;
@@ -277,6 +279,7 @@ void initrect() {
       if (edges[t].leng != 0 && edges[m].leng != 0)
         findline(i, j, t);
     }
+  // cout<<rect.size()<<endl;
 
   //三个输出端口之间的电势差为0
   findrect(EDGESUM - 4);
@@ -289,6 +292,8 @@ void initrect() {
   temp[EDGESUM - 4] = 1;
   temp[EDGESUM] = 200;
   addrect(temp);
+
+  // cout<<rect.size()<<endl;
 }
 
 //函数功能：确定a和b之前的最小数。
@@ -406,7 +411,7 @@ void getans() {
 }
 
 //函数功能：计算芯片所有管道的液体流速
-//参数含义：num，芯片的网格边长；length，存储网格中每个管道的长度，若管道不存在用0表示；i1,i2,o1,o2,o3
+//参数含义：num，正方形网格的边长（即网格一行的节点数量，比如8X8的网格，一行有8个节点，num为8）；length，存储网格中每个管道的长度，若管道不存在用0表示；i1,i2,o1,o2,o3
 //				分别表示两个输入管道与三个输出管道在第几列。
 vector<double> caluconspeed(int num, vector<double> &length, int i1, int i2,
                             int o1, int o2, int o3) {
@@ -416,7 +421,7 @@ vector<double> caluconspeed(int num, vector<double> &length, int i1, int i2,
   NODESUM = n * n + 2;
   int n1 = 0;
   int n2 = 1;
-  fr = new bool[EDGESUM];
+  fr = new bool[200];
   for (int i = 0; i < n * n - n; i++) {
     edges[i].n1 = n1;
     edges[i].n2 = n2;
@@ -481,19 +486,17 @@ vector<double> caluconspeed(int num, vector<double> &length, int i1, int i2,
 }
 
 /*
-int main(int argc, char ** argv)
-{
-        int n;
-        cin>>n;
-        vector<double> leng(2*n*n-2*n+5,0);
-        for (int i=0; i<2*n*n-2*n+5; i++)
-        {
-                cin>>leng[i];
-        }
-        vector<double> ans = caluconspeed(n,leng,0,1,0,1,2);
-        for (int i=0; i<3;i++)
-                cout<<ans[i]<<endl;
-        return 0;
+int main(int argc, char **argv) {
+  int n;
+  cin >> n;
+  vector<double> leng(2 * n * n - 2 * n + 5, 0);
+  for (int i = 0; i < 2 * n * n - 2 * n + 5; i++) {
+    cin >> leng[i];
+  }
+  vector<double> ans = caluconspeed(n, leng, 0, 1, 0, 1, 2);
+  for (int i = 0; i < 3; i++)
+    cout << ans[i] << endl;
+  return 0;
 }
 
 */

@@ -1,25 +1,27 @@
 // Copyright (C) 2018 Jiajie Chen
-// 
+//
 // This file is part of Week1.
-// 
+//
 // Week1 is free software: you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
 // the Free Software Foundation, either version 3 of the License, or
 // (at your option) any later version.
-// 
+//
 // Week1 is distributed in the hope that it will be useful,
 // but WITHOUT ANY WARRANTY; without even the implied warranty of
 // MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 // GNU General Public License for more details.
-// 
+//
 // You should have received a copy of the GNU General Public License
 // along with Week1.  If not, see <http://www.gnu.org/licenses/>.
-// 
+//
 
 #include "chip.h"
+#include "worker.h"
 #include <QDebug>
 #include <QMouseEvent>
 #include <QPainter>
+#include <QThread>
 #include <cmath>
 
 #define MIN_WIDTH 200
@@ -31,23 +33,34 @@
 Chip::Chip(QWidget *parent, int side) : QWidget(parent), side(side) {
   for (int i = 0; i < INPUT_NUM; i++) {
     inputCol[i] = i;
-    inputWidth[i] = MIN_WIDTH * (i + 1);
+    inputWidth[i] = MIN_WIDTH;
   }
   for (int i = 0; i < OUTPUT_NUM; i++) {
     outputCol[i] = i;
-    outputWidth[i] = MIN_WIDTH * (i + 1);
+    outputWidth[i] = MIN_WIDTH;
   }
   for (int i = 0; i <= 8; i++) {
     for (int j = 0; j <= 8; j++) {
-      width_v[i][j] = MIN_WIDTH * (rand() % 4 + 1);
+      width_v[i][j] = MIN_WIDTH;
       disabled_v[i][j] = false;
-      width_h[i][j] = MIN_WIDTH * (rand() % 4 + 1);
+      width_h[i][j] = MIN_WIDTH;
       disabled_h[i][j] = false;
     }
   }
   isResizing = false;
   isMouseDown = false;
   setMouseTracking(true);
+
+  Worker *worker = new Worker(this);
+  QThread *thread = new QThread(this);
+  worker->moveToThread(thread);
+  connect(this, SIGNAL(dataChanged()), worker, SLOT(calculate()));
+  qRegisterMetaType<QVector<double>>("QVector<double>");
+  connect(worker, SIGNAL(finished(QVector<double>)), this,
+          SLOT(onResultChanged(QVector<double>)));
+  thread->start();
+
+  emit dataChanged();
 }
 
 void draw_vertical(QPainter &painter, int width) {
@@ -242,6 +255,7 @@ void Chip::onSideChanged(int value) {
   }
   side = value;
   emit update();
+  emit dataChanged();
 }
 
 #define NOTFOUND 0
@@ -467,6 +481,7 @@ void Chip::mouseMoveEvent(QMouseEvent *event) {
       }
       emit statusChanged(tr("Resizing to width %1").arg((int)(off * 2)));
       update();
+      emit dataChanged();
     }
   } else {
     int i = 0, j = 0;
@@ -511,6 +526,7 @@ void Chip::mouseMoveEvent(QMouseEvent *event) {
     }
   }
 }
+
 void Chip::mousePressEvent(QMouseEvent *event) {
   isMouseDown = true;
   movedOnMouseDown = false;
@@ -544,6 +560,7 @@ void Chip::mousePressEvent(QMouseEvent *event) {
     resizingY = j;
   }
 }
+
 void Chip::mouseReleaseEvent(QMouseEvent *event) {
   isMouseDown = false;
 
@@ -552,18 +569,23 @@ void Chip::mouseReleaseEvent(QMouseEvent *event) {
   int result = convertPos(pos.x(), pos.y(), i, j);
   if (!movedOnMouseDown) {
     switch (result) {
-    case TYPE_V:
     case TYPE_V_MID:
       disabled_v[i][j] = !disabled_v[i][j];
       update();
+      emit dataChanged();
       break;
-    case TYPE_H:
     case TYPE_H_MID:
       disabled_h[i][j] = !disabled_h[i][j];
       update();
+      emit dataChanged();
       break;
     default:
       break;
     }
   }
+}
+
+void Chip::onResultChanged(QVector<double> result) {
+  qWarning() << result;
+  emit resultChanged(result[0], result[1], result[2]);
 }
