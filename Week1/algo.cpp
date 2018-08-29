@@ -74,7 +74,7 @@ void addrect(vector<double> &tmp) { rect.push_back(tmp); }
 //函数功能：计算节点(x,y)的dir方向的管道编号。dir为0表示上方，1表示右侧，2表示下方，3表示左侧。若管道存在(不论长度是否为0)则返回对应管道编号，不存在(即不在原始网格内)则返回EDGESUM
 //参数含义：x，节点的横坐标；y节点的纵坐标；dir，询问的节点方向。
 int getdirline(int x, int y, int dir) {
-  int e;
+  int e = EDGESUM;
   int sum = x * n + y;
   if (dir == 0) {
     if (y == 0) {
@@ -493,13 +493,13 @@ vector<double> caluconspeed(int num, vector<double> &length, int i1, int i2,
 
   if (!initrect()) {
     mutex.unlock();
-    return vector<double>(3, 0);
+    return vector<double>(EDGESUM, 0);
   }
   getans();
-  vector<double> v(3, 0);
-  v[0] = edges[EDGESUM - 3].v;
-  v[1] = edges[EDGESUM - 2].v;
-  v[2] = edges[EDGESUM - 1].v;
+  vector<double> v(EDGESUM, 0);
+  for (int i = 0;i < EDGESUM;i++) {
+    v[i] = edges[i].v;
+  }
   mutex.unlock();
   return v;
 }

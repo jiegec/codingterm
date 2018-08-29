@@ -40,7 +40,6 @@ Chip::Chip(QWidget *parent, int side) : QWidget(parent), side(side) {
   for (int i = 0; i < OUTPUT_NUM; i++) {
     outputCol[i] = i;
     outputWidth[i] = MIN_WIDTH;
-    result[i] = 0.0;
     target_output_flow[i] = 0;
   }
 
@@ -161,6 +160,12 @@ void draw_horizontal(QPainter &painter, int width) {
                   270 * 16, 90 * 16);
 }
 
+QColor gradient(const QColor from, const QColor to, double ratio) {
+  return QColor(from.red() + (to.red() - from.red()) * ratio,
+                from.green() + (to.green() - from.green() * ratio),
+                from.blue() + (to.blue() - from.blue()) * ratio);
+}
+
 void Chip::paintEvent(QPaintEvent *) {
   QPainter painter(this);
   painter.setRenderHint(QPainter::Antialiasing);
@@ -183,30 +188,37 @@ void Chip::paintEvent(QPaintEvent *) {
     }
   }
 
-  painter.setBrush(QColor("#9C27B0"));
+  QColor colorFull("#2962FF");
+  QColor colorNone("#039BE5");
+  QColor colorDisabled("#9E9E9E");
+
+  int resultIndex = 0;
   for (int i = 0; i <= side; i++) {
     for (int j = 0; j < side; j++) {
+      QColor color =
+          gradient(colorNone, colorFull, result[resultIndex++] / 400.0);
+      if (disabled_v[i][j]) {
+        color = colorDisabled;
+      }
+      painter.setBrush(color);
+
       painter.save();
       painter.translate(i * (LENGTH + MIN_WIDTH), j * (LENGTH + MIN_WIDTH));
-      if (disabled_v[i][j]) {
-        painter.setBrush(QColor("#9E9E9E"));
-      }
       draw_vertical(painter, width_v[i][j]);
       painter.restore();
     }
   }
 
-  for (int i = 0; i < INPUT_NUM; i++) {
-    painter.save();
-    painter.translate(inputCol[i] * (LENGTH + MIN_WIDTH),
-                      -1 * (LENGTH + MIN_WIDTH));
-    draw_vertical(painter, inputWidth[i]);
-    painter.restore();
-  }
-
-  painter.setBrush(QColor("#03A9F4"));
+  // painter.setBrush(QColor("#03A9F4"));
   for (int i = 0; i < side; i++) {
     for (int j = 0; j <= side; j++) {
+      QColor color =
+          gradient(colorNone, colorFull, result[resultIndex++] / 400.0);
+      if (disabled_h[i][j]) {
+        color = colorDisabled;
+      }
+      painter.setBrush(color);
+
       painter.save();
       painter.translate(i * (LENGTH + MIN_WIDTH), j * (LENGTH + MIN_WIDTH));
       if (disabled_h[i][j]) {
@@ -217,17 +229,34 @@ void Chip::paintEvent(QPaintEvent *) {
     }
   }
 
+  for (int i = 0; i < INPUT_NUM; i++) {
+    QColor color =
+        gradient(colorNone, colorFull, result[resultIndex++] / 400.0);
+    painter.setBrush(color);
+
+    painter.save();
+    painter.translate(inputCol[i] * (LENGTH + MIN_WIDTH),
+                      -1 * (LENGTH + MIN_WIDTH));
+    draw_vertical(painter, inputWidth[i]);
+    painter.restore();
+  }
+
   QFont font = painter.font();
   font.setPixelSize(300);
   painter.setFont(font);
   for (int i = 0; i < OUTPUT_NUM; i++) {
+    QColor color =
+        gradient(colorNone, colorFull, result[resultIndex++] / 400.0);
+    painter.setBrush(color);
+
     painter.save();
     painter.translate(outputCol[i] * (LENGTH + MIN_WIDTH),
                       side * (LENGTH + MIN_WIDTH));
     draw_vertical(painter, outputWidth[i]);
     painter.setPen(origPen);
     painter.drawText(-LENGTH / 2, LENGTH + MIN_WIDTH, LENGTH, LENGTH,
-                     Qt::AlignHCenter | Qt::AlignTop, tr("%1").arg(result[i]));
+                     Qt::AlignHCenter | Qt::AlignTop,
+                     tr("%1").arg(result[resultIndex - 1]));
     painter.setPen(Qt::NoPen);
     painter.restore();
   }
@@ -603,11 +632,10 @@ void Chip::mouseReleaseEvent(QMouseEvent *event) {
 }
 
 void Chip::onResultChanged(QVector<double> result) {
-  for (int i = 0; i < OUTPUT_NUM; i++) {
-    this->result[i] = result[i];
-  }
+  this->result = result;
+  int len = result.length();
   update();
-  emit resultChanged(result[0], result[1], result[2]);
+  emit resultChanged(result[len - 3], result[len - 2], result[len - 1]);
 }
 
 void Chip::onTargetOutputFlow1Changed(int value) {
@@ -632,7 +660,7 @@ struct {
   int outputCol[OUTPUT_NUM];
   int outputWidth[OUTPUT_NUM];
   int target_output_flow[OUTPUT_NUM];
-  double result[OUTPUT_NUM];
+  QVector<double> result;
 } workerData;
 
 struct State {
@@ -657,9 +685,12 @@ void workerThread() {
     }
   }
   elite[0].loss = 0.0;
+  int resultLen = workerData.result.length();
   for (int i = 0; i < OUTPUT_NUM; i++) {
-    elite[0].loss += (workerData.target_output_flow[i] - workerData.result[i]) *
-                     (workerData.target_output_flow[i] - workerData.result[i]);
+    elite[0].loss += (workerData.target_output_flow[i] -
+                      workerData.result[resultLen - 3 + i]) *
+                     (workerData.target_output_flow[i] -
+                      workerData.result[resultLen - 3 + i]);
   }
 
   double min_loss = elite[0].loss;
@@ -719,21 +750,25 @@ void workerThread() {
             caluconspeed(workerData.side + 1, length, workerData.inputCol[0],
                          workerData.inputCol[1], workerData.outputCol[0],
                          workerData.outputCol[1], workerData.outputCol[2]);
+        int resultLen = result.size();
         newstate.loss = 0;
         for (int i = 0; i < OUTPUT_NUM; i++) {
-          newstate.loss += (result[i] - workerData.target_output_flow[i]) *
-                           (result[i] - workerData.target_output_flow[i]);
+          newstate.loss +=
+              (result[resultLen - 3 + i] - workerData.target_output_flow[i]) *
+              (result[resultLen - 3 + i] - workerData.target_output_flow[i]);
         }
 
         if (newstate.loss < min_loss) {
           qWarning() << newstate.loss;
           min_loss = newstate.loss;
-          emit chip->statusChanged(QString("Found a solution #%1 of loss %2.(%3/%4)")
-                                       .arg(minSolutionCount++)
-                                       .arg(newstate.loss)
-                                       .arg(round + 1)
-                                       .arg(maxRound));
-          emit chip->updateDisabledMatrix(newstate.disabled_v, newstate.disabled_h);
+          emit chip->statusChanged(
+              QString("Found a solution #%1 of loss %2.(%3/%4)")
+                  .arg(minSolutionCount++)
+                  .arg(newstate.loss)
+                  .arg(round + 1)
+                  .arg(maxRound));
+          emit chip->updateDisabledMatrix(newstate.disabled_v,
+                                          newstate.disabled_h);
         }
       }
     }
@@ -777,8 +812,8 @@ void Chip::beginFindTarget() {
     workerData.outputCol[i] = outputCol[i];
     workerData.outputWidth[i] = outputWidth[i];
     workerData.target_output_flow[i] = target_output_flow[i];
-    workerData.result[i] = result[i];
   }
+  workerData.result = result;
 
   findTargetThread = QThread::create(workerThread);
   findTargetThread->start();

@@ -70,7 +70,7 @@ private:
   int inputWidth[INPUT_NUM];
   int outputCol[OUTPUT_NUM];
   int outputWidth[OUTPUT_NUM];
-  double result[OUTPUT_NUM];
+  QVector<double> result;
   int width_v[9][9];
   bool disabled_v[9][9];
   int width_h[9][9];
