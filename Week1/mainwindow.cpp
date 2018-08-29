@@ -31,6 +31,10 @@ void MainWindow::changeEvent(QEvent *e) {
   switch (e->type()) {
   case QEvent::LanguageChange:
     retranslateUi(this);
+    onSideChanged(side);
+    onTargetOutputFlow1Changed(output1Silder->value());
+    onTargetOutputFlow2Changed(output3Silder->value());
+    onTargetOutputFlow3Changed(output3Silder->value());
     break;
   default:
     break;
@@ -39,16 +43,23 @@ void MainWindow::changeEvent(QEvent *e) {
 
 void MainWindow::onSideChanged(int value) {
   side = value;
-  sideNumberLabel->setText(tr("%1").arg(side));
+  sideNumberLabel->setText(QString("%1").arg(side));
   emit sideChanged(side);
 }
 
 void MainWindow::onTargetOutputFlow1Changed(int value) {
-  output1Label->setText(tr("%1").arg(value));
+  output1Label->setText(QString("%1").arg(value));
 }
 void MainWindow::onTargetOutputFlow2Changed(int value) {
-  output2Label->setText(tr("%1").arg(value));
+  output2Label->setText(QString("%1").arg(value));
 }
 void MainWindow::onTargetOutputFlow3Changed(int value) {
-  output3Label->setText(tr("%1").arg(value));
+  output3Label->setText(QString("%1").arg(value));
+}
+
+void MainWindow::onLanguageChanged(QString language) {
+  QApplication::removeTranslator(&translator);
+  if (translator.load(QString(":/translations/%1").arg(language))) {
+    QApplication::installTranslator(&translator);
+  }
 }

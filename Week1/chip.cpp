@@ -204,10 +204,13 @@ void Chip::paintEvent(QPaintEvent *) {
   QColor colorDisabled("#9E9E9E");
 
   int resultIndex = 0;
+  // when side changes, the result array is no longer valid
+  // but it will be recalculated anyway
+  int resultLen = result.length();
   for (int i = 0; i <= side; i++) {
     for (int j = 0; j < side; j++) {
-      QColor color =
-          gradient(colorNone, colorFull, result[resultIndex++] / 400.0);
+      QColor color = gradient(colorNone, colorFull,
+                              result[(resultIndex++) % resultLen] / 400.0);
       if (disabled_v[i][j]) {
         color = colorDisabled;
       }
@@ -223,8 +226,8 @@ void Chip::paintEvent(QPaintEvent *) {
   // painter.setBrush(QColor("#03A9F4"));
   for (int i = 0; i < side; i++) {
     for (int j = 0; j <= side; j++) {
-      QColor color =
-          gradient(colorNone, colorFull, result[resultIndex++] / 400.0);
+      QColor color = gradient(colorNone, colorFull,
+                              result[(resultIndex++) % resultLen] / 400.0);
       if (disabled_h[i][j]) {
         color = colorDisabled;
       }
@@ -241,8 +244,8 @@ void Chip::paintEvent(QPaintEvent *) {
   }
 
   for (int i = 0; i < INPUT_NUM; i++) {
-    QColor color =
-        gradient(colorNone, colorFull, result[resultIndex++] / 400.0);
+    QColor color = gradient(colorNone, colorFull,
+                            result[(resultIndex++) % resultLen] / 400.0);
     painter.setBrush(color);
 
     painter.save();
@@ -256,8 +259,8 @@ void Chip::paintEvent(QPaintEvent *) {
   font.setPixelSize(300);
   painter.setFont(font);
   for (int i = 0; i < OUTPUT_NUM; i++) {
-    QColor color =
-        gradient(colorNone, colorFull, result[resultIndex++] / 400.0);
+    QColor color = gradient(colorNone, colorFull,
+                            result[(resultIndex++) % resultLen] / 400.0);
     painter.setBrush(color);
 
     painter.save();
@@ -267,7 +270,7 @@ void Chip::paintEvent(QPaintEvent *) {
     painter.setPen(origPen);
     painter.drawText(-LENGTH / 2, LENGTH + MIN_WIDTH, LENGTH, LENGTH,
                      Qt::AlignHCenter | Qt::AlignTop,
-                     tr("%1").arg(result[resultIndex - 1]));
+                     QString("%1").arg(result[(resultIndex - 1) % resultLen]));
     painter.setPen(Qt::NoPen);
     painter.restore();
   }
@@ -536,7 +539,7 @@ void Chip::mouseMoveEvent(QMouseEvent *event) {
       default:
         break;
       }
-      emit statusChanged(tr("Resizing to width %1").arg((int)(off * 2)));
+      emit statusChanged(tr("Resizing to width %1.").arg((int)(off * 2)));
       update();
       emit dataChanged();
     }
@@ -547,17 +550,25 @@ void Chip::mouseMoveEvent(QMouseEvent *event) {
     int resultIndex = 0;
     int resultLen = this->result.length();
     switch (result) {
-    case TYPE_H:
-    case TYPE_H_MID:
-      resultIndex = side * (side + 1) + i * (side + 1) + j;
-      emit messageChanged(
-          tr("Flow under cursor: %1.").arg(this->result[resultIndex]));
-      break;
     case TYPE_V:
     case TYPE_V_MID:
-      resultIndex = i * side + j;
-      emit messageChanged(
-          tr("Flow under cursor: %1.").arg(this->result[resultIndex]));
+      if (disabled_v[i][j]) {
+        emit messageChanged(tr("Edge under cursor is disabled."));
+      } else {
+        resultIndex = i * side + j;
+        emit messageChanged(
+            tr("Flow under cursor: %1.").arg(this->result[resultIndex]));
+      }
+      break;
+    case TYPE_H:
+    case TYPE_H_MID:
+      if (disabled_h[i][j]) {
+        emit messageChanged(tr("Edge under cursor is disabled."));
+      } else {
+        resultIndex = side * (side + 1) + i * (side + 1) + j;
+        emit messageChanged(
+            tr("Flow under cursor: %1.").arg(this->result[resultIndex]));
+      }
       break;
     case TYPE_INPUT:
     case TYPE_INPUT_MID:
@@ -592,22 +603,22 @@ void Chip::mouseMoveEvent(QMouseEvent *event) {
     case TYPE_V_MID:
     case TYPE_H_MID:
       setCursor(Qt::PointingHandCursor);
-      emit statusChanged(tr("Click to toggle"));
+      emit statusChanged(tr("Click to toggle."));
       break;
     case TYPE_V:
     case TYPE_INPUT:
     case TYPE_OUTPUT:
       setCursor(Qt::SizeHorCursor);
-      emit statusChanged(tr("Drag to resize, current width is %1").arg(width));
+      emit statusChanged(tr("Drag to resize, current width is %1.").arg(width));
       break;
     case TYPE_H:
       setCursor(Qt::SizeVerCursor);
-      emit statusChanged(tr("Drag to resize, current width is %1").arg(width));
+      emit statusChanged(tr("Drag to resize, current width is %1.").arg(width));
       break;
     case TYPE_INPUT_MID:
     case TYPE_OUTPUT_MID:
       setCursor(Qt::OpenHandCursor);
-      emit statusChanged(tr("Drag to move"));
+      emit statusChanged(tr("Drag to move."));
       break;
     default:
       setCursor(Qt::ArrowCursor);

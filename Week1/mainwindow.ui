@@ -20,7 +20,7 @@
       <x>10</x>
       <y>10</y>
       <width>174</width>
-      <height>131</height>
+      <height>161</height>
      </rect>
     </property>
     <property name="title">
@@ -32,14 +32,14 @@
        <x>10</x>
        <y>30</y>
        <width>154</width>
-       <height>71</height>
+       <height>121</height>
       </rect>
      </property>
      <layout class="QVBoxLayout" name="verticalLayout">
       <item>
        <widget class="QLabel" name="sideLabel">
         <property name="text">
-         <string>Rows:</string>
+         <string>Side:</string>
         </property>
        </widget>
       </item>
@@ -67,6 +67,20 @@
         </item>
        </layout>
       </item>
+      <item>
+       <widget class="QComboBox" name="languageComboBox">
+        <item>
+         <property name="text">
+          <string>en</string>
+         </property>
+        </item>
+        <item>
+         <property name="text">
+          <string>zh</string>
+         </property>
+        </item>
+       </widget>
+      </item>
      </layout>
     </widget>
    </widget>
@@ -84,7 +98,7 @@
     <property name="geometry">
      <rect>
       <x>10</x>
-      <y>380</y>
+      <y>420</y>
       <width>171</width>
       <height>181</height>
      </rect>
@@ -116,7 +130,7 @@
     <property name="geometry">
      <rect>
       <x>10</x>
-      <y>150</y>
+      <y>190</y>
       <width>171</width>
       <height>211</height>
      </rect>
@@ -253,8 +267,8 @@
    <slot>onSideChanged(int)</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>93</x>
-     <y>112</y>
+     <x>95</x>
+     <y>120</y>
     </hint>
     <hint type="destinationlabel">
      <x>77</x>
@@ -295,22 +309,6 @@
    </hints>
   </connection>
   <connection>
-   <sender>chip</sender>
-   <signal>resultChanged(double,double,double)</signal>
-   <receiver>MainWindow</receiver>
-   <slot>onResultChanged(double,double,double)</slot>
-   <hints>
-    <hint type="sourcelabel">
-     <x>262</x>
-     <y>324</y>
-    </hint>
-    <hint type="destinationlabel">
-     <x>110</x>
-     <y>363</y>
-    </hint>
-   </hints>
-  </connection>
-  <connection>
    <sender>output1Silder</sender>
    <signal>valueChanged(int)</signal>
    <receiver>chip</receiver>
@@ -318,7 +316,7 @@
    <hints>
     <hint type="sourcelabel">
      <x>34</x>
-     <y>234</y>
+     <y>274</y>
     </hint>
     <hint type="destinationlabel">
      <x>270</x>
@@ -334,7 +332,7 @@
    <hints>
     <hint type="sourcelabel">
      <x>72</x>
-     <y>275</y>
+     <y>315</y>
     </hint>
     <hint type="destinationlabel">
      <x>273</x>
@@ -350,7 +348,7 @@
    <hints>
     <hint type="sourcelabel">
      <x>54</x>
-     <y>309</y>
+     <y>349</y>
     </hint>
     <hint type="destinationlabel">
      <x>297</x>
@@ -366,7 +364,7 @@
    <hints>
     <hint type="sourcelabel">
      <x>85</x>
-     <y>238</y>
+     <y>278</y>
     </hint>
     <hint type="destinationlabel">
      <x>59</x>
@@ -382,7 +380,7 @@
    <hints>
     <hint type="sourcelabel">
      <x>97</x>
-     <y>267</y>
+     <y>307</y>
     </hint>
     <hint type="destinationlabel">
      <x>52</x>
@@ -398,7 +396,7 @@
    <hints>
     <hint type="sourcelabel">
      <x>96</x>
-     <y>311</y>
+     <y>351</y>
     </hint>
     <hint type="destinationlabel">
      <x>50</x>
@@ -414,7 +412,7 @@
    <hints>
     <hint type="sourcelabel">
      <x>126</x>
-     <y>344</y>
+     <y>384</y>
     </hint>
     <hint type="destinationlabel">
      <x>324</x>
@@ -438,6 +436,22 @@
     </hint>
    </hints>
   </connection>
+  <connection>
+   <sender>languageComboBox</sender>
+   <signal>activated(QString)</signal>
+   <receiver>MainWindow</receiver>
+   <slot>onLanguageChanged(QString)</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>120</x>
+     <y>169</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>103</x>
+     <y>673</y>
+    </hint>
+   </hints>
+  </connection>
  </connections>
  <slots>
   <signal>sideChanged(int)</signal>
@@ -446,5 +460,6 @@
   <slot>onTargetOutputFlow1Changed(int)</slot>
   <slot>onTargetOutputFlow2Changed(int)</slot>
   <slot>onTargetOutputFlow3Changed(int)</slot>
+  <slot>onLanguageChanged(QString)</slot>
  </slots>
 </ui>
