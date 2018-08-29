@@ -36,14 +36,16 @@
  *Version 1.3.1
  *Title: 流速计算程序
  */
+#include <QDebug>
+#include <QFile>
 #include <QMutex>
+#include <QThread>
 #include <fstream>
 #include <iostream>
 #include <math.h>
 #include <sstream>
 #include <time.h>
 #include <vector>
-
 
 using namespace std;
 #define NAX 0.000000001
@@ -355,71 +357,124 @@ void getans() {
       if (abs(rect[i][j]) < NAX)
         rect[i][j] = 0;
 
-  int num = 0;
-  for (int i = 0; i < n; i++) {
-    if (abs(rect[i][num]) < NAX) {
-      int mjj = 0;
-      for (int j = i + 1; j < n; j++)
-        if (!(abs(rect[j][num]) < NAX)) {
-          mjj++;
-          for (int k = 0; k < EDGESUM + 1; k++) {
-            double t = rect[j][k];
-            rect[j][k] = rect[i][k];
-            rect[i][k] = t;
-          }
-          break;
-        }
-      // if (mjj == 0)
-      // 	cout<<"454354354354354"<<endl;
+  QFile output("/Volumes/Data/oopterm/Week1/debug.out");
+  output.open(QIODevice::WriteOnly);
+  QDebug debug(&output);
+
+  int i = 0;
+  for (int num = 0; num <= EDGESUM && i < n; num++) {
+    debug << "num" << num << "i" << i << rect << "\n";
+    int mjj = -1;
+    double maxPivot = NAX;
+    for (int j = i; j < n; j++) {
+      if (abs(rect[j][num]) > maxPivot) {
+        mjj = j;
+        maxPivot = abs(rect[j][num]);
+      }
     }
-    for (int j = 0; j < n; j++)
-      if (i != j && (abs(rect[j][num]) > NAX)) {
-        double ml = LeastCommonMultiple(abs(rect[j][num]), abs(rect[i][num]));
-        double t = ml / rect[j][num];
-        double kt = ml / rect[i][num];
-        for (int k = EDGESUM; k >= 0; k--) {
-          rect[j][k] = rect[j][k] * t;
+    if (mjj == -1) {
+      continue;
+    }
+    for (int k = 0; k < EDGESUM + 1; k++) {
+      double t = rect[mjj][k];
+      rect[mjj][k] = rect[i][k];
+      rect[i][k] = t;
+    }
+    double main = rect[i][num];
+    for (int k = 0; k < EDGESUM + 1; k++) {
+      rect[i][k] /= main;
+    }
+    for (int j = i + 1; j < n; j++)
+      if (abs(rect[j][num]) > NAX) {
+        double t = rect[j][num];
+        for (int k = EDGESUM; k >= num; k--) {
+          rect[j][k] = rect[j][k] / t;
           rect[j][k] = (abs(rect[j][k]) < NAX) ? 0 : rect[j][k];
         }
         for (int k = EDGESUM; k >= num; k--) {
-          rect[j][k] -= kt * rect[i][k];
+          rect[j][k] -= rect[i][k];
           rect[j][k] = (abs(rect[j][k]) < NAX) ? 0 : rect[j][k];
         }
       }
 
-    num++;
-    for (int j = 0; j < n; j++) {
-      double common = 0;
-      for (int k = 0; k < EDGESUM + 1; k++)
-        if ((abs(rect[j][k]) > NAX)) {
-          if (abs(common) < NAX)
-            common = abs(rect[j][k]);
-          else
-            common = GreatestCommonDivisor(common, abs(rect[j][k]));
-        }
-      if (common != 0)
-        for (int k = 0; k < EDGESUM + 1; k++) {
-          rect[j][k] = rect[j][k] / common;
-          rect[j][k] = (abs(rect[j][k]) < NAX) ? 0 : rect[j][k];
-        }
-    }
-    if (num == EDGESUM)
-      break;
+    i++;
   }
 
-  num = 0;
-  for (int i = 0; i < EDGESUM; i++) {
-    edges[num].v = double(rect[i][EDGESUM]) / double(rect[i][num]);
-    if (edges[num].v < 0) {
-      edges[num].v = -edges[num].v;
-      int tm = edges[num].n1;
-      edges[num].n1 = edges[num].n2;
-      edges[num].n2 = tm;
-    }
-    num++;
-    if (num == EDGESUM)
-      break;
+  int num = 0;
+  for (int row = 0; row < i; row++) {
+    while (abs(rect[row][num] - 1) > NAX)
+      num++;
+    for (int j = 0; j < n; j++)
+      if (row != j && abs(rect[j][num]) > NAX) {
+        double t = rect[j][num];
+        for (int k = EDGESUM; k >= num; k--) {
+          rect[j][k] -= rect[row][k] * t;
+          rect[j][k] = (abs(rect[j][k]) < NAX) ? 0 : rect[j][k];
+        }
+      }
   }
+  debug << "final i" << i;
+  for (int i = 0; i < n; i++) {
+    debug << '\n';
+    for (int j = 0; j <= EDGESUM; j++) {
+      debug << rect[i][j];
+    }
+  }
+  return;
+
+  /*
+    int num = 0;
+    for (int i = 0; i < n; i++) {
+      if (abs(rect[i][num]) < NAX) {
+        int mjj = 0;
+        for (int j = i + 1; j < n; j++)
+          if (!(abs(rect[j][num]) < NAX)) {
+            mjj++;
+            for (int k = 0; k < EDGESUM + 1; k++) {
+              double t = rect[j][k];
+              rect[j][k] = rect[i][k];
+              rect[i][k] = t;
+            }
+            // if (mjj == 0)
+            // 	cout<<"454354354354354"<<endl;
+          }
+        for (int j = 0; j < n; j++)
+          if (i != j && (abs(rect[j][num]) > NAX)) {
+            double ml = LeastCommonMultiple(abs(rect[j][num]),
+    abs(rect[i][num])); double t = ml / rect[j][num]; double kt = ml /
+    rect[i][num]; for (int k = EDGESUM; k >= 0; k--) { rect[j][k] = rect[j][k] *
+    t; rect[j][k] = (abs(rect[j][k]) < NAX) ? 0 : rect[j][k];
+            }
+            for (int k = EDGESUM; k >= num; k--) {
+              rect[j][k] -= kt * rect[i][k];
+              rect[j][k] = (abs(rect[j][k]) < NAX) ? 0 : rect[j][k];
+            }
+          }
+
+        num++;
+        for (int j = 0; j < n; j++) {
+          double common = 0;
+          for (int k = 0; k < EDGESUM + 1; k++)
+            if ((abs(rect[j][k]) > NAX)) {
+              if (abs(common) < NAX)
+                common = abs(rect[j][k]);
+              else
+                common = GreatestCommonDivisor(common, abs(rect[j][k]));
+            }
+          if (common != 0)
+            for (int k = 0; k < EDGESUM + 1; k++) {
+              rect[j][k] = rect[j][k] / common;
+              rect[j][k] = (abs(rect[j][k]) < NAX) ? 0 : rect[j][k];
+            }
+        }
+        if (num == EDGESUM)
+          break;
+      }
+      num++;
+      if (num == EDGESUM)
+        break;
+    }
+    */
 }
 
 //函数功能：计算芯片所有管道的液体流速
@@ -494,13 +549,143 @@ vector<double> caluconspeed(int num, vector<double> &length, int i1, int i2,
 
   if (!initrect()) {
     mutex.unlock();
-    return vector<double>(EDGESUM, 0);
+    return vector<double>(EDGESUM * 3, 0);
   }
+  // solve the matrix
   getans();
+
+  // get the flow of each edge
+  // if neg, turn the side around
+  vector<int> direction(EDGESUM, 0);
+  num = 0;
+  for (int i = 0; i < EDGESUM; i++) {
+    edges[num].v = double(rect[i][EDGESUM]) / double(rect[i][num]);
+    if (edges[num].v < 0) {
+      direction[num] = 1;
+      edges[num].v = -edges[num].v;
+      int tm = edges[num].n1;
+      edges[num].n1 = edges[num].n2;
+      edges[num].n2 = tm;
+    }
+    num++;
+    if (num == EDGESUM)
+      break;
+  }
+
+  rect.clear();
+  {
+    vector<double> in1(EDGESUM + 1, 0);
+    in1[EDGESUM - 5] = 1;
+    in1[EDGESUM] = 1;
+    addrect(in1);
+  }
+  {
+    vector<double> in2(EDGESUM + 1, 0);
+    in2[EDGESUM - 4] = 1;
+    in2[EDGESUM] = 0;
+    addrect(in2);
+  }
+  {
+    vector<double> out(EDGESUM + 1, 0);
+    out[EDGESUM - 3] = edges[EDGESUM - 3].v;
+    out[EDGESUM - 2] = edges[EDGESUM - 2].v;
+    out[EDGESUM - 1] = edges[EDGESUM - 1].v;
+    out[EDGESUM] = 200 * 1;
+    addrect(out);
+  }
+  for (int i = 0; i < EDGESUM - 5; i++) {
+    if (abs(edges[i].v) < NAX) {
+      // flow = 0 then concentration = 0
+      vector<double> line(EDGESUM + 1, 0);
+      line[i] = 1;
+      line[EDGESUM] = 0;
+      addrect(line);
+    }
+  }
+  for (int i = 0; i < n; i++) {
+    for (int j = 0; j < n; j++) {
+      int nodeno = i * n + j;
+
+      vector<double> line(EDGESUM + 1, 0); // v_in * c_in = v_out * c_out
+      int in = 0, out = 0;
+
+      double inmax = 0;
+      int inmaxdir = -1;
+
+      for (int dir = 0; dir <= 3; dir++) {
+        int e = getdirline(i, j, dir);
+        if (e >= EDGESUM || edges[e].leng == 0)
+          continue;
+        if (edges[e].n1 == nodeno) {
+          // outflow
+          line[e] = -edges[e].v;
+          out++;
+        } else if (edges[e].n2 == nodeno) {
+          // inflow
+          line[e] = edges[e].v;
+          if (inmax < abs(edges[e].v)) {
+            inmax = abs(edges[e].v);
+            inmaxdir = dir;
+          }
+          in++;
+        } else {
+          assert(0);
+        }
+      }
+
+      // handle special case
+      if (in == 2 && out == 2) {
+        int left = (inmaxdir + 1) % 4, right = (inmaxdir - 1 + 4) % 4;
+        int leftedge = getdirline(i, j, left),
+            rightedge = getdirline(i, j, right);
+        if (edges[leftedge].n1 == nodeno) {
+          // left out flow
+          // concentration equals
+          vector<double> ce(EDGESUM + 1, 0);
+          ce[getdirline(i, j, inmaxdir)] = 1;
+          ce[leftedge] = -1;
+          addrect(ce);
+        } else if (edges[rightedge].n1 == nodeno) {
+          // right out flow
+          // concentration equals
+          vector<double> ce(EDGESUM + 1, 0);
+          ce[getdirline(i, j, inmaxdir)] = 1;
+          ce[rightedge] = -1;
+          addrect(ce);
+        } else {
+          assert(0);
+        }
+      }
+      addrect(line);
+    }
+  }
+  qWarning() << "Matrix for c size" << rect.size();
+  getans();
+  qWarning() << "Result of c" << rect;
+
+  vector<double> c(EDGESUM + 1, NAN);
+  for (int i = 0; i < (int)rect.size(); i++) {
+    for (int j = 0; j < EDGESUM; j++) {
+      if (abs(rect[i][j]) > NAX) {
+        c[j] = double(rect[i][EDGESUM]) / double(rect[i][j]);
+        break;
+      }
+    }
+  }
+  qWarning() << c;
+
   vector<double> v(EDGESUM, 0);
   for (int i = 0; i < EDGESUM; i++) {
     v[i] = edges[i].v;
   }
+  for (int i = 0; i < EDGESUM; i++) {
+    v.push_back(direction[i]);
+  }
+  for (int i = 0; i < EDGESUM; i++) {
+    v.push_back(c[i]);
+    // v.push_back(0);
+  }
+
   mutex.unlock();
   return v;
 }

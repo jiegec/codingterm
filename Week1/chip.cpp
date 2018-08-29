@@ -80,7 +80,11 @@ Chip::~Chip() {
   }
 }
 
-void draw_vertical(QPainter &painter, int width) {
+QColor colorFull("#2962FF");
+QColor colorNone("#039BE5");
+QColor colorDisabled("#9E9E9E");
+
+void draw_vertical(QPainter &painter, int width, int flow, int direction) {
   {
     // main body
     const QPointF points[4] = {
@@ -123,52 +127,26 @@ void draw_vertical(QPainter &painter, int width) {
                          LENGTH + MIN_WIDTH / 2 - BUFFER_HEIGHT * 2,
                          width - MIN_WIDTH, BUFFER_HEIGHT * 2),
                   270 * 16, 90 * 16);
-}
 
-void draw_horizontal(QPainter &painter, int width) {
+  // direction arrow
+  if (flow) {
 
-  {
-    // main body
-    const QPointF points[4] = {
-        QPointF(BUFFER_HEIGHT + MIN_WIDTH / 2, -width / 2),
-        QPointF(LENGTH - BUFFER_HEIGHT + MIN_WIDTH / 2, -width / 2),
-        QPointF(LENGTH - BUFFER_HEIGHT + MIN_WIDTH / 2, width / 2),
-        QPointF(BUFFER_HEIGHT + MIN_WIDTH / 2, width / 2)};
-    painter.drawPolygon(points, 4);
+    if (direction == 0) {
+      painter.setBrush(colorDisabled);
+      const QPointF points[4] = {
+          QPointF(-MIN_WIDTH / 2, LENGTH + MIN_WIDTH / 2 - BUFFER_HEIGHT),
+          QPointF(0, LENGTH + MIN_WIDTH / 2),
+          QPointF(MIN_WIDTH / 2, LENGTH + MIN_WIDTH / 2 - BUFFER_HEIGHT)};
+      painter.drawPolygon(points, 3);
+    } else {
+      painter.setBrush(colorDisabled);
+      const QPointF points[4] = {
+          QPointF(-MIN_WIDTH / 2, MIN_WIDTH / 2 + BUFFER_HEIGHT),
+          QPointF(0, MIN_WIDTH / 2),
+          QPointF(MIN_WIDTH / 2, MIN_WIDTH / 2 + BUFFER_HEIGHT)};
+      painter.drawPolygon(points, 3);
+    }
   }
-  {
-    // top block
-    const QPointF points[4] = {
-        QPointF(MIN_WIDTH / 2, -MIN_WIDTH / 2),
-        QPointF(BUFFER_HEIGHT + MIN_WIDTH / 2, -MIN_WIDTH / 2),
-        QPointF(BUFFER_HEIGHT + MIN_WIDTH / 2, MIN_WIDTH / 2),
-        QPointF(MIN_WIDTH / 2, MIN_WIDTH / 2)};
-    painter.drawPolygon(points, 4);
-  }
-  {
-    // bottom block
-    const QPointF points[4] = {
-        QPointF(LENGTH + MIN_WIDTH / 2, -MIN_WIDTH / 2),
-        QPointF(LENGTH - BUFFER_HEIGHT + MIN_WIDTH / 2, -MIN_WIDTH / 2),
-        QPointF(LENGTH - BUFFER_HEIGHT + MIN_WIDTH / 2, MIN_WIDTH / 2),
-        QPointF(LENGTH + MIN_WIDTH / 2, MIN_WIDTH / 2)};
-    painter.drawPolygon(points, 4);
-  }
-  // top arc
-  painter.drawPie(QRectF(MIN_WIDTH / 2, MIN_WIDTH - width / 2,
-                         BUFFER_HEIGHT * 2, width - MIN_WIDTH),
-                  180 * 16, 90 * 16);
-  painter.drawPie(
-      QRectF(MIN_WIDTH / 2, -width / 2, BUFFER_HEIGHT * 2, width - MIN_WIDTH),
-      90 * 16, 90 * 16);
-  // bottom arc
-  painter.drawPie(QRectF(LENGTH + MIN_WIDTH / 2 - BUFFER_HEIGHT * 2, -width / 2,
-                         BUFFER_HEIGHT * 2, width - MIN_WIDTH),
-                  0 * 16, 90 * 16);
-  painter.drawPie(QRectF(LENGTH + MIN_WIDTH / 2 - BUFFER_HEIGHT * 2,
-                         MIN_WIDTH - width / 2, BUFFER_HEIGHT * 2,
-                         width - MIN_WIDTH),
-                  270 * 16, 90 * 16);
 }
 
 QColor gradient(const QColor from, const QColor to, double ratio) {
@@ -199,10 +177,6 @@ void Chip::paintEvent(QPaintEvent *) {
     }
   }
 
-  QColor colorFull("#2962FF");
-  QColor colorNone("#039BE5");
-  QColor colorDisabled("#9E9E9E");
-
   int resultIndex = 0;
   // when side changes, the result array is no longer valid
   // but it will be recalculated anyway
@@ -210,7 +184,7 @@ void Chip::paintEvent(QPaintEvent *) {
   for (int i = 0; i <= side; i++) {
     for (int j = 0; j < side; j++) {
       QColor color = gradient(colorNone, colorFull,
-                              result[(resultIndex++) % resultLen] / 400.0);
+                              result[resultIndex % resultLen] / 400.0);
       if (disabled_v[i][j]) {
         color = colorDisabled;
       }
@@ -218,7 +192,9 @@ void Chip::paintEvent(QPaintEvent *) {
 
       painter.save();
       painter.translate(i * (LENGTH + MIN_WIDTH), j * (LENGTH + MIN_WIDTH));
-      draw_vertical(painter, width_v[i][j]);
+      draw_vertical(painter, width_v[i][j], result[resultIndex % resultLen],
+                    direction[resultIndex % resultLen]);
+      resultIndex++;
       painter.restore();
     }
   }
@@ -227,7 +203,7 @@ void Chip::paintEvent(QPaintEvent *) {
   for (int i = 0; i < side; i++) {
     for (int j = 0; j <= side; j++) {
       QColor color = gradient(colorNone, colorFull,
-                              result[(resultIndex++) % resultLen] / 400.0);
+                              result[resultIndex % resultLen] / 400.0);
       if (disabled_h[i][j]) {
         color = colorDisabled;
       }
@@ -235,44 +211,50 @@ void Chip::paintEvent(QPaintEvent *) {
 
       painter.save();
       painter.translate(i * (LENGTH + MIN_WIDTH), j * (LENGTH + MIN_WIDTH));
-      if (disabled_h[i][j]) {
-        painter.setBrush(QColor("#9E9E9E"));
-      }
-      draw_horizontal(painter, width_h[i][j]);
+      // reuse vertical code for horizontal
+      painter.rotate(270);
+
+      draw_vertical(painter, width_v[i][j], result[resultIndex % resultLen],
+                    direction[resultIndex % resultLen]);
+      resultIndex++;
       painter.restore();
     }
   }
 
   for (int i = 0; i < INPUT_NUM; i++) {
-    QColor color = gradient(colorNone, colorFull,
-                            result[(resultIndex++) % resultLen] / 400.0);
+    QColor color =
+        gradient(colorNone, colorFull, result[resultIndex % resultLen] / 400.0);
     painter.setBrush(color);
 
     painter.save();
     painter.translate(inputCol[i] * (LENGTH + MIN_WIDTH),
                       -1 * (LENGTH + MIN_WIDTH));
-    draw_vertical(painter, inputWidth[i]);
+    draw_vertical(painter, inputWidth[i], result[resultIndex % resultLen], 0);
     painter.restore();
+
+    resultIndex++;
   }
 
   QFont font = painter.font();
   font.setPixelSize(300);
   painter.setFont(font);
   for (int i = 0; i < OUTPUT_NUM; i++) {
-    QColor color = gradient(colorNone, colorFull,
-                            result[(resultIndex++) % resultLen] / 400.0);
+    QColor color =
+        gradient(colorNone, colorFull, result[resultIndex % resultLen] / 400.0);
     painter.setBrush(color);
 
     painter.save();
     painter.translate(outputCol[i] * (LENGTH + MIN_WIDTH),
                       side * (LENGTH + MIN_WIDTH));
-    draw_vertical(painter, outputWidth[i]);
+    draw_vertical(painter, outputWidth[i], result[resultIndex % resultLen], 0);
     painter.setPen(origPen);
     painter.drawText(-LENGTH / 2, LENGTH + MIN_WIDTH, LENGTH, LENGTH,
                      Qt::AlignHCenter | Qt::AlignTop,
-                     QString("%1").arg(result[(resultIndex - 1) % resultLen]));
+                     QString("%1").arg(result[resultIndex % resultLen]));
     painter.setPen(Qt::NoPen);
     painter.restore();
+
+    resultIndex++;
   }
 }
 
@@ -557,7 +539,9 @@ void Chip::mouseMoveEvent(QMouseEvent *event) {
       } else {
         resultIndex = i * side + j;
         emit messageChanged(
-            tr("Flow under cursor: %1.").arg(this->result[resultIndex]));
+            tr("Flow under cursor: %1. Concentration under cursor: %2.")
+                .arg(this->result[resultIndex])
+                .arg(this->concentration[resultIndex]));
       }
       break;
     case TYPE_H:
@@ -567,20 +551,26 @@ void Chip::mouseMoveEvent(QMouseEvent *event) {
       } else {
         resultIndex = side * (side + 1) + i * (side + 1) + j;
         emit messageChanged(
-            tr("Flow under cursor: %1.").arg(this->result[resultIndex]));
+            tr("Flow under cursor: %1. Concentration under cursor: %2.")
+                .arg(this->result[resultIndex])
+                .arg(this->concentration[resultIndex]));
       }
       break;
     case TYPE_INPUT:
     case TYPE_INPUT_MID:
       resultIndex = resultLen - 5 + i;
       emit messageChanged(
-          tr("Flow under cursor: %1.").arg(this->result[resultIndex]));
+          tr("Flow under cursor: %1. Concentration under cursor: %2.")
+              .arg(this->result[resultIndex])
+              .arg(this->concentration[resultIndex]));
       break;
     case TYPE_OUTPUT:
     case TYPE_OUTPUT_MID:
       resultIndex = resultLen - 3 + i;
       emit messageChanged(
-          tr("Flow under cursor: %1.").arg(this->result[resultIndex]));
+          tr("Flow under cursor: %1. Concentration under cursor: %2.")
+              .arg(this->result[resultIndex])
+              .arg(this->concentration[resultIndex]));
       break;
     default:
       emit messageChanged(tr(
@@ -697,8 +687,17 @@ void Chip::mouseReleaseEvent(QMouseEvent *event) {
 }
 
 void Chip::onResultChanged(QVector<double> result) {
+  int len = result.length() / 3;
   this->result = result;
-  int len = result.length();
+  this->result.resize(len);
+
+  this->direction = result;
+  this->direction.remove(0, len);
+  this->direction.resize(len);
+
+  this->concentration = result;
+  this->concentration.remove(0, len * 2);
+
   update();
   if (result[len - 3] == 0 && result[len - 2] == 0 && result[len - 1] == 0) {
     emit messageChanged(
@@ -820,7 +819,7 @@ void findTargetWorker() {
             caluconspeed(workerData.side + 1, length, workerData.inputCol[0],
                          workerData.inputCol[1], workerData.outputCol[0],
                          workerData.outputCol[1], workerData.outputCol[2]);
-        int resultLen = result.size();
+        int resultLen = result.size() / 3;
         newstate.loss = 0;
         for (int i = 0; i < OUTPUT_NUM; i++) {
           newstate.loss +=
