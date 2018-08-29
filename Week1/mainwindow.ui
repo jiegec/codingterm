@@ -6,8 +6,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>1059</width>
-    <height>743</height>
+    <width>1086</width>
+    <height>779</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -19,8 +19,8 @@
      <rect>
       <x>10</x>
       <y>10</y>
-      <width>174</width>
-      <height>131</height>
+      <width>191</width>
+      <height>181</height>
      </rect>
     </property>
     <property name="title">
@@ -31,8 +31,8 @@
       <rect>
        <x>10</x>
        <y>30</y>
-       <width>154</width>
-       <height>91</height>
+       <width>171</width>
+       <height>124</height>
       </rect>
      </property>
      <layout class="QVBoxLayout" name="verticalLayout">
@@ -68,6 +68,13 @@
        </layout>
       </item>
       <item>
+       <widget class="QCheckBox" name="checkBox">
+        <property name="text">
+         <string>Visualize Concentration</string>
+        </property>
+       </widget>
+      </item>
+      <item>
        <widget class="QComboBox" name="languageComboBox"/>
       </item>
      </layout>
@@ -76,10 +83,10 @@
    <widget class="Chip" name="chip" native="true">
     <property name="geometry">
      <rect>
-      <x>190</x>
+      <x>210</x>
       <y>20</y>
       <width>861</width>
-      <height>661</height>
+      <height>701</height>
      </rect>
     </property>
    </widget>
@@ -87,8 +94,8 @@
     <property name="geometry">
      <rect>
       <x>10</x>
-      <y>350</y>
-      <width>171</width>
+      <y>390</y>
+      <width>191</width>
       <height>331</height>
      </rect>
     </property>
@@ -100,7 +107,7 @@
       <rect>
        <x>10</x>
        <y>30</y>
-       <width>151</width>
+       <width>171</width>
        <height>291</height>
       </rect>
      </property>
@@ -119,9 +126,9 @@
     <property name="geometry">
      <rect>
       <x>10</x>
-      <y>140</y>
-      <width>171</width>
-      <height>211</height>
+      <y>190</y>
+      <width>191</width>
+      <height>201</height>
      </rect>
     </property>
     <property name="title">
@@ -132,7 +139,7 @@
       <rect>
        <x>10</x>
        <y>30</y>
-       <width>154</width>
+       <width>171</width>
        <height>159</height>
       </rect>
      </property>
@@ -223,7 +230,7 @@
     <rect>
      <x>0</x>
      <y>0</y>
-     <width>1059</width>
+     <width>1086</width>
      <height>22</height>
     </rect>
    </property>
@@ -244,6 +251,7 @@
     <slot>onTargetOutputFlow2Changed(int)</slot>
     <slot>onTargetOutputFlow3Changed(int)</slot>
     <slot>beginFindTarget()</slot>
+    <slot>onVisualizeConcentrationChanged(bool)</slot>
    </slots>
   </customwidget>
  </customwidgets>
@@ -257,7 +265,7 @@
    <hints>
     <hint type="sourcelabel">
      <x>95</x>
-     <y>120</y>
+     <y>128</y>
     </hint>
     <hint type="destinationlabel">
      <x>77</x>
@@ -293,7 +301,7 @@
     </hint>
     <hint type="destinationlabel">
      <x>124</x>
-     <y>739</y>
+     <y>775</y>
     </hint>
    </hints>
   </connection>
@@ -438,6 +446,22 @@
     <hint type="destinationlabel">
      <x>56</x>
      <y>669</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>checkBox</sender>
+   <signal>toggled(bool)</signal>
+   <receiver>chip</receiver>
+   <slot>onVisualizeConcentrationChanged(bool)</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>132</x>
+     <y>101</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>259</x>
+     <y>119</y>
     </hint>
    </hints>
   </connection>

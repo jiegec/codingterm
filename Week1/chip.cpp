@@ -55,6 +55,7 @@ Chip::Chip(QWidget *parent, int side) : QWidget(parent), side(side) {
   findTargetThread = nullptr;
   isResizing = false;
   isMouseDown = false;
+  visualizeConcentration = false;
   setMouseTracking(true);
 
   worker = new Worker(this);
@@ -183,7 +184,9 @@ void Chip::paintEvent(QPaintEvent *) {
   for (int i = 0; i <= side; i++) {
     for (int j = 0; j < side; j++) {
       QColor color = gradient(colorNone, colorFull,
-                              result[resultIndex % resultLen] / 400.0);
+                              visualizeConcentration
+                                  ? concentration[resultIndex % resultLen]
+                                  : result[resultIndex % resultLen] / 400.0);
       if (disabled_v[i][j]) {
         color = colorDisabled;
       }
@@ -202,7 +205,9 @@ void Chip::paintEvent(QPaintEvent *) {
   for (int i = 0; i < side; i++) {
     for (int j = 0; j <= side; j++) {
       QColor color = gradient(colorNone, colorFull,
-                              result[resultIndex % resultLen] / 400.0);
+                              visualizeConcentration
+                                  ? concentration[resultIndex % resultLen]
+                                  : result[resultIndex % resultLen] / 400.0);
       if (disabled_h[i][j]) {
         color = colorDisabled;
       }
@@ -221,8 +226,11 @@ void Chip::paintEvent(QPaintEvent *) {
   }
 
   for (int i = 0; i < INPUT_NUM; i++) {
-    QColor color =
-        gradient(colorNone, colorFull, result[resultIndex % resultLen] / 400.0);
+    QColor color = gradient(colorNone, colorFull,
+                            visualizeConcentration
+                                ? concentration[resultIndex % resultLen]
+                                : result[resultIndex % resultLen] / 400.0);
+
     painter.setBrush(color);
 
     painter.save();
@@ -238,8 +246,10 @@ void Chip::paintEvent(QPaintEvent *) {
   font.setPixelSize(300);
   painter.setFont(font);
   for (int i = 0; i < OUTPUT_NUM; i++) {
-    QColor color =
-        gradient(colorNone, colorFull, result[resultIndex % resultLen] / 400.0);
+    QColor color = gradient(colorNone, colorFull,
+                            visualizeConcentration
+                                ? concentration[resultIndex % resultLen]
+                                : result[resultIndex % resultLen] / 400.0);
     painter.setBrush(color);
 
     painter.save();
@@ -829,11 +839,12 @@ void findTargetWorker() {
         if (newstate.loss < min_loss) {
           qWarning() << newstate.loss;
           min_loss = newstate.loss;
-          emit chip->statusChanged(Chip::tr("Found a solution #%1 of loss %2.(%3/%4)")
-                                       .arg(minSolutionCount++)
-                                       .arg(newstate.loss)
-                                       .arg(round + 1)
-                                       .arg(maxRound));
+          emit chip->statusChanged(
+              Chip::tr("Found a solution #%1 of loss %2.(%3/%4)")
+                  .arg(minSolutionCount++)
+                  .arg(newstate.loss)
+                  .arg(round + 1)
+                  .arg(maxRound));
           emit chip->updateDisabledMatrix(newstate.disabled_v,
                                           newstate.disabled_h, false);
         }
@@ -909,4 +920,9 @@ void Chip::updateDisabledMatrix(bool new_disabled_v[9][9],
 
   update();
   emit dataChanged();
+}
+
+void Chip::onVisualizeConcentrationChanged(bool value) {
+  visualizeConcentration = value;
+  update();
 }

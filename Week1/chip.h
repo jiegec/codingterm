@@ -38,6 +38,7 @@ public slots:
   void onTargetOutputFlow1Changed(int value);
   void onTargetOutputFlow2Changed(int value);
   void onTargetOutputFlow3Changed(int value);
+  void onVisualizeConcentrationChanged(bool value);
   void beginFindTarget();
   void updateDisabledMatrix(bool new_disabled_v[9][9],
                             bool new_disabled_h[9][9],
@@ -79,6 +80,7 @@ private:
   QVector<double> result;
   QVector<double> direction;
   QVector<double> concentration;
+  bool visualizeConcentration;
   int width_v[9][9];
   bool disabled_v[9][9];
   int width_h[9][9];

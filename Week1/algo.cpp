@@ -357,15 +357,8 @@ void getans() {
       if (abs(rect[i][j]) < NAX)
         rect[i][j] = 0;
 
-  /*
-    QFile output("/Volumes/Data/oopterm/Week1/debug.out");
-    output.open(QIODevice::WriteOnly);
-    QDebug debug(&output);
-    */
-
   int i = 0;
-  for (int num = 0; num <= EDGESUM && i < n; num++) {
-    // debug << "num" << num << "i" << i << rect << "\n";
+  for (int num = 0; num < EDGESUM && i < n; num++) {
     int mjj = -1;
     double maxPivot = NAX;
     for (int j = i; j < n; j++) {
@@ -415,16 +408,7 @@ void getans() {
         }
       }
   }
-  /*
-  debug << "final i" << i;
-  for (int i = 0; i < n; i++) {
-    debug << '\n';
-    for (int j = 0; j <= EDGESUM; j++) {
-      debug << rect[i][j];
-    }
-  }
-  output.flush();
-  */
+
   return;
 }
 
@@ -607,6 +591,23 @@ vector<double> caluconspeed(int num, vector<double> &length, int i1, int i2,
           assert(0);
         }
       }
+
+      if (in == 1 && out >= 2) {
+        // output concentration equals to input
+        for (int dir = 0; dir < 4; dir++) {
+          int e = getdirline(i, j, dir);
+          if (e >= EDGESUM || edges[e].leng == 0)
+            continue;
+          if (edges[e].n1 == nodeno) {
+            // outflow
+            vector<double> ce(EDGESUM + 1, 0);
+            ce[getdirline(i, j, inmaxdir)] = 1;
+            ce[e] = -1;
+            addrect(ce);
+          }
+        }
+      }
+
       addrect(line);
     }
   }
