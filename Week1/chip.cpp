@@ -544,6 +544,39 @@ void Chip::mouseMoveEvent(QMouseEvent *event) {
     int i = 0, j = 0;
     int result = convertPos(pos.x(), pos.y(), i, j);
 
+    int resultIndex = 0;
+    int resultLen = this->result.length();
+    switch (result) {
+    case TYPE_H:
+    case TYPE_H_MID:
+      resultIndex = side * (side + 1) + i * (side + 1) + j;
+      emit messageChanged(
+          tr("Flow under cursor: %1.").arg(this->result[resultIndex]));
+      break;
+    case TYPE_V:
+    case TYPE_V_MID:
+      resultIndex = i * side + j;
+      emit messageChanged(
+          tr("Flow under cursor: %1.").arg(this->result[resultIndex]));
+      break;
+    case TYPE_INPUT:
+    case TYPE_INPUT_MID:
+      resultIndex = resultLen - 5 + i;
+      emit messageChanged(
+          tr("Flow under cursor: %1.").arg(this->result[resultIndex]));
+      break;
+    case TYPE_OUTPUT:
+    case TYPE_OUTPUT_MID:
+      resultIndex = resultLen - 3 + i;
+      emit messageChanged(
+          tr("Flow under cursor: %1.").arg(this->result[resultIndex]));
+      break;
+    default:
+      emit messageChanged("");
+      emit statusChanged(tr("Hover over an edge to see its flow."));
+      break;
+    }
+
     int width = 0;
     if (result == TYPE_H) {
       width = width_h[i][j];
@@ -646,7 +679,12 @@ void Chip::onResultChanged(QVector<double> result) {
   this->result = result;
   int len = result.length();
   update();
-  emit resultChanged(result[len - 3], result[len - 2], result[len - 1]);
+  if (result[len - 3] == 0 && result[len - 2] == 0 && result[len - 1] == 0) {
+    emit messageChanged(
+        tr("Please ensure there is a path from input to output."));
+  } else {
+    emit messageChanged(tr("Calculation completed."));
+  }
 }
 
 void Chip::onTargetOutputFlow1Changed(int value) {

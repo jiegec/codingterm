@@ -26,7 +26,7 @@
     <property name="title">
      <string>Settings</string>
     </property>
-    <widget class="QWidget" name="">
+    <widget class="QWidget" name="layoutWidget">
      <property name="geometry">
       <rect>
        <x>10</x>
@@ -86,11 +86,11 @@
       <x>10</x>
       <y>380</y>
       <width>171</width>
-      <height>151</height>
+      <height>181</height>
      </rect>
     </property>
     <property name="title">
-     <string>Result</string>
+     <string>Message</string>
     </property>
     <widget class="QLabel" name="resultLabel">
      <property name="geometry">
@@ -124,7 +124,7 @@
     <property name="title">
      <string>Target</string>
     </property>
-    <widget class="QWidget" name="">
+    <widget class="QWidget" name="layoutWidget">
      <property name="geometry">
       <rect>
        <x>10</x>
@@ -235,7 +235,7 @@
    <container>1</container>
    <slots>
     <signal>statusChanged(QString)</signal>
-    <signal>resultChanged(double,double,double)</signal>
+    <signal>messageChanged(QString)</signal>
     <slot>onSideChanged(int)</slot>
     <slot>onTargetOutputFlow1Changed(int)</slot>
     <slot>onTargetOutputFlow2Changed(int)</slot>
@@ -419,6 +419,22 @@
     <hint type="destinationlabel">
      <x>324</x>
      <y>254</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>chip</sender>
+   <signal>messageChanged(QString)</signal>
+   <receiver>resultLabel</receiver>
+   <slot>setText(QString)</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>270</x>
+     <y>517</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>135</x>
+     <y>502</y>
     </hint>
    </hints>
   </connection>

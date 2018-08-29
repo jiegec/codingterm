@@ -36,7 +36,6 @@ protected:
 
 private slots:
   void onSideChanged(int);
-  void onResultChanged(double, double, double);
   void onTargetOutputFlow1Changed(int);
   void onTargetOutputFlow2Changed(int);
   void onTargetOutputFlow3Changed(int);

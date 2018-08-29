@@ -43,15 +43,6 @@ void MainWindow::onSideChanged(int value) {
   emit sideChanged(side);
 }
 
-void MainWindow::onResultChanged(double r1, double r2, double r3) {
-  if (r1 == 0 && r2 == 0 && r3 == 0) {
-    resultLabel->setText(
-        tr("Please ensure there is a path from input to output."));
-  } else {
-    resultLabel->setText(tr("Calculation completed."));
-  }
-}
-
 void MainWindow::onTargetOutputFlow1Changed(int value) {
   output1Label->setText(tr("%1").arg(value));
 }

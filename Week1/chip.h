@@ -45,7 +45,7 @@ public slots:
 signals:
   void statusChanged(QString);
   void dataChanged();
-  void resultChanged(double, double, double);
+  void messageChanged(QString);
 
 protected:
   void paintEvent(QPaintEvent *event) override;
