@@ -358,7 +358,7 @@ void getans() {
         rect[i][j] = 0;
 
   int i = 0;
-  for (int num = 0; num < EDGESUM && i < n; num++) {
+  for (int num = 0; num <= EDGESUM && i < n; num++) {
     int mjj = -1;
     double maxPivot = NAX;
     for (int j = i; j < n; j++) {
