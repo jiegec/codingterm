@@ -80,10 +80,6 @@ Chip::~Chip() {
   }
 }
 
-QColor colorFull("#2962FF");
-QColor colorNone("#039BE5");
-QColor colorDisabled("#9E9E9E");
-
 void draw_vertical(QPainter &painter, int width, int flow, int direction) {
   {
     // main body
@@ -129,17 +125,16 @@ void draw_vertical(QPainter &painter, int width, int flow, int direction) {
                   270 * 16, 90 * 16);
 
   // direction arrow
+  QColor colorDirection("#F44336");
   if (flow) {
-
+    painter.setBrush(colorDirection);
     if (direction == 0) {
-      painter.setBrush(colorDisabled);
       const QPointF points[4] = {
           QPointF(-MIN_WIDTH / 2, LENGTH + MIN_WIDTH / 2 - BUFFER_HEIGHT),
           QPointF(0, LENGTH + MIN_WIDTH / 2),
           QPointF(MIN_WIDTH / 2, LENGTH + MIN_WIDTH / 2 - BUFFER_HEIGHT)};
       painter.drawPolygon(points, 3);
     } else {
-      painter.setBrush(colorDisabled);
       const QPointF points[4] = {
           QPointF(-MIN_WIDTH / 2, MIN_WIDTH / 2 + BUFFER_HEIGHT),
           QPointF(0, MIN_WIDTH / 2),
@@ -162,6 +157,10 @@ void Chip::paintEvent(QPaintEvent *) {
   QPen origPen = painter.pen();
   painter.setPen(Qt::NoPen);
   painter.translate(OFFSET, OFFSET);
+
+  QColor colorFull("#2962FF");
+  QColor colorNone("#039BE5");
+  QColor colorDisabled("#9E9E9E");
 
   painter.setBrush(QColor("#FFC107"));
   for (int i = 0; i <= side; i++) {
@@ -765,7 +764,7 @@ void findTargetWorker() {
   double min_loss = elite[0].loss;
   int eliteCount = 1;
   int minSolutionCount = 1;
-  const int maxRound = 1000;
+  const int maxRound = 100;
   for (int round = 0; round < maxRound; round++) {
     int buffer_num = 0;
     for (int i = 0; i < eliteCount; i++) {
@@ -830,14 +829,13 @@ void findTargetWorker() {
         if (newstate.loss < min_loss) {
           qWarning() << newstate.loss;
           min_loss = newstate.loss;
-          emit chip->statusChanged(
-              QString("Found a solution #%1 of loss %2.(%3/%4)")
-                  .arg(minSolutionCount++)
-                  .arg(newstate.loss)
-                  .arg(round + 1)
-                  .arg(maxRound));
+          emit chip->statusChanged(Chip::tr("Found a solution #%1 of loss %2.(%3/%4)")
+                                       .arg(minSolutionCount++)
+                                       .arg(newstate.loss)
+                                       .arg(round + 1)
+                                       .arg(maxRound));
           emit chip->updateDisabledMatrix(newstate.disabled_v,
-                                          newstate.disabled_h);
+                                          newstate.disabled_h, false);
         }
       }
     }
@@ -845,15 +843,21 @@ void findTargetWorker() {
     for (int i = 0; i < eliteCount; i++) {
       buffer[buffer_num++] = elite[i];
     }
+    eliteCount = eliteLen;
 
     std::sort(buffer, buffer + buffer_num);
     for (int i = 0; i < eliteCount; i++) {
       elite[i] = buffer[i];
     }
+
+    if (round % 10 == 0)
+      emit chip->statusChanged(
+          Chip::tr("Working on it.(%1/%2)").arg(round).arg(maxRound));
   }
 
-  emit chip->statusChanged(QString("Done"));
-  emit chip->updateDisabledMatrix(elite[0].disabled_v, elite[0].disabled_h);
+  emit chip->statusChanged(Chip::tr("Done"));
+  emit chip->updateDisabledMatrix(elite[0].disabled_v, elite[0].disabled_h,
+                                  true);
 }
 
 void Chip::beginFindTarget() {
@@ -889,7 +893,7 @@ void Chip::beginFindTarget() {
 }
 
 void Chip::updateDisabledMatrix(bool new_disabled_v[9][9],
-                                bool new_disabled_h[9][9]) {
+                                bool new_disabled_h[9][9], bool isFinished) {
 
   for (int i = 0; i <= side; i++) {
     for (int j = 0; j <= side; j++) {
@@ -898,7 +902,10 @@ void Chip::updateDisabledMatrix(bool new_disabled_v[9][9],
     }
   }
 
-  findTargetThread = nullptr;
+  if (isFinished) {
+
+    findTargetThread = nullptr;
+  }
 
   update();
   emit dataChanged();

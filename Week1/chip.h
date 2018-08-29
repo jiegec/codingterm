@@ -40,7 +40,8 @@ public slots:
   void onTargetOutputFlow3Changed(int value);
   void beginFindTarget();
   void updateDisabledMatrix(bool new_disabled_v[9][9],
-                            bool new_disabled_h[9][9]);
+                            bool new_disabled_h[9][9],
+                            bool isFinished);
 
 signals:
   void statusChanged(QString);

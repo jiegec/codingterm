@@ -357,13 +357,15 @@ void getans() {
       if (abs(rect[i][j]) < NAX)
         rect[i][j] = 0;
 
-  QFile output("/Volumes/Data/oopterm/Week1/debug.out");
-  output.open(QIODevice::WriteOnly);
-  QDebug debug(&output);
+  /*
+    QFile output("/Volumes/Data/oopterm/Week1/debug.out");
+    output.open(QIODevice::WriteOnly);
+    QDebug debug(&output);
+    */
 
   int i = 0;
   for (int num = 0; num <= EDGESUM && i < n; num++) {
-    debug << "num" << num << "i" << i << rect << "\n";
+    // debug << "num" << num << "i" << i << rect << "\n";
     int mjj = -1;
     double maxPivot = NAX;
     for (int j = i; j < n; j++) {
@@ -413,6 +415,7 @@ void getans() {
         }
       }
   }
+  /*
   debug << "final i" << i;
   for (int i = 0; i < n; i++) {
     debug << '\n';
@@ -420,61 +423,9 @@ void getans() {
       debug << rect[i][j];
     }
   }
+  output.flush();
+  */
   return;
-
-  /*
-    int num = 0;
-    for (int i = 0; i < n; i++) {
-      if (abs(rect[i][num]) < NAX) {
-        int mjj = 0;
-        for (int j = i + 1; j < n; j++)
-          if (!(abs(rect[j][num]) < NAX)) {
-            mjj++;
-            for (int k = 0; k < EDGESUM + 1; k++) {
-              double t = rect[j][k];
-              rect[j][k] = rect[i][k];
-              rect[i][k] = t;
-            }
-            // if (mjj == 0)
-            // 	cout<<"454354354354354"<<endl;
-          }
-        for (int j = 0; j < n; j++)
-          if (i != j && (abs(rect[j][num]) > NAX)) {
-            double ml = LeastCommonMultiple(abs(rect[j][num]),
-    abs(rect[i][num])); double t = ml / rect[j][num]; double kt = ml /
-    rect[i][num]; for (int k = EDGESUM; k >= 0; k--) { rect[j][k] = rect[j][k] *
-    t; rect[j][k] = (abs(rect[j][k]) < NAX) ? 0 : rect[j][k];
-            }
-            for (int k = EDGESUM; k >= num; k--) {
-              rect[j][k] -= kt * rect[i][k];
-              rect[j][k] = (abs(rect[j][k]) < NAX) ? 0 : rect[j][k];
-            }
-          }
-
-        num++;
-        for (int j = 0; j < n; j++) {
-          double common = 0;
-          for (int k = 0; k < EDGESUM + 1; k++)
-            if ((abs(rect[j][k]) > NAX)) {
-              if (abs(common) < NAX)
-                common = abs(rect[j][k]);
-              else
-                common = GreatestCommonDivisor(common, abs(rect[j][k]));
-            }
-          if (common != 0)
-            for (int k = 0; k < EDGESUM + 1; k++) {
-              rect[j][k] = rect[j][k] / common;
-              rect[j][k] = (abs(rect[j][k]) < NAX) ? 0 : rect[j][k];
-            }
-        }
-        if (num == EDGESUM)
-          break;
-      }
-      num++;
-      if (num == EDGESUM)
-        break;
-    }
-    */
 }
 
 //函数功能：计算芯片所有管道的液体流速
@@ -659,9 +610,9 @@ vector<double> caluconspeed(int num, vector<double> &length, int i1, int i2,
       addrect(line);
     }
   }
-  qWarning() << "Matrix for c size" << rect.size();
+  // qWarning() << "Matrix for c size" << rect.size();
   getans();
-  qWarning() << "Result of c" << rect;
+  // qWarning() << "Result of c" << rect;
 
   vector<double> c(EDGESUM + 1, NAN);
   for (int i = 0; i < (int)rect.size(); i++) {
@@ -672,7 +623,7 @@ vector<double> caluconspeed(int num, vector<double> &length, int i1, int i2,
       }
     }
   }
-  qWarning() << c;
+  // qWarning() << c;
 
   vector<double> v(EDGESUM, 0);
   for (int i = 0; i < EDGESUM; i++) {
