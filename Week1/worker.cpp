@@ -18,6 +18,7 @@
 
 #include "worker.h"
 #include "algo.h"
+#include <QApplication>
 #include <QDebug>
 
 Worker::Worker(Chip *chip) : chip(chip) {}

@@ -21,6 +21,8 @@
 
 #include <QWidget>
 
+class Worker;
+
 #define INPUT_NUM 2
 #define OUTPUT_NUM 3
 
@@ -28,6 +30,7 @@ class Chip : public QWidget {
   Q_OBJECT
 public:
   Chip(QWidget *parent = nullptr, int side = 5);
+  virtual ~Chip();
 
 public slots:
   void onSideChanged(int value);
@@ -64,6 +67,8 @@ private:
   int resizingType;
   int resizingX;
   int resizingY;
+  QThread *workerThread;
+  Worker *worker;
 
   int side;
   int inputCol[INPUT_NUM];
@@ -78,7 +83,7 @@ private:
 
   double target_output_flow[3];
   QThread *findTargetThread;
-  friend void workerThread();
+  friend void findTargetWorker();
 };
 
 #endif

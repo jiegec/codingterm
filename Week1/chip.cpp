@@ -57,16 +57,27 @@ Chip::Chip(QWidget *parent, int side) : QWidget(parent), side(side) {
   isMouseDown = false;
   setMouseTracking(true);
 
-  Worker *worker = new Worker(this);
-  QThread *thread = new QThread(this);
-  worker->moveToThread(thread);
+  worker = new Worker(this);
+  workerThread = new QThread(this);
+  worker->moveToThread(workerThread);
   connect(this, SIGNAL(dataChanged()), worker, SLOT(calculate()));
   qRegisterMetaType<QVector<double>>("QVector<double>");
   connect(worker, SIGNAL(finished(QVector<double>)), this,
           SLOT(onResultChanged(QVector<double>)));
-  thread->start();
+  workerThread->start();
 
   emit dataChanged();
+}
+
+Chip::~Chip() {
+  if (findTargetThread) {
+    findTargetThread->wait();
+    delete findTargetThread;
+  }
+  if (workerThread) {
+    workerThread->exit();
+    workerThread->wait();
+  }
 }
 
 void draw_vertical(QPainter &painter, int width) {
@@ -673,7 +684,7 @@ bool operator<(const struct State &a, const struct State &b) {
   return a.loss < b.loss;
 }
 
-void workerThread() {
+void findTargetWorker() {
   const int eliteLen = 10;
   const int bufferLen = 128;
   struct State elite[eliteLen];
@@ -815,7 +826,7 @@ void Chip::beginFindTarget() {
   }
   workerData.result = result;
 
-  findTargetThread = QThread::create(workerThread);
+  findTargetThread = QThread::create(findTargetWorker);
   findTargetThread->start();
 }
 
