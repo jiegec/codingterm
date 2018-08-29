@@ -40,11 +40,12 @@ private slots:
   void onTargetOutputFlow1Changed(int);
   void onTargetOutputFlow2Changed(int);
   void onTargetOutputFlow3Changed(int);
-  void onLanguageChanged(QString);
+  void onLanguageChanged(int);
 
 private:
   QTranslator translator;
   int side;
+  QVector<const char *> languages;
 };
 
 #endif // MAINWINDOW_H

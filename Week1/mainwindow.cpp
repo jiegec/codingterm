@@ -17,13 +17,40 @@
 //
 
 #include "mainwindow.h"
+#include <QDebug>
+#include <QInputDialog>
 
-MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent) {
+MainWindow::MainWindow(QWidget *parent)
+    : QMainWindow(parent), languages({"en", "zh"}) {
+  tr("en"), tr("zh");
+
   setupUi(this);
   onSideChanged(5);
   onTargetOutputFlow1Changed(0);
   onTargetOutputFlow2Changed(0);
   onTargetOutputFlow3Changed(0);
+  if (translator.load(":/translations/")) {
+    qWarning() << "Loaded translation for default locale";
+  } else {
+    translator.load(":/translation/en");
+    qWarning() << "Using en for fallback locale";
+  }
+  QApplication::installTranslator(&translator);
+
+  for (int i = 0; i < languages.length(); i++) {
+    languageComboBox->addItem(
+        QApplication::translate("MainWindow", languages[i], nullptr));
+  }
+
+  bool ok;
+  int initialSide =
+      QInputDialog::getInt(this, tr("Introduction"),
+                           tr("Enter the "
+                              "initial side ranging from 5 to 8:"),
+                           5, 5, 8, 1, &ok);
+  if (ok) {
+    onSideChanged(initialSide);
+  }
 }
 
 void MainWindow::changeEvent(QEvent *e) {
@@ -35,6 +62,10 @@ void MainWindow::changeEvent(QEvent *e) {
     onTargetOutputFlow1Changed(output1Silder->value());
     onTargetOutputFlow2Changed(output3Silder->value());
     onTargetOutputFlow3Changed(output3Silder->value());
+    for (int i = 0; i < languages.length(); i++) {
+      languageComboBox->setItemText(
+          i, QApplication::translate("MainWindow", languages[i], nullptr));
+    }
     break;
   default:
     break;
@@ -57,9 +88,14 @@ void MainWindow::onTargetOutputFlow3Changed(int value) {
   output3Label->setText(QString("%1").arg(value));
 }
 
-void MainWindow::onLanguageChanged(QString language) {
-  QApplication::removeTranslator(&translator);
-  if (translator.load(QString(":/translations/%1").arg(language))) {
-    QApplication::installTranslator(&translator);
+void MainWindow::onLanguageChanged(int index) {
+  if (index >= 0) {
+    const char *language = languages[index];
+    QApplication::removeTranslator(&translator);
+    qWarning() << "Looking for translation for" << language;
+    if (translator.load(QString(":/translations/%1").arg(language))) {
+      qWarning() << "Loaded translation for" << language;
+      QApplication::installTranslator(&translator);
+    }
   }
 }

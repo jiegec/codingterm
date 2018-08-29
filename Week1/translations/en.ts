@@ -23,39 +23,44 @@
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../chip.cpp" line="587"/>
+        <location filename="../chip.cpp" line="586"/>
+        <source>On the left side of the interface, you can change the side of the chip, change the language and specify the target output flow for each output port and then ask it to search for a solution. On the right side, you can see the chip, where color reflects the current flow of edge. You can toggle the existence of edges by clicking them, and change their width by dragging their two sides.</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../chip.cpp" line="597"/>
         <source>Hover over an edge to see its flow.</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../chip.cpp" line="606"/>
+        <location filename="../chip.cpp" line="616"/>
         <source>Click to toggle.</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../chip.cpp" line="612"/>
-        <location filename="../chip.cpp" line="616"/>
+        <location filename="../chip.cpp" line="622"/>
+        <location filename="../chip.cpp" line="626"/>
         <source>Drag to resize, current width is %1.</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../chip.cpp" line="621"/>
+        <location filename="../chip.cpp" line="631"/>
         <source>Drag to move.</source>
         <oldsource>Drag to move</oldsource>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../chip.cpp" line="695"/>
+        <location filename="../chip.cpp" line="705"/>
         <source>Please ensure there is a path from input to output.</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../chip.cpp" line="697"/>
+        <location filename="../chip.cpp" line="707"/>
         <source>Calculation completed.</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../chip.cpp" line="852"/>
+        <location filename="../chip.cpp" line="862"/>
         <source>Don&apos;t push me now. I am working on it.</source>
         <translation type="unfinished"></translation>
     </message>
@@ -79,41 +84,50 @@
     </message>
     <message>
         <location filename="../mainwindow.ui" line="64"/>
-        <location filename="../mainwindow.ui" line="119"/>
-        <location filename="../mainwindow.ui" line="173"/>
-        <location filename="../mainwindow.ui" line="194"/>
-        <location filename="../mainwindow.ui" line="215"/>
-        <source>TextLabel</source>
+        <location filename="../mainwindow.ui" line="162"/>
+        <location filename="../mainwindow.ui" line="183"/>
+        <location filename="../mainwindow.ui" line="204"/>
+        <source>0</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../mainwindow.ui" line="74"/>
-        <source>en</source>
-        <translation>English</translation>
-    </message>
-    <message>
-        <location filename="../mainwindow.ui" line="79"/>
-        <source>zh</source>
-        <translation>Chinese</translation>
-    </message>
-    <message>
-        <location filename="../mainwindow.ui" line="107"/>
+        <location filename="../mainwindow.ui" line="96"/>
         <source>Message</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../mainwindow.ui" line="139"/>
+        <location filename="../mainwindow.ui" line="128"/>
         <source>Target</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../mainwindow.ui" line="154"/>
+        <location filename="../mainwindow.ui" line="143"/>
         <source>Output flow</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../mainwindow.ui" line="224"/>
+        <location filename="../mainwindow.ui" line="213"/>
         <source>Run</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../mainwindow.cpp" line="25"/>
+        <source>en</source>
+        <translation>English</translation>
+    </message>
+    <message>
+        <location filename="../mainwindow.cpp" line="25"/>
+        <source>zh</source>
+        <translation>Chinese</translation>
+    </message>
+    <message>
+        <location filename="../mainwindow.cpp" line="47"/>
+        <source>Introduction</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../mainwindow.cpp" line="48"/>
+        <source>Enter the initial side ranging from 5 to 8:</source>
         <translation type="unfinished"></translation>
     </message>
 </context>

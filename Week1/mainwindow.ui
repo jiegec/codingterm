@@ -20,7 +20,7 @@
       <x>10</x>
       <y>10</y>
       <width>174</width>
-      <height>161</height>
+      <height>131</height>
      </rect>
     </property>
     <property name="title">
@@ -32,7 +32,7 @@
        <x>10</x>
        <y>30</y>
        <width>154</width>
-       <height>121</height>
+       <height>91</height>
       </rect>
      </property>
      <layout class="QVBoxLayout" name="verticalLayout">
@@ -61,25 +61,14 @@
         <item>
          <widget class="QLabel" name="sideNumberLabel">
           <property name="text">
-           <string>TextLabel</string>
+           <string>0</string>
           </property>
          </widget>
         </item>
        </layout>
       </item>
       <item>
-       <widget class="QComboBox" name="languageComboBox">
-        <item>
-         <property name="text">
-          <string>en</string>
-         </property>
-        </item>
-        <item>
-         <property name="text">
-          <string>zh</string>
-         </property>
-        </item>
-       </widget>
+       <widget class="QComboBox" name="languageComboBox"/>
       </item>
      </layout>
     </widget>
@@ -98,9 +87,9 @@
     <property name="geometry">
      <rect>
       <x>10</x>
-      <y>420</y>
+      <y>350</y>
       <width>171</width>
-      <height>181</height>
+      <height>331</height>
      </rect>
     </property>
     <property name="title">
@@ -112,11 +101,11 @@
        <x>10</x>
        <y>30</y>
        <width>151</width>
-       <height>101</height>
+       <height>291</height>
       </rect>
      </property>
      <property name="text">
-      <string>TextLabel</string>
+      <string/>
      </property>
      <property name="alignment">
       <set>Qt::AlignLeading|Qt::AlignLeft|Qt::AlignTop</set>
@@ -130,7 +119,7 @@
     <property name="geometry">
      <rect>
       <x>10</x>
-      <y>190</y>
+      <y>140</y>
       <width>171</width>
       <height>211</height>
      </rect>
@@ -170,7 +159,7 @@
         <item>
          <widget class="QLabel" name="output1Label">
           <property name="text">
-           <string>TextLabel</string>
+           <string>0</string>
           </property>
          </widget>
         </item>
@@ -191,7 +180,7 @@
         <item>
          <widget class="QLabel" name="output2Label">
           <property name="text">
-           <string>TextLabel</string>
+           <string>0</string>
           </property>
          </widget>
         </item>
@@ -212,7 +201,7 @@
         <item>
          <widget class="QLabel" name="output3Label">
           <property name="text">
-           <string>TextLabel</string>
+           <string>0</string>
           </property>
          </widget>
         </item>
@@ -438,17 +427,17 @@
   </connection>
   <connection>
    <sender>languageComboBox</sender>
-   <signal>activated(QString)</signal>
+   <signal>currentIndexChanged(int)</signal>
    <receiver>MainWindow</receiver>
-   <slot>onLanguageChanged(QString)</slot>
+   <slot>onLanguageChanged(int)</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>120</x>
-     <y>169</y>
+     <x>113</x>
+     <y>167</y>
     </hint>
     <hint type="destinationlabel">
-     <x>103</x>
-     <y>673</y>
+     <x>56</x>
+     <y>669</y>
     </hint>
    </hints>
   </connection>
@@ -460,6 +449,6 @@
   <slot>onTargetOutputFlow1Changed(int)</slot>
   <slot>onTargetOutputFlow2Changed(int)</slot>
   <slot>onTargetOutputFlow3Changed(int)</slot>
-  <slot>onLanguageChanged(QString)</slot>
+  <slot>onLanguageChanged(int)</slot>
  </slots>
 </ui>
