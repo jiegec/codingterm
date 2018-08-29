@@ -36,13 +36,14 @@
  *Version 1.3.1
  *Title: 流速计算程序
  */
+#include <QMutex>
 #include <fstream>
 #include <iostream>
 #include <math.h>
 #include <sstream>
 #include <time.h>
 #include <vector>
-#include <QMutex>
+
 
 using namespace std;
 #define NAX 0.000000001
@@ -267,7 +268,7 @@ bool initrect() {
   {
     int number = 0;
     vector<double> tmp(EDGESUM + 1, 0);
-    for (int j = 0; j < nodes[i].elist.size(); j++)
+    for (size_t j = 0; j < nodes[i].elist.size(); j++)
       if (edges[nodes[i].elist[j]].leng != 0) {
         number++;
         if (edges[nodes[i].elist[j]].n1 == i)
@@ -290,7 +291,7 @@ bool initrect() {
   // cout<<rect.size()<<endl;
 
   //三个输出端口之间的电势差为0
-  if (!findrect(EDGESUM - 4)) {
+  if (!findrect(EDGESUM - 4) && !findrect(EDGESUM - 3)) {
     return false;
   }
   //两个输入端口的流速相同且已知，构成两个方程
@@ -497,7 +498,7 @@ vector<double> caluconspeed(int num, vector<double> &length, int i1, int i2,
   }
   getans();
   vector<double> v(EDGESUM, 0);
-  for (int i = 0;i < EDGESUM;i++) {
+  for (int i = 0; i < EDGESUM; i++) {
     v[i] = edges[i].v;
   }
   mutex.unlock();
