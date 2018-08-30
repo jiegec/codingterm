@@ -26,7 +26,8 @@
 #include <algorithm>
 #include <cmath>
 
-#define MIN_WIDTH 200
+#define MIN_WIDTH 20
+#define MIN_SPACE 200
 #define BUFFER_HEIGHT 500
 #define LENGTH 1600
 #define SCALE 0.036
@@ -35,19 +36,19 @@
 Chip::Chip(QWidget *parent, int side) : QWidget(parent), side(side) {
   for (int i = 0; i < INPUT_NUM; i++) {
     inputCol[i] = i;
-    inputWidth[i] = MIN_WIDTH;
+    inputWidth[i] = 200;
   }
   for (int i = 0; i < OUTPUT_NUM; i++) {
     outputCol[i] = i;
-    outputWidth[i] = MIN_WIDTH;
+    outputWidth[i] = 200;
     target_output_flow[i] = 0;
   }
 
   for (int i = 0; i <= 8; i++) {
     for (int j = 0; j <= 8; j++) {
-      width_v[i][j] = MIN_WIDTH;
+      width_v[i][j] = 200;
       disabled_v[i][j] = false;
-      width_h[i][j] = MIN_WIDTH;
+      width_h[i][j] = 200;
       disabled_h[i][j] = false;
     }
   }
@@ -415,7 +416,7 @@ void Chip::mouseMoveEvent(QMouseEvent *event) {
             // this is occupied.
             break;
           }
-          int gap = (LENGTH + MIN_WIDTH) * abs(inputCol[j] - i) - MIN_WIDTH;
+          int gap = (LENGTH + MIN_WIDTH) * abs(inputCol[j] - i) - MIN_SPACE;
           if ((inputWidth[holdingInputIndex] + inputWidth[j]) / 2 >= gap) {
             // no enough space.
             break;
@@ -449,7 +450,7 @@ void Chip::mouseMoveEvent(QMouseEvent *event) {
             // this is occupied.
             break;
           }
-          int gap = (LENGTH + MIN_WIDTH) * abs(outputCol[j] - i) - MIN_WIDTH;
+          int gap = (LENGTH + MIN_WIDTH) * abs(outputCol[j] - i) - MIN_SPACE;
           if ((outputWidth[holdingOutputIndex] + outputWidth[j]) / 2 >= gap) {
             // no enough space.
             break;
@@ -481,10 +482,10 @@ void Chip::mouseMoveEvent(QMouseEvent *event) {
         off = abs(pos.x() / SCALE - xx);
         off = fmax(off, MIN_WIDTH / 2);
         if (resizingX > 0) {
-          off = fmin(off, LENGTH - width_v[resizingX - 1][resizingY] / 2);
+          off = fmin(off, LENGTH - width_v[resizingX - 1][resizingY] / 2 - MIN_SPACE);
         }
         if (resizingX < side) {
-          off = fmin(off, LENGTH - width_v[resizingX + 1][resizingY] / 2);
+          off = fmin(off, LENGTH - width_v[resizingX + 1][resizingY] / 2 - MIN_SPACE);
         }
         width_v[resizingX][resizingY] = off * 2;
         break;
@@ -492,10 +493,10 @@ void Chip::mouseMoveEvent(QMouseEvent *event) {
         off = fabs(pos.y() / SCALE - yy);
         off = fmax(off, MIN_WIDTH / 2);
         if (resizingY > 0) {
-          off = fmin(off, LENGTH - width_h[resizingX][resizingY - 1] / 2);
+          off = fmin(off, LENGTH - width_h[resizingX][resizingY - 1] / 2 - MIN_SPACE);
         }
         if (resizingY < side) {
-          off = fmin(off, LENGTH - width_h[resizingX][resizingY + 1] / 2);
+          off = fmin(off, LENGTH - width_h[resizingX][resizingY + 1] / 2 - MIN_SPACE);
         }
         width_h[resizingX][resizingY] = off * 2;
         break;
@@ -507,7 +508,7 @@ void Chip::mouseMoveEvent(QMouseEvent *event) {
           if (inputCol[resizingX] != inputCol[i]) {
             int gap =
                 (LENGTH + MIN_WIDTH) * abs(inputCol[resizingX] - inputCol[i]) -
-                MIN_WIDTH;
+                MIN_SPACE;
             off = fmin(off, gap - inputWidth[i] / 2);
           }
         }
@@ -521,7 +522,7 @@ void Chip::mouseMoveEvent(QMouseEvent *event) {
           if (outputCol[resizingX] != outputCol[i]) {
             int gap = (LENGTH + MIN_WIDTH) *
                           abs(outputCol[resizingX] - outputCol[i]) -
-                      MIN_WIDTH;
+                      MIN_SPACE;
             off = fmin(off, gap - outputWidth[i] / 2);
           }
         }

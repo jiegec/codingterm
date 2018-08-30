@@ -16,37 +16,37 @@
 // along with Week1.  If not, see <http://www.gnu.org/licenses/>.
 //
 
-#ifndef MAINWINDOW_H
-#define MAINWINDOW_H
+#ifndef SETTINGSDIALOG_H
+#define SETTINGSDIALOG_H
 
-#include "ui_mainwindow.h"
+#include "ui_settingsdialog.h"
 #include <QMainWindow>
 #include <QTranslator>
 
-class MainWindow : public QMainWindow, private Ui::MainWindow {
+class SettingsDialog : public QDialog, private Ui::Dialog {
   Q_OBJECT
 
 public:
-  explicit MainWindow(QWidget *parent = nullptr);
+  explicit SettingsDialog(QWidget *parent = nullptr);
 
 signals:
   void sideChanged(int);
 
-protected:
-  void changeEvent(QEvent *e) override;
-
 private slots:
   void onSideChanged(int);
-  void onTargetOutputFlow1Changed(int);
-  void onTargetOutputFlow2Changed(int);
-  void onTargetOutputFlow3Changed(int);
-  void onLanguageChanged(int);
-  void popupSettings();
+  void onInputCol1Changed(int);
+  void onInputCol2Changed(int);
+  void onOutputCol1Changed(int);
+  void onOutputCol2Changed(int);
+  void onOutputCol3Changed(int);
+  void onDone();
 
 private:
-  QTranslator translator;
   int side;
-  QVector<const char *> languages;
+  int inputCol[2];
+  int outputCol[3];
+
+  friend class MainWindow;
 };
 
 #endif // MAINWINDOW_H

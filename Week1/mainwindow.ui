@@ -234,8 +234,25 @@
      <height>22</height>
     </rect>
    </property>
+   <widget class="QMenu" name="menuSettings">
+    <property name="title">
+     <string>Settings</string>
+    </property>
+    <addaction name="actionChange_Parameters"/>
+   </widget>
+   <addaction name="menuSettings"/>
   </widget>
   <widget class="QStatusBar" name="statusbar"/>
+  <action name="actionSettings">
+   <property name="text">
+    <string>Change Parameters</string>
+   </property>
+  </action>
+  <action name="actionChange_Parameters">
+   <property name="text">
+    <string>Change Parameters</string>
+   </property>
+  </action>
  </widget>
  <customwidgets>
   <customwidget>
@@ -264,8 +281,8 @@
    <slot>onSideChanged(int)</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>95</x>
-     <y>128</y>
+     <x>98</x>
+     <y>120</y>
     </hint>
     <hint type="destinationlabel">
      <x>77</x>
@@ -456,12 +473,28 @@
    <slot>onVisualizeConcentrationChanged(bool)</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>132</x>
-     <y>101</y>
+     <x>133</x>
+     <y>149</y>
     </hint>
     <hint type="destinationlabel">
      <x>259</x>
      <y>119</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>actionChange_Parameters</sender>
+   <signal>triggered()</signal>
+   <receiver>MainWindow</receiver>
+   <slot>popupSettings()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>542</x>
+     <y>389</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>542</x>
+     <y>389</y>
     </hint>
    </hints>
   </connection>
@@ -474,5 +507,6 @@
   <slot>onTargetOutputFlow2Changed(int)</slot>
   <slot>onTargetOutputFlow3Changed(int)</slot>
   <slot>onLanguageChanged(int)</slot>
+  <slot>popupSettings()</slot>
  </slots>
 </ui>

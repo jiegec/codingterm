@@ -17,6 +17,7 @@
 //
 
 #include "mainwindow.h"
+#include "settingsdialog.h"
 #include <QDebug>
 #include <QInputDialog>
 
@@ -42,15 +43,19 @@ MainWindow::MainWindow(QWidget *parent)
         QApplication::translate("MainWindow", languages[i], nullptr));
   }
 
-  bool ok;
-  int initialSide =
-      QInputDialog::getInt(this, tr("Introduction"),
-                           tr("Enter the "
-                              "initial side ranging from 5 to 8:"),
-                           5, 5, 8, 1, &ok);
-  if (ok) {
-    onSideChanged(initialSide);
-  }
+  popupSettings();
+}
+
+void MainWindow::popupSettings() {
+  SettingsDialog settings;
+  settings.exec();
+  onSideChanged(settings.side);
+  chip->inputCol[0] = settings.inputCol[0];
+  chip->inputCol[1] = settings.inputCol[1];
+  chip->outputCol[0] = settings.outputCol[0];
+  chip->outputCol[1] = settings.outputCol[1];
+  chip->outputCol[2] = settings.outputCol[2];
+  emit chip->dataChanged();
 }
 
 void MainWindow::changeEvent(QEvent *e) {

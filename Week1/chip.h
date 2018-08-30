@@ -57,6 +57,7 @@ protected:
 
 private:
   friend class Worker;
+  friend class MainWindow;
   int convertPos(int x, int y, int &res_i, int &res_j);
   bool isMouseDown;
   bool movedOnMouseDown;
