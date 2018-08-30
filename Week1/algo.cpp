@@ -579,18 +579,20 @@ vector<double> caluconspeed(int num, vector<double> &length, int i1, int i2,
           vector<double> ce(EDGESUM + 1, 0);
           ce[getdirline(i, j, inmaxdir)] = 1;
           ce[leftedge] = -1;
-          addrect(ce);
+          // addrect(ce);
         } else if (edges[rightedge].n1 == nodeno) {
           // right out flow
           // concentration equals
           vector<double> ce(EDGESUM + 1, 0);
           ce[getdirline(i, j, inmaxdir)] = 1;
           ce[rightedge] = -1;
-          addrect(ce);
+          // addrect(ce);
         } else {
           assert(0);
         }
-      } else if (out >= 2) {
+      }
+
+      if (out >= 2) {
         // output concentration equals to each other
         int lastedge = -1;
         for (int dir = 0; dir < 4; dir++) {

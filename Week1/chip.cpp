@@ -131,15 +131,15 @@ void draw_vertical(QPainter &painter, int width, int flow, int direction) {
     painter.setBrush(colorDirection);
     if (direction == 0) {
       const QPointF points[4] = {
-          QPointF(-MIN_WIDTH / 2, LENGTH + MIN_WIDTH / 2 - BUFFER_HEIGHT),
+          QPointF(-MIN_WIDTH / 2, LENGTH + MIN_WIDTH / 2 - MIN_WIDTH),
           QPointF(0, LENGTH + MIN_WIDTH / 2),
-          QPointF(MIN_WIDTH / 2, LENGTH + MIN_WIDTH / 2 - BUFFER_HEIGHT)};
+          QPointF(MIN_WIDTH / 2, LENGTH + MIN_WIDTH / 2 - MIN_WIDTH)};
       painter.drawPolygon(points, 3);
     } else {
       const QPointF points[4] = {
-          QPointF(-MIN_WIDTH / 2, MIN_WIDTH / 2 + BUFFER_HEIGHT),
+          QPointF(-MIN_WIDTH / 2, MIN_WIDTH / 2 + MIN_WIDTH),
           QPointF(0, MIN_WIDTH / 2),
-          QPointF(MIN_WIDTH / 2, MIN_WIDTH / 2 + BUFFER_HEIGHT)};
+          QPointF(MIN_WIDTH / 2, MIN_WIDTH / 2 + MIN_WIDTH)};
       painter.drawPolygon(points, 3);
     }
   }
@@ -218,7 +218,7 @@ void Chip::paintEvent(QPaintEvent *) {
       // reuse vertical code for horizontal
       painter.rotate(270);
 
-      draw_vertical(painter, width_v[i][j], result[resultIndex % resultLen],
+      draw_vertical(painter, width_h[i][j], result[resultIndex % resultLen],
                     direction[resultIndex % resultLen]);
       resultIndex++;
       painter.restore();
