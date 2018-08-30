@@ -81,7 +81,7 @@ Chip::~Chip() {
   }
 }
 
-void draw_vertical(QPainter &painter, int width, int flow, int direction) {
+void draw_vertical(QPainter &painter, int width, double flow, int direction) {
   {
     // main body
     const QPointF points[4] = {
@@ -127,7 +127,7 @@ void draw_vertical(QPainter &painter, int width, int flow, int direction) {
 
   // direction arrow
   QColor colorDirection("#F44336");
-  if (flow) {
+  if (flow > 0) {
     painter.setBrush(colorDirection);
     if (direction == 0) {
       const QPointF points[4] = {
