@@ -582,17 +582,24 @@ void Chip::mouseMoveEvent(QMouseEvent *event) {
               .arg(this->concentration[resultIndex]));
       break;
     default:
-      emit messageChanged(tr(
-          "On the left side of the interface, you "
-          "can change the side of the chip, change the language and specify "
-          "the "
-          "target output flow for each output port and then ask it to search "
-          "for a solution. On the right side, you can see the chip, where "
-          "color "
-          "reflects the current flow of edge. You can toggle the existence of "
-          "edges by clicking them, and change their width by dragging their "
-          "two "
-          "sides."));
+      if (this->result[resultLen - 3] == 0 && this->result[resultLen - 2] == 0 &&
+          this->result[resultLen - 1] == 0) {
+        emit messageChanged(
+            tr("Please ensure there is a path from input to output."));
+      } else {
+        emit messageChanged(tr(
+            "On the left side of the interface, you "
+            "can change the side of the chip, change the language and specify "
+            "the "
+            "target output flow for each output port and then ask it to search "
+            "for a solution. On the right side, you can see the chip, where "
+            "color "
+            "reflects the current flow of edge. You can toggle the existence "
+            "of "
+            "edges by clicking them, and change their width by dragging their "
+            "two "
+            "sides."));
+      }
       emit statusChanged(tr("Hover over an edge to see its flow."));
       break;
     }

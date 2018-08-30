@@ -616,7 +616,7 @@ vector<double> caluconspeed(int num, vector<double> &length, int i1, int i2,
   getans();
   // qWarning() << "Result of c" << rect;
 
-  vector<double> c(EDGESUM + 1, NAN);
+  vector<double> c(EDGESUM + 1, 0);
   for (int i = 0; i < (int)rect.size(); i++) {
     for (int j = 0; j < EDGESUM; j++) {
       if (abs(rect[i][j]) > NAX) {
