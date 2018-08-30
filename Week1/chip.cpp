@@ -771,7 +771,7 @@ void findTargetWorker() {
                       workerData.result[resultLen - 3 + i]);
   }
 
-  double min_loss = elite[0].loss;
+  struct State bestState = elite[0];
   int eliteCount = 1;
   int minSolutionCount = 1;
   const int maxRound = 100;
@@ -836,9 +836,9 @@ void findTargetWorker() {
               (result[resultLen - 3 + i] - workerData.target_output_flow[i]);
         }
 
-        if (newstate.loss < min_loss) {
+        if (newstate.loss < bestState.loss) {
           qWarning() << newstate.loss;
-          min_loss = newstate.loss;
+          bestState = newstate;
           emit chip->statusChanged(
               Chip::tr("Found a solution #%1 of loss %2.(%3/%4)")
                   .arg(minSolutionCount++)
@@ -867,7 +867,7 @@ void findTargetWorker() {
   }
 
   emit chip->statusChanged(Chip::tr("Done"));
-  emit chip->updateDisabledMatrix(elite[0].disabled_v, elite[0].disabled_h,
+  emit chip->updateDisabledMatrix(bestState.disabled_v, bestState.disabled_h,
                                   true);
 }
 
@@ -914,7 +914,6 @@ void Chip::updateDisabledMatrix(bool new_disabled_v[9][9],
   }
 
   if (isFinished) {
-
     findTargetThread = nullptr;
   }
 
