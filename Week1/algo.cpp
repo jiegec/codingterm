@@ -590,20 +590,22 @@ vector<double> caluconspeed(int num, vector<double> &length, int i1, int i2,
         } else {
           assert(0);
         }
-      }
-
-      if (in == 1 && out >= 2) {
-        // output concentration equals to input
+      } else if (out >= 2) {
+        // output concentration equals to each other
+        int lastedge = -1;
         for (int dir = 0; dir < 4; dir++) {
           int e = getdirline(i, j, dir);
           if (e >= EDGESUM || edges[e].leng == 0)
             continue;
           if (edges[e].n1 == nodeno) {
             // outflow
-            vector<double> ce(EDGESUM + 1, 0);
-            ce[getdirline(i, j, inmaxdir)] = 1;
-            ce[e] = -1;
-            addrect(ce);
+            if (lastedge != -1) {
+              vector<double> ce(EDGESUM + 1, 0);
+              ce[lastedge] = 1;
+              ce[e] = -1;
+              addrect(ce);
+            }
+            lastedge = e;
           }
         }
       }
