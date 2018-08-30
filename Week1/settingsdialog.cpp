@@ -27,10 +27,10 @@ SettingsDialog::SettingsDialog(QWidget *parent) : QDialog(parent) {
   onSideChanged(5);
 
   onInputCol1Changed(1);
-  onInputCol2Changed(1);
+  onInputCol2Changed(2);
   onOutputCol1Changed(1);
-  onOutputCol2Changed(1);
-  onOutputCol3Changed(1);
+  onOutputCol2Changed(2);
+  onOutputCol3Changed(3);
 }
 
 void SettingsDialog::onSideChanged(int value) {

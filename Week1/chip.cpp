@@ -130,17 +130,18 @@ void draw_vertical(QPainter &painter, int width, double flow, int direction) {
   QColor colorDirection("#F44336");
   if (flow > 0) {
     painter.setBrush(colorDirection);
+    int arrow_width = fmin(width, BUFFER_HEIGHT);
     if (direction == 0) {
       const QPointF points[4] = {
-          QPointF(-MIN_WIDTH / 2, LENGTH + MIN_WIDTH / 2 - MIN_WIDTH),
+          QPointF(-arrow_width / 2, LENGTH + MIN_WIDTH / 2 - BUFFER_HEIGHT),
           QPointF(0, LENGTH + MIN_WIDTH / 2),
-          QPointF(MIN_WIDTH / 2, LENGTH + MIN_WIDTH / 2 - MIN_WIDTH)};
+          QPointF(arrow_width / 2, LENGTH + MIN_WIDTH / 2 - BUFFER_HEIGHT)};
       painter.drawPolygon(points, 3);
     } else {
       const QPointF points[4] = {
-          QPointF(-MIN_WIDTH / 2, MIN_WIDTH / 2 + MIN_WIDTH),
+          QPointF(-arrow_width / 2, MIN_WIDTH / 2 + BUFFER_HEIGHT),
           QPointF(0, MIN_WIDTH / 2),
-          QPointF(MIN_WIDTH / 2, MIN_WIDTH / 2 + MIN_WIDTH)};
+          QPointF(arrow_width / 2, MIN_WIDTH / 2 + BUFFER_HEIGHT)};
       painter.drawPolygon(points, 3);
     }
   }
