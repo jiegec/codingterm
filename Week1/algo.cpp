@@ -520,14 +520,6 @@ vector<double> caluconspeed(int num, vector<double> &length, int i1, int i2,
     in2[EDGESUM] = 0;
     addrect(in2);
   }
-  {
-    vector<double> out(EDGESUM + 1, 0);
-    out[EDGESUM - 3] = edges[EDGESUM - 3].v;
-    out[EDGESUM - 2] = edges[EDGESUM - 2].v;
-    out[EDGESUM - 1] = edges[EDGESUM - 1].v;
-    out[EDGESUM] = 200 * 1;
-    addrect(out);
-  }
   for (int i = 0; i < EDGESUM - 5; i++) {
     if (abs(edges[i].v) < NAX) {
       // flow = 0 then concentration = 0
