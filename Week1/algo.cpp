@@ -543,9 +543,7 @@ vector<double> caluconspeed(int num, vector<double> &length, int i1, int i2,
 
       vector<double> line(EDGESUM + 1, 0); // v_in * c_in = v_out * c_out
       int in = 0, out = 0;
-
-      double inmax = 0;
-      int inmaxdir = -1;
+      int indir[4];
 
       for (int dir = 0; dir <= 3; dir++) {
         int e = getdirline(i, j, dir);
@@ -558,10 +556,7 @@ vector<double> caluconspeed(int num, vector<double> &length, int i1, int i2,
         } else if (edges[e].n2 == nodeno) {
           // inflow
           line[e] = edges[e].v;
-          if (inmax < abs(edges[e].v)) {
-            inmax = abs(edges[e].v);
-            inmaxdir = dir;
-          }
+          indir[in] = dir;
           in++;
         } else {
           assert(0);
@@ -570,29 +565,31 @@ vector<double> caluconspeed(int num, vector<double> &length, int i1, int i2,
 
       // handle special case
       if (in == 2 && out == 2) {
-        int left = (inmaxdir + 1) % 4, right = (inmaxdir - 1 + 4) % 4;
-        int leftedge = getdirline(i, j, left),
-            rightedge = getdirline(i, j, right);
-        if (edges[leftedge].n1 == nodeno) {
-          // left out flow
-          // concentration equals
-          vector<double> ce(EDGESUM + 1, 0);
-          ce[getdirline(i, j, inmaxdir)] = 1;
-          ce[leftedge] = -1;
-          // addrect(ce);
-        } else if (edges[rightedge].n1 == nodeno) {
-          // right out flow
-          // concentration equals
-          vector<double> ce(EDGESUM + 1, 0);
-          ce[getdirline(i, j, inmaxdir)] = 1;
-          ce[rightedge] = -1;
-          // addrect(ce);
-        } else {
-          assert(0);
+        for (int index = 0; index < in; index++) {
+          int curdir = indir[index];
+          int left = (curdir + 1) % 4, right = (curdir - 1 + 4) % 4;
+          int leftedge = getdirline(i, j, left),
+              rightedge = getdirline(i, j, right);
+          int e = getdirline(i, j, curdir);
+          if (edges[leftedge].n1 == nodeno &&
+              abs(edges[e].v) > abs(edges[leftedge].v)) {
+            // left out flow
+            // concentration equals
+            vector<double> ce(EDGESUM + 1, 0);
+            ce[e] = 1;
+            ce[leftedge] = -1;
+            addrect(ce);
+          } else if (edges[rightedge].n1 == nodeno &&
+                     abs(edges[e].v) > abs(edges[rightedge].v)) {
+            // right out flow
+            // concentration equals
+            vector<double> ce(EDGESUM + 1, 0);
+            ce[e] = 1;
+            ce[rightedge] = -1;
+            addrect(ce);
+          }
         }
-      }
-
-      if (out >= 2) {
+      } else if (out >= 2) {
         // output concentration equals to each other
         int lastedge = -1;
         for (int dir = 0; dir < 4; dir++) {
