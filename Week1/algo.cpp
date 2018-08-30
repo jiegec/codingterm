@@ -547,7 +547,7 @@ vector<double> caluconspeed(int num, vector<double> &length, int i1, int i2,
 
       for (int dir = 0; dir <= 3; dir++) {
         int e = getdirline(i, j, dir);
-        if (e >= EDGESUM || edges[e].leng == 0)
+        if (e >= EDGESUM || edges[e].leng == 0 || edges[e].v == 0)
           continue;
         if (edges[e].n1 == nodeno) {
           // outflow
