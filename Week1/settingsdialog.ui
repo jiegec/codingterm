@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <ui version="4.0">
- <class>Dialog</class>
- <widget class="QDialog" name="Dialog">
+ <class>SettingsDialog</class>
+ <widget class="QDialog" name="SettingsDialog">
   <property name="geometry">
    <rect>
     <x>0</x>
@@ -11,7 +11,10 @@
    </rect>
   </property>
   <property name="windowTitle">
-   <string>Dialog</string>
+   <string>Settings</string>
+  </property>
+  <property name="modal">
+   <bool>true</bool>
   </property>
   <widget class="QPushButton" name="pushButton">
    <property name="geometry">
@@ -26,7 +29,7 @@
     <string>Done</string>
    </property>
   </widget>
-  <widget class="QWidget" name="">
+  <widget class="QWidget" name="layoutWidget">
    <property name="geometry">
     <rect>
      <x>10</x>
@@ -41,7 +44,7 @@
       <item>
        <widget class="QLabel" name="label">
         <property name="text">
-         <string>Side:</string>
+         <string>Side length:</string>
         </property>
        </widget>
       </item>
@@ -72,7 +75,7 @@
       <item>
        <widget class="QLabel" name="label_3">
         <property name="text">
-         <string>Input1:</string>
+         <string>Input 1 Column:</string>
         </property>
        </widget>
       </item>
@@ -106,7 +109,7 @@
       <item>
        <widget class="QLabel" name="label_5">
         <property name="text">
-         <string>Input2:</string>
+         <string>Input 2 Column:</string>
         </property>
        </widget>
       </item>
@@ -117,6 +120,9 @@
         </property>
         <property name="maximum">
          <number>8</number>
+        </property>
+        <property name="value">
+         <number>2</number>
         </property>
         <property name="orientation">
          <enum>Qt::Horizontal</enum>
@@ -137,7 +143,7 @@
       <item>
        <widget class="QLabel" name="label_7">
         <property name="text">
-         <string>Output1:</string>
+         <string>Output 1 Column:</string>
         </property>
        </widget>
       </item>
@@ -168,7 +174,7 @@
       <item>
        <widget class="QLabel" name="label_9">
         <property name="text">
-         <string>Output2:</string>
+         <string>Output 2 Column:</string>
         </property>
        </widget>
       </item>
@@ -179,6 +185,9 @@
         </property>
         <property name="maximum">
          <number>8</number>
+        </property>
+        <property name="value">
+         <number>2</number>
         </property>
         <property name="orientation">
          <enum>Qt::Horizontal</enum>
@@ -199,7 +208,7 @@
       <item>
        <widget class="QLabel" name="label_11">
         <property name="text">
-         <string>Output3:</string>
+         <string>Output 3 Column:</string>
         </property>
        </widget>
       </item>
@@ -210,6 +219,9 @@
         </property>
         <property name="maximum">
          <number>8</number>
+        </property>
+        <property name="value">
+         <number>3</number>
         </property>
         <property name="orientation">
          <enum>Qt::Horizontal</enum>
@@ -233,7 +245,7 @@
   <connection>
    <sender>horizontalSlider</sender>
    <signal>valueChanged(int)</signal>
-   <receiver>Dialog</receiver>
+   <receiver>SettingsDialog</receiver>
    <slot>onSideChanged(int)</slot>
    <hints>
     <hint type="sourcelabel">
@@ -249,7 +261,7 @@
   <connection>
    <sender>horizontalSlider_2</sender>
    <signal>valueChanged(int)</signal>
-   <receiver>Dialog</receiver>
+   <receiver>SettingsDialog</receiver>
    <slot>onInputCol1Changed(int)</slot>
    <hints>
     <hint type="sourcelabel">
@@ -265,7 +277,7 @@
   <connection>
    <sender>horizontalSlider_3</sender>
    <signal>valueChanged(int)</signal>
-   <receiver>Dialog</receiver>
+   <receiver>SettingsDialog</receiver>
    <slot>onInputCol2Changed(int)</slot>
    <hints>
     <hint type="sourcelabel">
@@ -281,7 +293,7 @@
   <connection>
    <sender>horizontalSlider_4</sender>
    <signal>valueChanged(int)</signal>
-   <receiver>Dialog</receiver>
+   <receiver>SettingsDialog</receiver>
    <slot>onOutputCol1Changed(int)</slot>
    <hints>
     <hint type="sourcelabel">
@@ -297,7 +309,7 @@
   <connection>
    <sender>horizontalSlider_5</sender>
    <signal>valueChanged(int)</signal>
-   <receiver>Dialog</receiver>
+   <receiver>SettingsDialog</receiver>
    <slot>onOutputCol2Changed(int)</slot>
    <hints>
     <hint type="sourcelabel">
@@ -313,7 +325,7 @@
   <connection>
    <sender>horizontalSlider_6</sender>
    <signal>valueChanged(int)</signal>
-   <receiver>Dialog</receiver>
+   <receiver>SettingsDialog</receiver>
    <slot>onOutputCol3Changed(int)</slot>
    <hints>
     <hint type="sourcelabel">
@@ -329,7 +341,7 @@
   <connection>
    <sender>pushButton</sender>
    <signal>clicked(bool)</signal>
-   <receiver>Dialog</receiver>
+   <receiver>SettingsDialog</receiver>
    <slot>onDone()</slot>
    <hints>
     <hint type="sourcelabel">

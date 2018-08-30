@@ -23,7 +23,7 @@
 #include <QMainWindow>
 #include <QTranslator>
 
-class SettingsDialog : public QDialog, private Ui::Dialog {
+class SettingsDialog : public QDialog, private Ui::SettingsDialog {
   Q_OBJECT
 
 public:
