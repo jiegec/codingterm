@@ -49,6 +49,7 @@ MainWindow::MainWindow(QWidget *parent)
 void MainWindow::popupSettings() {
   SettingsDialog settings;
   settings.exec();
+  sideSilder->setValue(settings.side);
   onSideChanged(settings.side);
   chip->inputCol[0] = settings.inputCol[0];
   chip->inputCol[1] = settings.inputCol[1];
