@@ -14,15 +14,67 @@
    <string>MainWindow</string>
   </property>
   <widget class="QWidget" name="centralwidget">
-   <widget class="Board" name="widget" native="true">
+   <widget class="Board" name="board" native="true">
     <property name="geometry">
      <rect>
-      <x>60</x>
-      <y>60</y>
+      <x>10</x>
+      <y>10</y>
       <width>600</width>
       <height>600</height>
      </rect>
     </property>
+   </widget>
+   <widget class="QWidget" name="layoutWidget">
+    <property name="geometry">
+     <rect>
+      <x>620</x>
+      <y>10</y>
+      <width>451</width>
+      <height>18</height>
+     </rect>
+    </property>
+    <layout class="QHBoxLayout" name="horizontalLayout_2">
+     <item>
+      <widget class="QLabel" name="label_2">
+       <property name="text">
+        <string>Current Turn:</string>
+       </property>
+      </widget>
+     </item>
+     <item>
+      <widget class="QLabel" name="currentTurnLabel">
+       <property name="text">
+        <string/>
+       </property>
+      </widget>
+     </item>
+    </layout>
+   </widget>
+   <widget class="QWidget" name="">
+    <property name="geometry">
+     <rect>
+      <x>620</x>
+      <y>30</y>
+      <width>451</width>
+      <height>18</height>
+     </rect>
+    </property>
+    <layout class="QHBoxLayout" name="horizontalLayout">
+     <item>
+      <widget class="QLabel" name="label_3">
+       <property name="text">
+        <string>Player Side:</string>
+       </property>
+      </widget>
+     </item>
+     <item>
+      <widget class="QLabel" name="playerSideLabel">
+       <property name="text">
+        <string/>
+       </property>
+      </widget>
+     </item>
+    </layout>
    </widget>
   </widget>
   <widget class="QMenuBar" name="menubar">
@@ -67,6 +119,10 @@
    <extends>QWidget</extends>
    <header>board.h</header>
    <container>1</container>
+   <slots>
+    <signal>onUserMove(int,int,int,int)</signal>
+    <signal>onCurrentTurnChanged(int)</signal>
+   </slots>
   </customwidget>
  </customwidgets>
  <resources/>
@@ -103,9 +159,43 @@
     </hint>
    </hints>
   </connection>
+  <connection>
+   <sender>board</sender>
+   <signal>onUserMove(int,int,int,int)</signal>
+   <receiver>MainWindow</receiver>
+   <slot>onUserMove(int,int,int,int)</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>532</x>
+     <y>160</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>741</x>
+     <y>211</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>board</sender>
+   <signal>onCurrentTurnChanged(int)</signal>
+   <receiver>MainWindow</receiver>
+   <slot>onCurrentTurnChanged(int)</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>443</x>
+     <y>312</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>713</x>
+     <y>311</y>
+    </hint>
+   </hints>
+  </connection>
  </connections>
  <slots>
   <slot>onNewGame()</slot>
   <slot>onSaveGame()</slot>
+  <slot>onUserMove(int,int,int,int)</slot>
+  <slot>onCurrentTurnChanged(int)</slot>
  </slots>
 </ui>

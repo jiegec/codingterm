@@ -4,6 +4,8 @@
 #include "ui_mainwindow.h"
 #include <QMainWindow>
 #include <QTranslator>
+#include <QTcpSocket>
+#include <QTcpServer>
 
 class MainWindow : public QMainWindow, private Ui::MainWindow {
   Q_OBJECT
@@ -19,10 +21,16 @@ protected:
 private slots:
   void onNewGame();
   void onSaveGame();
+  void onUserMove(int fromX, int fromY, int toX, int toY);
+  void onSocketAvailable();
+  void onCurrentTurnChanged(int);
 
 private:
   QTranslator translator;
   QVector<const char *> languages;
+  int numMoves;
+  QTcpSocket *socket;
+  QTcpServer *server;
 };
 
 #endif // MAINWINDOW_H

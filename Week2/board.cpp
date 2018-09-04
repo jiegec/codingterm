@@ -42,6 +42,7 @@ void Board::setPlayerSide(int side) {
 void Board::setCurrentTurn(int side) {
   currentTurn = side;
   update();
+  emit onCurrentTurnChanged(side);
 }
 
 void Board::setInitialBoard() {
@@ -163,7 +164,11 @@ void Board::paintEvent(QPaintEvent *event) {
       }
 
       painter.save();
-      painter.translate(i * SPACE, (9 - j) * SPACE);
+      if (renderSide == SIDE_BLACK) {
+        painter.translate((8 - i) * SPACE, j * SPACE);
+      } else {
+        painter.translate(i * SPACE, (9 - j) * SPACE);
+      }
       painter.translate(-RADIUS, -RADIUS);
       painter.scale(0.05, 0.05);
 
@@ -193,6 +198,10 @@ bool Board::getIndexByPos(QPointF position, int &x, int &y) {
       double dist = sqrt((xx - position.x()) * (xx - position.x()) +
                          (yy - position.y()) * (yy - position.y()));
       if (dist < RADIUS) {
+        if (renderSide == SIDE_BLACK) {
+          i = 8 - i;
+          j = 9 - j;
+        }
         x = i;
         y = j;
         return true;
@@ -206,7 +215,7 @@ void Board::mousePressEvent(QMouseEvent *event) {
   QPointF pos = event->localPos();
   int x = -1, y = -1;
   bool onChess = getIndexByPos(pos, x, y);
-  if (onChess) {
+  if (onChess && currentTurn == playerSide) {
     isDragging = true;
     draggingX = x;
     draggingY = y;
@@ -233,7 +242,7 @@ void Board::mouseMoveEvent(QMouseEvent *event) {
     }
     update();
   } else {
-    if (onChess) {
+    if (onChess && currentTurn == playerSide) {
       setCursor(Qt::OpenHandCursor);
     }
   }
@@ -244,11 +253,13 @@ void Board::mouseReleaseEvent(QMouseEvent *event) {
   int x = -1, y = -1;
   bool onChess = getIndexByPos(pos, x, y);
   if (onChess && isDragging) {
-    if (!HAS_CHESS(board[x][y]) && hoverValid) {
+    if (isMoveValid(board, draggingX, draggingY, x, y, currentTurn)) {
       if (x != draggingX || y != draggingY) {
         board[x][y] = board[draggingX][draggingY];
         board[draggingX][draggingY] = 0;
+        setCurrentTurn(!currentTurn);
         update();
+        emit onUserMove(draggingX, draggingY, x, y);
       }
     }
   }
@@ -460,7 +471,8 @@ bool Board::isMoveValid(int board[9][10], int fromX, int fromY, int toX,
       return false;
     }
 
-    if (count == 0 && HAS_CHESS(board[toX][toY]) && (board[toX][toY] & SIDE_MASK) == opponent) {
+    if (count == 0 && HAS_CHESS(board[toX][toY]) &&
+        (board[toX][toY] & SIDE_MASK) == opponent) {
       return false;
     }
 
@@ -567,4 +579,13 @@ bool Board::isMoveValid(int board[9][10], int fromX, int fromY, int toX,
   temp[toX][toY] = temp[fromX][fromY];
   temp[fromX][fromY] = 0;
   return !isDangerForSide(temp, side);
+}
+
+void Board::doMove(int fromX, int fromY, int toX, int toY) {
+  if (isMoveValid(board, fromX, fromY, toX, toY, currentTurn)) {
+    board[toX][toY] = board[fromX][fromY];
+    board[fromX][fromY] = 0;
+    setCurrentTurn(!currentTurn);
+    update();
+  }
 }

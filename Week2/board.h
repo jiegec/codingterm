@@ -28,13 +28,14 @@ public:
   void setCurrentTurn(int side);
 
 public slots:
+  void doMove(int fromX, int fromY, int toX, int toY);
 
 signals:
   void onUserMove(int fromX, int fromY, int toX, int toY);
+  void onCurrentTurnChanged(int side);
 
 protected:
   void paintEvent(QPaintEvent *event) override;
-
   void mousePressEvent(QMouseEvent *event) override;
   void mouseMoveEvent(QMouseEvent *event) override;
   void mouseReleaseEvent(QMouseEvent *event) override;
