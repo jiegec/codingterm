@@ -17,9 +17,10 @@ protected:
   void changeEvent(QEvent *e) override;
 
 private slots:
+  void onNewGame();
+  void onSaveGame();
 
 private:
-  void newGame();
   QTranslator translator;
   QVector<const char *> languages;
 };

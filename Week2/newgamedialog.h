@@ -12,7 +12,6 @@ class NewGameDialog : public QDialog, private Ui::NewGameDialog {
 
 public:
   explicit NewGameDialog(QWidget *parent = nullptr);
-  bool ok;
   QTcpSocket *socket;
   QTcpServer *server;
 

@@ -16,16 +16,7 @@ MainWindow::MainWindow(QWidget *parent)
   }
   QApplication::installTranslator(&translator);
 
-  newGame();
-}
-
-void MainWindow::newGame() {
-  NewGameDialog dialog;
-  dialog.exec();
-
-  if (!dialog.ok) {
-    close();
-  }
+  onNewGame();
 }
 
 void MainWindow::changeEvent(QEvent *e) {
@@ -38,3 +29,11 @@ void MainWindow::changeEvent(QEvent *e) {
     break;
   }
 }
+
+void MainWindow::onNewGame() {
+  NewGameDialog dialog;
+  if (dialog.exec() == QDialog::Accepted) {
+  }
+}
+
+void MainWindow::onSaveGame() {}

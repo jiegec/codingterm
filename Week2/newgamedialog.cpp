@@ -28,7 +28,6 @@ NewGameDialog::NewGameDialog(QWidget *parent) : QDialog(parent) {
   network.get(QNetworkRequest(QUrl("http://ipecho.net/plain")));
 
   cancelButton->setEnabled(false);
-  ok = false;
   server = nullptr;
   socket = nullptr;
 }
@@ -68,8 +67,7 @@ void NewGameDialog::onCancel() {
 void NewGameDialog::onNewConnection() {
   server->close();
   socket = server->nextPendingConnection();
-  ok = true;
-  close();
+  done(QDialog::Accepted);
 }
 
 void NewGameDialog::onConnect() {
@@ -85,8 +83,7 @@ void NewGameDialog::onConnect() {
 }
 
 void NewGameDialog::onSocketConnected() {
-  ok = true;
-  close();
+  done(QDialog::Accepted);
 }
 
 void NewGameDialog::onSocketError() {

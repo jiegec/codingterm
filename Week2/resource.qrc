@@ -2,5 +2,12 @@
 <qresource>
     <file>translations/en.qm</file>
     <file>translations/zh.qm</file>
+    <file>images/Xiangqi_Advisor_(Trad).svg</file>
+    <file>images/Xiangqi_Cannon_(Trad).svg</file>
+    <file>images/Xiangqi_Chariot_(Trad).svg</file>
+    <file>images/Xiangqi_Elephant_(Trad).svg</file>
+    <file>images/Xiangqi_General_(Trad).svg</file>
+    <file>images/Xiangqi_Horse_(Trad).svg</file>
+    <file>images/Xiangqi_Soldier_(Trad).svg</file>
 </qresource>
 </RCC>

@@ -13,7 +13,18 @@
   <property name="windowTitle">
    <string>MainWindow</string>
   </property>
-  <widget class="QWidget" name="centralwidget"/>
+  <widget class="QWidget" name="centralwidget">
+   <widget class="Board" name="widget" native="true">
+    <property name="geometry">
+     <rect>
+      <x>60</x>
+      <y>60</y>
+      <width>600</width>
+      <height>600</height>
+     </rect>
+    </property>
+   </widget>
+  </widget>
   <widget class="QMenuBar" name="menubar">
    <property name="geometry">
     <rect>
@@ -23,26 +34,48 @@
      <height>22</height>
     </rect>
    </property>
+   <widget class="QMenu" name="menuFile">
+    <property name="title">
+     <string>File</string>
+    </property>
+    <addaction name="actionNew_Game"/>
+    <addaction name="actionSave_Game"/>
+   </widget>
+   <addaction name="menuFile"/>
   </widget>
   <widget class="QStatusBar" name="statusbar"/>
-  <action name="actionSettings">
+  <action name="actionNew_Game">
    <property name="text">
-    <string>Change Parameters</string>
+    <string>New Game</string>
+   </property>
+   <property name="shortcut">
+    <string>Alt+N</string>
    </property>
   </action>
-  <action name="actionChange_Parameters">
+  <action name="actionSave_Game">
    <property name="text">
-    <string>Change Parameters</string>
+    <string>Save Game</string>
+   </property>
+   <property name="shortcut">
+    <string>Alt+S</string>
    </property>
   </action>
  </widget>
+ <customwidgets>
+  <customwidget>
+   <class>Board</class>
+   <extends>QWidget</extends>
+   <header>board.h</header>
+   <container>1</container>
+  </customwidget>
+ </customwidgets>
  <resources/>
  <connections>
   <connection>
-   <sender>actionChange_Parameters</sender>
+   <sender>actionNew_Game</sender>
    <signal>triggered()</signal>
    <receiver>MainWindow</receiver>
-   <slot>popupSettings()</slot>
+   <slot>onNewGame()</slot>
    <hints>
     <hint type="sourcelabel">
      <x>-1</x>
@@ -50,19 +83,29 @@
     </hint>
     <hint type="destinationlabel">
      <x>542</x>
-     <y>389</y>
+     <y>387</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>actionSave_Game</sender>
+   <signal>triggered()</signal>
+   <receiver>MainWindow</receiver>
+   <slot>onSaveGame()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>-1</x>
+     <y>-1</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>542</x>
+     <y>387</y>
     </hint>
    </hints>
   </connection>
  </connections>
  <slots>
-  <signal>sideChanged(int)</signal>
-  <slot>onSideChanged(int)</slot>
-  <slot>onResultChanged(double,double,double)</slot>
-  <slot>onTargetOutputFlow1Changed(int)</slot>
-  <slot>onTargetOutputFlow2Changed(int)</slot>
-  <slot>onTargetOutputFlow3Changed(int)</slot>
-  <slot>onLanguageChanged(int)</slot>
-  <slot>popupSettings()</slot>
+  <slot>onNewGame()</slot>
+  <slot>onSaveGame()</slot>
  </slots>
 </ui>
