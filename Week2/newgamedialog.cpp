@@ -4,6 +4,7 @@
 #include <QNetworkInterface>
 #include <QNetworkReply>
 #include <QNetworkRequest>
+#include <QRegExp>
 
 NewGameDialog::NewGameDialog(QWidget *parent) : QDialog(parent) {
   setupUi(this);
@@ -35,6 +36,16 @@ NewGameDialog::NewGameDialog(QWidget *parent) : QDialog(parent) {
 
 void NewGameDialog::onListen() {
   server = new QTcpServer;
+
+  QRegExp ip("^((25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\\.){3}(25[0-5]|2[0-4][0-"
+             "9]|[01]?[0-9][0-9]?)$");
+  if (!ip.exactMatch(hostIpAddress->text())) {
+    QMessageBox msgBox;
+    msgBox.setText("Bad ip address");
+    msgBox.exec();
+    return;
+  }
+
   if (server->listen(QHostAddress(hostIpAddress->text()),
                      hostPort->text().toInt())) {
     listenButton->setEnabled(false);
@@ -73,6 +84,15 @@ void NewGameDialog::onNewConnection() {
 }
 
 void NewGameDialog::onConnect() {
+  QRegExp ip("^((25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\\.){3}(25[0-5]|2[0-4][0-"
+             "9]|[01]?[0-9][0-9]?)$");
+  if (!ip.exactMatch(clientIpAddress->text())) {
+    QMessageBox msgBox;
+    msgBox.setText("Bad ip address");
+    msgBox.exec();
+    return;
+  }
+
   socket = new QTcpSocket();
   socket->connectToHost(clientIpAddress->text(), clientPort->text().toInt());
   connect(socket, SIGNAL(connected()), this, SLOT(onSocketConnected()));

@@ -1,10 +1,11 @@
 #include "mainwindow.h"
 #include "newgamedialog.h"
 #include <QDebug>
-#include <QInputDialog>
 #include <QFileDialog>
+#include <QInputDialog>
 #include <QJsonDocument>
 #include <QJsonObject>
+#include <QMessageBox>
 
 MainWindow::MainWindow(QWidget *parent)
     : QMainWindow(parent), languages({"en", "zh"}) {
@@ -55,6 +56,7 @@ void MainWindow::onNewGame() {
     emit board->setPlayerSide(dialog.side);
     emit board->setRenderSide(dialog.side);
     emit board->setCurrentTurn(SIDE_RED);
+    emit board->setSinglePlayer(false);
 
     if (dialog.side == SIDE_RED) {
       playerSideLabel->setText(tr("Red"));
@@ -137,12 +139,16 @@ void MainWindow::onCheck(int side) {
                           tr("\nBlack general is checked"));
   }
 }
+
 void MainWindow::onCheckmate(int side) {
   if (side == SIDE_RED) {
     messageLabel->setText(messageLabel->text() +
-                          tr("\nRed general is checkmateed"));
+                          tr("\nRed general is checkmated"));
   } else {
     messageLabel->setText(messageLabel->text() +
-                          tr("\nBlack general is checkmateed"));
+                          tr("\nBlack general is checkmated"));
   }
+  QMessageBox msgBox;
+  msgBox.setText(tr("Checkmate!"));
+  msgBox.exec();
 }
