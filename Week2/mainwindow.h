@@ -26,6 +26,7 @@ private slots:
   void onCurrentTurnChanged(int);
   void onCheck(int);
   void onCheckmate(int);
+  void onSurrender();
 
 private:
   QTranslator translator;

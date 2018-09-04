@@ -92,6 +92,28 @@
      <set>Qt::AlignLeading|Qt::AlignLeft|Qt::AlignTop</set>
     </property>
    </widget>
+   <widget class="QWidget" name="">
+    <property name="geometry">
+     <rect>
+      <x>623</x>
+      <y>364</y>
+      <width>451</width>
+      <height>41</height>
+     </rect>
+    </property>
+    <layout class="QHBoxLayout" name="horizontalLayout_3">
+     <item>
+      <widget class="QLCDNumber" name="lcdNumber"/>
+     </item>
+     <item>
+      <widget class="QPushButton" name="pushButton">
+       <property name="text">
+        <string>Surrender</string>
+       </property>
+      </widget>
+     </item>
+    </layout>
+   </widget>
   </widget>
   <widget class="QMenuBar" name="menubar">
    <property name="geometry">
@@ -241,6 +263,22 @@
     </hint>
    </hints>
   </connection>
+  <connection>
+   <sender>pushButton</sender>
+   <signal>clicked()</signal>
+   <receiver>MainWindow</receiver>
+   <slot>onSurrender()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>984</x>
+     <y>409</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>932</x>
+     <y>465</y>
+    </hint>
+   </hints>
+  </connection>
  </connections>
  <slots>
   <slot>onNewGame()</slot>
@@ -249,5 +287,6 @@
   <slot>onCurrentTurnChanged(int)</slot>
   <slot>onCheck(int)</slot>
   <slot>onCheckmate(int)</slot>
+  <slot>onSurrender()</slot>
  </slots>
 </ui>

@@ -121,11 +121,20 @@ void MainWindow::onSocketAvailable() {
   auto data = socket->readAll();
   QJsonDocument json = QJsonDocument::fromJson(data);
   qWarning() << "Got json" << json;
-  int fromX = json["fromX"].toInt();
-  int fromY = json["fromY"].toInt();
-  int toX = json["toX"].toInt();
-  int toY = json["toY"].toInt();
-  emit board->doMove(fromX, fromY, toX, toY);
+  if (json["surrender"].toBool()) {
+    messageLabel->setText(messageLabel->text() +
+                          tr("\nYou opponent has surrendered."));
+
+    QMessageBox msgBox;
+    msgBox.setText("Your opponent has surrendered.");
+    msgBox.exec();
+  } else {
+    int fromX = json["fromX"].toInt();
+    int fromY = json["fromY"].toInt();
+    int toX = json["toX"].toInt();
+    int toY = json["toY"].toInt();
+    emit board->doMove(fromX, fromY, toX, toY);
+  }
 }
 
 void MainWindow::onCurrentTurnChanged(int side) {
@@ -156,5 +165,22 @@ void MainWindow::onCheckmate(int side) {
   }
   QMessageBox msgBox;
   msgBox.setText(tr("Checkmate!"));
+  msgBox.exec();
+}
+
+void MainWindow::onSurrender() {
+  if (socket) {
+    QJsonObject json;
+    json["surrender"] = true;
+
+    QJsonDocument doc(json);
+
+    qWarning() << "Sent json" << doc;
+    socket->write(doc.toJson());
+  }
+
+  messageLabel->setText(messageLabel->text() + tr("\nYou have surrendered."));
+  QMessageBox msgBox;
+  msgBox.setText("You have surrendered.");
   msgBox.exec();
 }
