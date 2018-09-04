@@ -27,6 +27,8 @@ private slots:
   void onCheck(int);
   void onCheckmate(int);
   void onSurrender();
+  void onTimerChanged(int);
+  void onTimeout();
 
 private:
   QTranslator translator;

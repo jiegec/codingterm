@@ -9,5 +9,8 @@
     <file>images/Xiangqi_General_(Trad).svg</file>
     <file>images/Xiangqi_Horse_(Trad).svg</file>
     <file>images/Xiangqi_Soldier_(Trad).svg</file>
+    <file>sounds/capture.mp3</file>
+    <file>sounds/check.mp3</file>
+    <file>sounds/checkmate.mp3</file>
 </qresource>
 </RCC>

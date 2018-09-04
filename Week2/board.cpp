@@ -3,6 +3,7 @@
 #include <QJsonArray>
 #include <QJsonDocument>
 #include <QJsonObject>
+#include <QMediaPlayer>
 #include <QMouseEvent>
 #include <QPainter>
 #include <QSvgRenderer>
@@ -30,6 +31,8 @@ Board::Board(QWidget *parent) : QWidget(parent) {
   setPlayerSide(SIDE_RED);
   setCurrentTurn(SIDE_RED);
   setInitialBoard();
+
+  connect(&timer, SIGNAL(timeout()), this, SLOT(onTick()));
 }
 
 void Board::setRenderSide(int side) {
@@ -257,9 +260,13 @@ void Board::mouseReleaseEvent(QMouseEvent *event) {
   bool onChess = getIndexByPos(pos, x, y);
   if (onChess && isDragging) {
     if (isMoveValid(board, draggingX, draggingY, x, y, currentTurn)) {
+      if (HAS_CHESS(board[x][y])) {
+        playSound("capture");
+      }
       board[x][y] = board[draggingX][draggingY];
       board[draggingX][draggingY] = 0;
       setCurrentTurn(!currentTurn);
+      startTimer();
       update();
       emit onUserMove(draggingX, draggingY, x, y);
       checkStatus();
@@ -589,9 +596,13 @@ bool Board::isMoveValid(int board[9][10], int fromX, int fromY, int toX,
 
 void Board::doMove(int fromX, int fromY, int toX, int toY) {
   if (isMoveValid(board, fromX, fromY, toX, toY, currentTurn)) {
+    if (HAS_CHESS(board[toX][toY])) {
+      playSound("capture");
+    }
     board[toX][toY] = board[fromX][fromY];
     board[fromX][fromY] = 0;
     setCurrentTurn(!currentTurn);
+    startTimer();
     update();
     checkStatus();
   }
@@ -711,9 +722,11 @@ bool Board::isCheckmateForSide(int board[9][10], int side) {
 void Board::checkStatus() {
   if (isDangerForSide(board, currentTurn)) {
     emit onCheck(currentTurn);
+    playSound("check");
   }
   if (isCheckmateForSide(board, currentTurn)) {
     emit onCheckmate(currentTurn);
+    playSound("checkmate");
   }
 }
 
@@ -757,4 +770,29 @@ void Board::loadBoard(QByteArray data) {
 void Board::setSinglePlayer(bool value) {
   singlePlayer = value;
   update();
+}
+
+void Board::startTimer() {
+  timer.start(1000);
+  secondsLeft = 60;
+  emit timerChanged(secondsLeft);
+}
+
+void Board::onTick() {
+  if (secondsLeft == 0) {
+    if (!singlePlayer && currentTurn == playerSide) {
+      emit timeout();
+    }
+  } else {
+    secondsLeft -= 1;
+    emit timerChanged(secondsLeft);
+    timer.start(1000);
+  }
+}
+
+void Board::playSound(QString name) {
+  QMediaPlayer *player = new QMediaPlayer(this);
+  player->setMedia(QUrl(QString("qrc:/sounds/%1.mp3").arg(name)));
+  player->setVolume(50);
+  player->play();
 }

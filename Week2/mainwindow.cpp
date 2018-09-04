@@ -41,10 +41,12 @@ void MainWindow::onNewGame() {
   NewGameDialog dialog;
   if (dialog.exec() == QDialog::Accepted) {
     if (socket) {
-      delete socket;
+      socket->deleteLater();
+      socket = nullptr;
     }
     if (server) {
-      delete server;
+      server->deleteLater();
+      server = nullptr;
     }
 
     socket = dialog.socket;
@@ -125,6 +127,16 @@ void MainWindow::onSocketAvailable() {
     messageLabel->setText(messageLabel->text() +
                           tr("\nYou opponent has surrendered."));
 
+    if (socket) {
+      socket->deleteLater();
+      socket = nullptr;
+    }
+    if (server) {
+      server->deleteLater();
+      server = nullptr;
+    }
+    emit board->setSinglePlayer(true);
+
     QMessageBox msgBox;
     msgBox.setText("Your opponent has surrendered.");
     msgBox.exec();
@@ -180,7 +192,24 @@ void MainWindow::onSurrender() {
   }
 
   messageLabel->setText(messageLabel->text() + tr("\nYou have surrendered."));
+  if (socket) {
+    socket->deleteLater();
+    socket = nullptr;
+  }
+  if (server) {
+    server->deleteLater();
+    server = nullptr;
+  }
+  emit board->setSinglePlayer(true);
   QMessageBox msgBox;
   msgBox.setText("You have surrendered.");
   msgBox.exec();
+}
+
+void MainWindow::onTimerChanged(int time) {
+  lcdNumber->display(time);
+}
+
+void MainWindow::onTimeout() {
+  onSurrender();
 }

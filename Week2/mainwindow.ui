@@ -162,6 +162,8 @@
     <signal>onCurrentTurnChanged(int)</signal>
     <signal>onCheck(int)</signal>
     <signal>onCheckmate(int)</signal>
+    <signal>timeout()</signal>
+    <signal>timerChanged(int)</signal>
    </slots>
   </customwidget>
  </customwidgets>
@@ -279,6 +281,38 @@
     </hint>
    </hints>
   </connection>
+  <connection>
+   <sender>board</sender>
+   <signal>timeout()</signal>
+   <receiver>MainWindow</receiver>
+   <slot>onTimeout()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>323</x>
+     <y>399</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>668</x>
+     <y>672</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>board</sender>
+   <signal>timerChanged(int)</signal>
+   <receiver>MainWindow</receiver>
+   <slot>onTimerChanged(int)</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>526</x>
+     <y>585</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>761</x>
+     <y>644</y>
+    </hint>
+   </hints>
+  </connection>
  </connections>
  <slots>
   <slot>onNewGame()</slot>
@@ -288,5 +322,7 @@
   <slot>onCheck(int)</slot>
   <slot>onCheckmate(int)</slot>
   <slot>onSurrender()</slot>
+  <slot>onTimeout()</slot>
+  <slot>onTimerChanged(int)</slot>
  </slots>
 </ui>

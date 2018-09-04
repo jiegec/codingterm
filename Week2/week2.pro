@@ -1,4 +1,4 @@
-QT += core gui widgets network svg
+QT += core gui widgets network svg multimedia
 TEMPLATE = app
 TARGET = Week2
 INCLUDEPATH += .
