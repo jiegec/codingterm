@@ -7,6 +7,7 @@
 #include <QNetworkAccessManager>
 #include <QTcpServer>
 #include <QTranslator>
+#include <QCloseEvent>
 
 class NewGameDialog : public QDialog, private Ui::NewGameDialog {
   Q_OBJECT
@@ -18,6 +19,8 @@ public:
   int side;
 
 signals:
+
+protected:
 
 private slots:
   void onListen();

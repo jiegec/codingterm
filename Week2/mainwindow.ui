@@ -50,7 +50,7 @@
      </item>
     </layout>
    </widget>
-   <widget class="QWidget" name="">
+   <widget class="QWidget" name="layoutWidget">
     <property name="geometry">
      <rect>
       <x>620</x>
@@ -75,6 +75,19 @@
       </widget>
      </item>
     </layout>
+   </widget>
+   <widget class="QLabel" name="messageLabel">
+    <property name="geometry">
+     <rect>
+      <x>620</x>
+      <y>50</y>
+      <width>451</width>
+      <height>291</height>
+     </rect>
+    </property>
+    <property name="text">
+     <string/>
+    </property>
    </widget>
   </widget>
   <widget class="QMenuBar" name="menubar">
@@ -122,6 +135,8 @@
    <slots>
     <signal>onUserMove(int,int,int,int)</signal>
     <signal>onCurrentTurnChanged(int)</signal>
+    <signal>onCheck(int)</signal>
+    <signal>onCheckmate(int)</signal>
    </slots>
   </customwidget>
  </customwidgets>
@@ -191,11 +206,45 @@
     </hint>
    </hints>
   </connection>
+  <connection>
+   <sender>board</sender>
+   <signal>onCheck(int)</signal>
+   <receiver>MainWindow</receiver>
+   <slot>onCheck(int)</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>579</x>
+     <y>427</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>766</x>
+     <y>441</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>board</sender>
+   <signal>onCheckmate(int)</signal>
+   <receiver>MainWindow</receiver>
+   <slot>onCheckmate(int)</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>556</x>
+     <y>526</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>818</x>
+     <y>551</y>
+    </hint>
+   </hints>
+  </connection>
  </connections>
  <slots>
   <slot>onNewGame()</slot>
   <slot>onSaveGame()</slot>
   <slot>onUserMove(int,int,int,int)</slot>
   <slot>onCurrentTurnChanged(int)</slot>
+  <slot>onCheck(int)</slot>
+  <slot>onCheckmate(int)</slot>
  </slots>
 </ui>

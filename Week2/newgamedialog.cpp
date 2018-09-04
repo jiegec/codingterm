@@ -68,7 +68,7 @@ void NewGameDialog::onNewConnection() {
   socket = server->nextPendingConnection();
   side = SIDE_RED;
   server->close();
-  done(QDialog::Accepted);
+  accept();
 }
 
 void NewGameDialog::onConnect() {
@@ -85,7 +85,7 @@ void NewGameDialog::onConnect() {
 
 void NewGameDialog::onSocketConnected() {
   side = SIDE_BLACK;
-  done(QDialog::Accepted);
+  accept();
 }
 
 void NewGameDialog::onSocketError() {

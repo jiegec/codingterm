@@ -58,7 +58,10 @@ void MainWindow::onNewGame() {
     } else {
       playerSideLabel->setText(tr("Black"));
     }
+  } else {
+    this->deleteLater();
   }
+
   numMoves = 0;
 }
 
@@ -95,5 +98,24 @@ void MainWindow::onCurrentTurnChanged(int side) {
     currentTurnLabel->setText(tr("Red"));
   } else {
     currentTurnLabel->setText(tr("Black"));
+  }
+}
+
+void MainWindow::onCheck(int side) {
+  if (side == SIDE_RED) {
+    messageLabel->setText(messageLabel->text() + "\n" +
+                          "Red general is checked");
+  } else {
+    messageLabel->setText(messageLabel->text() + "\n" +
+                          "Black general is checked");
+  }
+}
+void MainWindow::onCheckmate(int side) {
+  if (side == SIDE_RED) {
+    messageLabel->setText(messageLabel->text() + "\n" +
+                          "Red general is checkmateed");
+  } else {
+    messageLabel->setText(messageLabel->text() + "\n" +
+                          "Black general is checkmateed");
   }
 }

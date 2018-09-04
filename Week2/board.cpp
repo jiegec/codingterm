@@ -254,13 +254,12 @@ void Board::mouseReleaseEvent(QMouseEvent *event) {
   bool onChess = getIndexByPos(pos, x, y);
   if (onChess && isDragging) {
     if (isMoveValid(board, draggingX, draggingY, x, y, currentTurn)) {
-      if (x != draggingX || y != draggingY) {
-        board[x][y] = board[draggingX][draggingY];
-        board[draggingX][draggingY] = 0;
-        setCurrentTurn(!currentTurn);
-        update();
-        emit onUserMove(draggingX, draggingY, x, y);
-      }
+      board[x][y] = board[draggingX][draggingY];
+      board[draggingX][draggingY] = 0;
+      setCurrentTurn(!currentTurn);
+      update();
+      emit onUserMove(draggingX, draggingY, x, y);
+      checkStatus();
     }
   }
   isDragging = false;
@@ -408,6 +407,10 @@ bool Board::isDangerForSide(int board[9][10], int side) {
 
 bool Board::isMoveValid(int board[9][10], int fromX, int fromY, int toX,
                         int toY, int side) {
+  if (fromX < 0 || fromX >= 9 || fromY < 0 || fromY >= 10)
+    return false;
+  if (toX < 0 || toX >= 9 || toY < 0 || toY >= 10)
+    return false;
   if (fromX == toX && fromY == toY)
     return false;
   if (!HAS_CHESS(board[fromX][fromY]) ||
@@ -587,5 +590,126 @@ void Board::doMove(int fromX, int fromY, int toX, int toY) {
     board[fromX][fromY] = 0;
     setCurrentTurn(!currentTurn);
     update();
+    checkStatus();
+  }
+}
+
+bool Board::isCheckmateForSide(int board[9][10], int side) {
+  if (!isDangerForSide(board, side))
+    return false;
+  for (int i = 0; i < 9; i++) {
+    for (int j = 0; j < 10; j++) {
+      if ((board[i][j] & SIDE_MASK) == side) {
+        // our chess
+
+        int type = board[i][j] & TYPE_MASK;
+        int from = 0, to = 0;
+        int count = 0;
+        switch (type) {
+        case TYPE_ADVISOR:
+          if (i == 4) {
+            if (isMoveValid(board, i, j, i - 1, j - 1, side)) {
+              return false;
+            }
+            if (isMoveValid(board, i, j, i - 1, j + 1, side)) {
+              return false;
+            }
+            if (isMoveValid(board, i, j, i + 1, j + 1, side)) {
+              return false;
+            }
+            if (isMoveValid(board, i, j, i + 1, j - 1, side)) {
+              return false;
+            }
+          } else {
+            if (isMoveValid(board, i, j, 4, side == SIDE_RED ? 1 : 8, side)) {
+              return false;
+            }
+          }
+          break;
+        case TYPE_CANNON:
+          for (int ii = 0; ii < 9; ii++) {
+            if (isMoveValid(board, i, j, ii, j, side)) {
+              return false;
+            }
+          }
+          for (int jj = 0; jj < 10; jj++) {
+            if (isMoveValid(board, i, j, i, jj, side)) {
+              return false;
+            }
+          }
+          break;
+        case TYPE_CHARIOT:
+          for (int ii = 0; ii < 9; ii++) {
+            if (isMoveValid(board, i, j, ii, j, side)) {
+              return false;
+            }
+          }
+          for (int jj = 0; jj < 10; jj++) {
+            if (isMoveValid(board, i, j, i, jj, side)) {
+              return false;
+            }
+          }
+          break;
+        case TYPE_ELEPHANT:
+          for (int dir = 0; dir < 4; dir++) {
+            int ii = i + elephantStep[dir][0];
+            int jj = j + elephantStep[dir][1];
+            if (isMoveValid(board, i, j, ii, jj, side)) {
+              return false;
+            }
+          }
+          break;
+        case TYPE_GENERAL:
+          if (isMoveValid(board, i, j, i - 1, j, side)) {
+            return false;
+          }
+          if (isMoveValid(board, i, j, i + 1, j, side)) {
+            return false;
+          }
+          if (isMoveValid(board, i, j, i, j + 1, side)) {
+            return false;
+          }
+          if (isMoveValid(board, i, j, i, j - 1, side)) {
+            return false;
+          }
+          break;
+        case TYPE_HORSE:
+          for (int dir = 0; dir < 8; dir++) {
+            int ii = i + horseStep[dir][0];
+            int jj = j + horseStep[dir][1];
+            if (isMoveValid(board, i, j, ii, jj, side)) {
+              return false;
+            }
+          }
+          break;
+        case TYPE_SOLDIER:
+          if (isMoveValid(board, i, j, i - 1, j, side)) {
+            return false;
+          }
+          if (isMoveValid(board, i, j, i + 1, j, side)) {
+            return false;
+          }
+          if (isMoveValid(board, i, j, i, j + 1, side)) {
+            return false;
+          }
+          if (isMoveValid(board, i, j, i, j - 1, side)) {
+            return false;
+          }
+        default:
+          break;
+        }
+      }
+    }
+  }
+
+  return true;
+}
+
+void Board::checkStatus() {
+  if (isDangerForSide(board, currentTurn)) {
+    emit onCheck(currentTurn);
+  }
+  if (isCheckmateForSide(board, currentTurn)) {
+    emit onCheckmate(currentTurn);
   }
 }

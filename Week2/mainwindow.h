@@ -24,6 +24,8 @@ private slots:
   void onUserMove(int fromX, int fromY, int toX, int toY);
   void onSocketAvailable();
   void onCurrentTurnChanged(int);
+  void onCheck(int);
+  void onCheckmate(int);
 
 private:
   QTranslator translator;

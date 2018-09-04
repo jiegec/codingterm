@@ -33,6 +33,8 @@ public slots:
 signals:
   void onUserMove(int fromX, int fromY, int toX, int toY);
   void onCurrentTurnChanged(int side);
+  void onCheck(int side);
+  void onCheckmate(int side);
 
 protected:
   void paintEvent(QPaintEvent *event) override;
@@ -43,8 +45,10 @@ protected:
 private:
   QString getImageFileName(int);
   bool isDangerForSide(int board[9][10], int side);
+  bool isCheckmateForSide(int board[9][10], int side);
   bool isMoveValid(int board[9][10], int fromX, int fromY, int toX, int toY, int side);
   bool getIndexByPos(QPointF position, int &x, int &y);
+  void checkStatus();
   int board[9][10];
   int renderSide;
   int currentTurn;
