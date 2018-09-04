@@ -73,9 +73,15 @@ void MainWindow::onNewGame() {
       }
       QByteArray data = file.readAll();
       emit board->loadBoard(data);
+      playerSideLabel->setText(tr("Both"));
     }
   } else {
-    destroy();
+    emit board->setInitialBoard();
+    emit board->setPlayerSide(SIDE_RED);
+    playerSideLabel->setText(tr("Both"));
+    emit board->setRenderSide(SIDE_RED);
+    emit board->setCurrentTurn(SIDE_RED);
+    emit board->setSinglePlayer(true);
   }
 
   numMoves = 0;
