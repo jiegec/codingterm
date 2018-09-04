@@ -198,6 +198,41 @@
     <attribute name="title">
      <string>Load Game</string>
     </attribute>
+    <widget class="QPushButton" name="pushButton">
+     <property name="geometry">
+      <rect>
+       <x>150</x>
+       <y>210</y>
+       <width>114</width>
+       <height>32</height>
+      </rect>
+     </property>
+     <property name="text">
+      <string>Load FIle</string>
+     </property>
+    </widget>
+    <widget class="QWidget" name="">
+     <property name="geometry">
+      <rect>
+       <x>0</x>
+       <y>60</y>
+       <width>421</width>
+       <height>33</height>
+      </rect>
+     </property>
+     <layout class="QHBoxLayout" name="horizontalLayout_4">
+      <item>
+       <widget class="QLineEdit" name="chooseFileTextEdit"/>
+      </item>
+      <item>
+       <widget class="QPushButton" name="chooseFileButton">
+        <property name="text">
+         <string>...</string>
+        </property>
+       </widget>
+      </item>
+     </layout>
+    </widget>
    </widget>
   </widget>
  </widget>
@@ -251,10 +286,44 @@
     </hint>
    </hints>
   </connection>
+  <connection>
+   <sender>chooseFileButton</sender>
+   <signal>clicked()</signal>
+   <receiver>NewGameDialog</receiver>
+   <slot>onChooseFile()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>412</x>
+     <y>114</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>444</x>
+     <y>211</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>pushButton</sender>
+   <signal>clicked()</signal>
+   <receiver>NewGameDialog</receiver>
+   <slot>onLoadFile()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>223</x>
+     <y>256</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>445</x>
+     <y>290</y>
+    </hint>
+   </hints>
+  </connection>
  </connections>
  <slots>
   <slot>onListen()</slot>
   <slot>onCancel()</slot>
   <slot>onConnect()</slot>
+  <slot>onChooseFile()</slot>
+  <slot>onLoadFile()</slot>
  </slots>
 </ui>

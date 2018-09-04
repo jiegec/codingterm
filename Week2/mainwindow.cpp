@@ -2,6 +2,7 @@
 #include "newgamedialog.h"
 #include <QDebug>
 #include <QInputDialog>
+#include <QFileDialog>
 #include <QJsonDocument>
 #include <QJsonObject>
 
@@ -47,7 +48,9 @@ void MainWindow::onNewGame() {
 
     socket = dialog.socket;
     server = dialog.server;
-    connect(socket, SIGNAL(readyRead()), this, SLOT(onSocketAvailable()));
+    if (socket) {
+      connect(socket, SIGNAL(readyRead()), this, SLOT(onSocketAvailable()));
+    }
     emit board->setInitialBoard();
     emit board->setPlayerSide(dialog.side);
     emit board->setRenderSide(dialog.side);
@@ -58,14 +61,38 @@ void MainWindow::onNewGame() {
     } else {
       playerSideLabel->setText(tr("Black"));
     }
+    messageLabel->setText("");
+
+    if (dialog.loadFilePath != "") {
+      QFile file(dialog.loadFilePath);
+
+      if (!file.open(QFile::ReadOnly)) {
+        return;
+      }
+      QByteArray data = file.readAll();
+      emit board->loadBoard(data);
+    }
   } else {
-    this->deleteLater();
+    destroy();
   }
 
   numMoves = 0;
 }
 
-void MainWindow::onSaveGame() {}
+void MainWindow::onSaveGame() {
+  QString fileName = QFileDialog::getSaveFileName(this, tr("Save File"));
+  if (fileName == "") {
+    return;
+  }
+
+  QFile file(fileName);
+
+  if (!file.open(QFile::WriteOnly)) {
+    return;
+  }
+  QByteArray data = board->dumpBoard();
+  file.write(data);
+}
 
 void MainWindow::onUserMove(int fromX, int fromY, int toX, int toY) {
   if (socket) {
@@ -103,19 +130,19 @@ void MainWindow::onCurrentTurnChanged(int side) {
 
 void MainWindow::onCheck(int side) {
   if (side == SIDE_RED) {
-    messageLabel->setText(messageLabel->text() + "\n" +
-                          "Red general is checked");
+    messageLabel->setText(messageLabel->text() +
+                          tr("\nRed general is checked"));
   } else {
-    messageLabel->setText(messageLabel->text() + "\n" +
-                          "Black general is checked");
+    messageLabel->setText(messageLabel->text() +
+                          tr("\nBlack general is checked"));
   }
 }
 void MainWindow::onCheckmate(int side) {
   if (side == SIDE_RED) {
-    messageLabel->setText(messageLabel->text() + "\n" +
-                          "Red general is checkmateed");
+    messageLabel->setText(messageLabel->text() +
+                          tr("\nRed general is checkmateed"));
   } else {
-    messageLabel->setText(messageLabel->text() + "\n" +
-                          "Black general is checkmateed");
+    messageLabel->setText(messageLabel->text() +
+                          tr("\nBlack general is checkmateed"));
   }
 }

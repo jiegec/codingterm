@@ -1,4 +1,5 @@
 #include "newgamedialog.h"
+#include <QFileDialog>
 #include <QMessageBox>
 #include <QNetworkInterface>
 #include <QNetworkReply>
@@ -99,4 +100,18 @@ void NewGameDialog::onSocketError() {
   connectButton->setEnabled(true);
   tabWidget->setTabEnabled(0, true);
   tabWidget->setTabEnabled(2, true);
+}
+
+void NewGameDialog::onChooseFile() {
+  QString fileName = QFileDialog::getOpenFileName(this, tr("Open File"));
+  if (fileName == "") {
+    return;
+  }
+
+  chooseFileTextEdit->setText(fileName);
+}
+
+void NewGameDialog::onLoadFile() {
+  loadFilePath = chooseFileTextEdit->text();
+  accept();
 }

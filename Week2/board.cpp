@@ -1,5 +1,8 @@
 #include "board.h"
 #include <QDebug>
+#include <QJsonArray>
+#include <QJsonDocument>
+#include <QJsonObject>
 #include <QMouseEvent>
 #include <QPainter>
 #include <QSvgRenderer>
@@ -215,7 +218,7 @@ void Board::mousePressEvent(QMouseEvent *event) {
   QPointF pos = event->localPos();
   int x = -1, y = -1;
   bool onChess = getIndexByPos(pos, x, y);
-  if (onChess && currentTurn == playerSide) {
+  if (onChess && (singlePlayer || currentTurn == playerSide)) {
     isDragging = true;
     draggingX = x;
     draggingY = y;
@@ -242,7 +245,7 @@ void Board::mouseMoveEvent(QMouseEvent *event) {
     }
     update();
   } else {
-    if (onChess && currentTurn == playerSide) {
+    if (onChess && (singlePlayer || currentTurn == playerSide)) {
       setCursor(Qt::OpenHandCursor);
     }
   }
@@ -712,4 +715,46 @@ void Board::checkStatus() {
   if (isCheckmateForSide(board, currentTurn)) {
     emit onCheckmate(currentTurn);
   }
+}
+
+QByteArray Board::dumpBoard() {
+  QJsonObject json;
+  json["renderSide"] = renderSide;
+  json["currentTurn"] = currentTurn;
+
+  QJsonArray boardArray;
+  for (int i = 0; i < 9; i++) {
+    QJsonArray array;
+    for (int j = 0; j < 10; j++) {
+      array.append(board[i][j]);
+    }
+    boardArray.append(array);
+  }
+  json["board"] = boardArray;
+
+  QJsonDocument doc(json);
+
+  return doc.toJson();
+}
+
+void Board::loadBoard(QByteArray data) {
+  singlePlayer = true;
+  QJsonDocument json = QJsonDocument::fromJson(data);
+  renderSide = json["renderSide"].toInt();
+  setCurrentTurn(json["currentTurn"].toInt());
+
+  for (int i = 0; i < 9; i++) {
+    QJsonArray array = json["board"].toArray()[i].toArray();
+    for (int j = 0; j < 10; j++) {
+      board[i][j] = array[j].toInt();
+    }
+  }
+
+  update();
+  checkStatus();
+}
+
+void Board::setSinglePlayer(bool value) {
+  singlePlayer = value;
+  update();
 }

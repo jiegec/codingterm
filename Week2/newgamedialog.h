@@ -17,6 +17,7 @@ public:
   QTcpSocket *socket;
   QTcpServer *server;
   int side;
+  QString loadFilePath;
 
 signals:
 
@@ -30,6 +31,9 @@ private slots:
   void onConnect();
   void onSocketConnected();
   void onSocketError();
+
+  void onChooseFile();
+  void onLoadFile();
 
 private:
   QTranslator translator;

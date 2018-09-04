@@ -26,6 +26,9 @@ public:
   void setPlayerSide(int side);
   void setInitialBoard();
   void setCurrentTurn(int side);
+  QByteArray dumpBoard();
+  void loadBoard(QByteArray);
+  void setSinglePlayer(bool);
 
 public slots:
   void doMove(int fromX, int fromY, int toX, int toY);
@@ -60,6 +63,7 @@ private:
   int hoverX;
   int hoverY;
   int hoverValid;
+  bool singlePlayer;
 };
 
 #endif
