@@ -110,7 +110,7 @@ void MainWindow::onSaveGame() {
   if (!file.open(QFile::WriteOnly)) {
     return;
   }
-  QByteArray data = board->dumpBoard();
+  QByteArray data = board->dumpBoard(board->getPlayerSide());
   file.write(data);
 }
 
@@ -162,7 +162,7 @@ void MainWindow::onSocketAvailable() {
     if (!file.open(QFile::WriteOnly)) {
       return;
     }
-    QByteArray data = board->dumpBoard();
+    QByteArray data = board->dumpBoard(!board->getPlayerSide());
     file.write(data);
   } else {
     int fromX = json["fromX"].toInt();

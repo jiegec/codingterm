@@ -753,7 +753,7 @@ void Board::checkStatus() {
 int types[] = {TYPE_GENERAL, TYPE_ADVISOR, TYPE_ELEPHANT, TYPE_HORSE,
                TYPE_CHARIOT, TYPE_CANNON,  TYPE_SOLDIER};
 
-QByteArray Board::dumpBoard() {
+QByteArray Board::dumpBoard(int side) {
   QString result[2] = {"red", "black"};
 
   for (int side = 0; side < 2; side++) {
@@ -772,7 +772,7 @@ QByteArray Board::dumpBoard() {
     }
   }
 
-  if (currentTurn == SIDE_RED) {
+  if (side == SIDE_RED) {
     return (result[0] + "\n" + result[1]).toUtf8();
   } else {
     return (result[1] + "\n" + result[0]).toUtf8();
@@ -852,3 +852,5 @@ void Board::playSound(QString name) {
   player->setVolume(50);
   player->play();
 }
+
+int Board::getPlayerSide() { return playerSide; }
