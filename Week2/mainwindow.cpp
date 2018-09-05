@@ -90,6 +90,16 @@ void MainWindow::onNewGame() {
 }
 
 void MainWindow::onSaveGame() {
+  if (socket) {
+    QJsonObject json;
+    json["saveGame"] = true;
+
+    QJsonDocument doc(json);
+
+    qWarning() << "Sent json" << doc;
+    socket->write(doc.toJson());
+  }
+
   QString fileName = QFileDialog::getSaveFileName(this, tr("Save File"));
   if (fileName == "") {
     return;
@@ -136,10 +146,24 @@ void MainWindow::onSocketAvailable() {
       server = nullptr;
     }
     emit board->setSinglePlayer(true);
+    playerSideLabel->setText(tr("Both"));
 
     QMessageBox msgBox;
     msgBox.setText("Your opponent has surrendered.");
     msgBox.exec();
+  } else if (json["saveGame"].toBool()) {
+    QString fileName = QFileDialog::getSaveFileName(this, tr("Save File"));
+    if (fileName == "") {
+      return;
+    }
+
+    QFile file(fileName);
+
+    if (!file.open(QFile::WriteOnly)) {
+      return;
+    }
+    QByteArray data = board->dumpBoard();
+    file.write(data);
   } else {
     int fromX = json["fromX"].toInt();
     int fromY = json["fromY"].toInt();
@@ -201,15 +225,12 @@ void MainWindow::onSurrender() {
     server = nullptr;
   }
   emit board->setSinglePlayer(true);
+  playerSideLabel->setText(tr("Both"));
   QMessageBox msgBox;
   msgBox.setText("You have surrendered.");
   msgBox.exec();
 }
 
-void MainWindow::onTimerChanged(int time) {
-  lcdNumber->display(time);
-}
+void MainWindow::onTimerChanged(int time) { lcdNumber->display(time); }
 
-void MainWindow::onTimeout() {
-  onSurrender();
-}
+void MainWindow::onTimeout() { onSurrender(); }
