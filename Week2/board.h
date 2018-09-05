@@ -72,6 +72,8 @@ private:
   bool singlePlayer;
   QTimer timer;
   int secondsLeft;
+
+  bool validPlace[9][10];
 };
 
 #endif

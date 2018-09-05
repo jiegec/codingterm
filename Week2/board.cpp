@@ -175,6 +175,8 @@ void Board::paintEvent(QPaintEvent *event) {
       } else {
         painter.translate(i * SPACE, (9 - j) * SPACE);
       }
+
+      painter.save();
       painter.translate(-RADIUS, -RADIUS);
       painter.scale(0.05, 0.05);
 
@@ -189,6 +191,13 @@ void Board::paintEvent(QPaintEvent *event) {
       if (fileName != "") {
         QSvgRenderer renderer(fileName);
         renderer.render(&painter, element);
+      }
+      painter.restore();
+
+      if (isDragging && validPlace[renderI][renderJ]) {
+        painter.setBrush(QColor("#F44336"));
+        painter.drawEllipse(-RADIUS / 3.0, -RADIUS / 3.0, RADIUS / 3.0 * 2,
+                            RADIUS / 3.0 * 2);
       }
 
       painter.restore();
@@ -226,6 +235,13 @@ void Board::mousePressEvent(QMouseEvent *event) {
     draggingX = x;
     draggingY = y;
 
+    memset(validPlace, 0, sizeof(validPlace));
+    for (int i = 0; i < 9; i++) {
+      for (int j = 0; j < 10; j++) {
+        validPlace[i][j] = isMoveValid(board, x, y, i, j, currentTurn);
+      }
+    }
+
     setCursor(Qt::ClosedHandCursor);
   }
 }
@@ -256,9 +272,13 @@ void Board::mouseMoveEvent(QMouseEvent *event) {
 
 void Board::mouseReleaseEvent(QMouseEvent *event) {
   QPointF pos = event->localPos();
-  int x = -1, y = -1;
-  bool onChess = getIndexByPos(pos, x, y);
-  if (onChess && isDragging) {
+  if (isDragging) {
+    int x = -1, y = -1;
+    bool onChess = getIndexByPos(pos, x, y);
+    if (!onChess) {
+      x = hoverX;
+      y = hoverY;
+    }
     if (isMoveValid(board, draggingX, draggingY, x, y, currentTurn)) {
       if (HAS_CHESS(board[x][y])) {
         playSound("capture");
@@ -773,10 +793,10 @@ void Board::loadBoard(QByteArray data) {
     currentTurn = SIDE_BLACK;
   }
 
-  for (int type = 0;type < 7;type++) {
+  for (int type = 0; type < 7; type++) {
     int count;
     stream >> count;
-    for (int i = 0;i < count;i++) {
+    for (int i = 0; i < count; i++) {
       int x, y;
       char temp;
       stream.skipWhiteSpace();
@@ -787,10 +807,10 @@ void Board::loadBoard(QByteArray data) {
 
   stream >> side;
 
-  for (int type = 0;type < 7;type++) {
+  for (int type = 0; type < 7; type++) {
     int count;
     stream >> count;
-    for (int i = 0;i < count;i++) {
+    for (int i = 0; i < count; i++) {
       int x, y;
       char temp;
       stream.skipWhiteSpace();
