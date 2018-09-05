@@ -75,6 +75,7 @@ void MainWindow::onNewGame() {
       }
       QByteArray data = file.readAll();
       emit board->loadBoard(data);
+      emit board->setSinglePlayer(true);
       playerSideLabel->setText(tr("Both"));
     }
   } else {
@@ -234,3 +235,18 @@ void MainWindow::onSurrender() {
 void MainWindow::onTimerChanged(int time) { lcdNumber->display(time); }
 
 void MainWindow::onTimeout() { onSurrender(); }
+
+void MainWindow::onLoadGame() {
+  QString fileName = QFileDialog::getOpenFileName(this, tr("Open File"));
+  if (fileName == "") {
+    return;
+  }
+
+  QFile file(fileName);
+
+  if (!file.open(QFile::ReadOnly)) {
+    return;
+  }
+  QByteArray data = file.readAll();
+  emit board->loadBoard(data);
+}

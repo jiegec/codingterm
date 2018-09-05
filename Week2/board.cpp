@@ -4,6 +4,7 @@
 #include <QJsonDocument>
 #include <QJsonObject>
 #include <QMediaPlayer>
+#include <QMessageBox>
 #include <QMouseEvent>
 #include <QPainter>
 #include <QSvgRenderer>
@@ -625,6 +626,10 @@ void Board::doMove(int fromX, int fromY, int toX, int toY) {
     startTimer();
     update();
     checkStatus();
+  } else {
+    QMessageBox msgBox;
+    msgBox.setText("An invalid move occurred!");
+    msgBox.exec();
   }
 }
 
@@ -780,7 +785,6 @@ QByteArray Board::dumpBoard(int side) {
 }
 
 void Board::loadBoard(QByteArray data) {
-  singlePlayer = true;
   QTextStream stream(data);
   QString side;
   stream >> side;
@@ -788,9 +792,9 @@ void Board::loadBoard(QByteArray data) {
   memset(board, 0, sizeof(board));
 
   if (side == "red") {
-    currentTurn = SIDE_RED;
+    setCurrentTurn(SIDE_RED);
   } else {
-    currentTurn = SIDE_BLACK;
+    setCurrentTurn(SIDE_BLACK);
   }
 
   for (int type = 0; type < 7; type++) {

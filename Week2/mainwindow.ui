@@ -92,7 +92,7 @@
      <set>Qt::AlignLeading|Qt::AlignLeft|Qt::AlignTop</set>
     </property>
    </widget>
-   <widget class="QWidget" name="">
+   <widget class="QWidget" name="layoutWidget">
     <property name="geometry">
      <rect>
       <x>623</x>
@@ -129,6 +129,7 @@
      <string>File</string>
     </property>
     <addaction name="actionNew_Game"/>
+    <addaction name="actionLoad_Game"/>
     <addaction name="actionSave_Game"/>
    </widget>
    <addaction name="menuFile"/>
@@ -148,6 +149,14 @@
    </property>
    <property name="shortcut">
     <string>Alt+S</string>
+   </property>
+  </action>
+  <action name="actionLoad_Game">
+   <property name="text">
+    <string>Load Game</string>
+   </property>
+   <property name="shortcut">
+    <string>Alt+L</string>
    </property>
   </action>
  </widget>
@@ -313,6 +322,22 @@
     </hint>
    </hints>
   </connection>
+  <connection>
+   <sender>actionLoad_Game</sender>
+   <signal>triggered()</signal>
+   <receiver>MainWindow</receiver>
+   <slot>onLoadGame()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>-1</x>
+     <y>-1</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>542</x>
+     <y>387</y>
+    </hint>
+   </hints>
+  </connection>
  </connections>
  <slots>
   <slot>onNewGame()</slot>
@@ -324,5 +349,6 @@
   <slot>onSurrender()</slot>
   <slot>onTimeout()</slot>
   <slot>onTimerChanged(int)</slot>
+  <slot>onLoadGame()</slot>
  </slots>
 </ui>

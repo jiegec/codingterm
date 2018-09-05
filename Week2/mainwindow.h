@@ -21,6 +21,7 @@ protected:
 private slots:
   void onNewGame();
   void onSaveGame();
+  void onLoadGame();
   void onUserMove(int fromX, int fromY, int toX, int toY);
   void onSocketAvailable();
   void onCurrentTurnChanged(int);
