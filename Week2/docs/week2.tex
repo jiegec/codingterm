@@ -1,0 +1,98 @@
+% Created 2018-09-05 Wed 16:27
+% Intended LaTeX compiler: pdflatex
+\documentclass[11pt]{article}
+\usepackage[utf8]{inputenc}
+\usepackage[T1]{fontenc}
+\usepackage{graphicx}
+\usepackage{grffile}
+\usepackage{longtable}
+\usepackage{wrapfig}
+\usepackage{rotating}
+\usepackage[normalem]{ulem}
+\usepackage{amsmath}
+\usepackage{textcomp}
+\usepackage{amssymb}
+\usepackage{capt-of}
+\usepackage{hyperref}
+\usepackage[newfloat]{minted}
+\usepackage{xeCJK}
+\setCJKmainfont{Songti SC}
+\usepackage{latexsym}
+\usepackage[mathscr]{eucal}
+\usepackage[section]{placeins}
+\usepackage{float}
+\usepackage{svg}
+\author{计72 陈嘉杰}
+\date{\today}
+\title{Qt 大作业 中国象棋在线对战}
+\hypersetup{
+ pdfauthor={计72 陈嘉杰},
+ pdftitle={Qt 大作业 中国象棋在线对战},
+ pdfkeywords={},
+ pdfsubject={},
+ pdfcreator={Emacs 26.1 (Org mode 9.1.14)}, 
+ pdflang={English}}
+\begin{document}
+
+\maketitle
+\tableofcontents
+
+\section{题目说明}
+\label{sec:orgf1f5ca6}
+通过 Qt 实现一个中国象棋在线对战功能。在双方轮流下子并保证规则之上，支持超时判负、主动投降和残局保存加载功能。
+
+\section{实现思路}
+\label{sec:org0e90c63}
+网络方面，通过 \texttt{NewGameDialog} 让用户选择是作为主机监听哪个地址的哪个端口还是作为客户端连接到哪个地址的哪个端口，在建立连接成功后，把 \texttt{QTcpSocket} 转交给主窗口。主窗口中，采用 \texttt{Board} 类进行棋盘的渲染和操作，该类中利用 \texttt{paintEvent} 进行棋盘的绘制，并通过监听鼠标事件实现了用户拖拽棋子以下棋的功能。主窗口右侧则是一些状态信息、倒计时和主动投降按钮，同时在菜单栏中提供了新建游戏、加载游戏和保存游戏三个功能。
+
+\section{程序编译环境}
+\label{sec:org178035b}
+\begin{enumerate}
+\item 操作系统： macOS
+\item 编译器： LLVM/Clang 6.0.1
+\item 依赖：Qt 5.11.1
+\end{enumerate}
+
+\section{实现细节}
+\label{sec:orgae13955}
+\subsection{MainWindow 类}
+\label{sec:org3df3931}
+这个类为主界面，控件通过 UIC 生成，主要功能是响应用户棋盘之外的操作，如菜单栏的新建游戏、加载游戏和保存游戏，和主动认输，此外还有网络传输部分 \texttt{QTcpSocket} 的监听和发送。这个类只负责网络通信和打开对话框选择文件等功能，不涉及棋盘逻辑和建立网络连接。同时接受棋盘的将军和将死事件，相应地显示信息和播放声音。
+\subsection{Board 类}
+\label{sec:orga8dc13f}
+主要分为以下几个部分：
+\subsubsection{绘图部分}
+\label{sec:org893c2b5}
+通过覆盖 \texttt{paintEvent()} 方法，使用 \texttt{QPainter} 进行绘制。根据当前棋盘，获取到每一个棋盘上的点有无棋子的信息，然后从资源文件中获取到相关的 SVG 文件，绘制到指定位置上。同时，如果获取到当前棋子可以走的位置的信息，则会在这些位置上画一个小红点，表示这个点可以走。同时，支持棋盘的翻转功能，即如果是黑方执手，则把黑方显示在下方。
+\subsubsection{鼠标跟踪部分}
+\label{sec:org4e0589d}
+对鼠标事件进行判断，同时维护当前的鼠标状态，并且根据鼠标下边的棋子类型不同提供不同的行为。当移动到本方棋子并且轮到本方移动时，将光标显示为可拖拽，然后当用户开始拖拽时，判断可以行走的格子，并在鼠标释放时更新棋盘。
+\subsubsection{超时判负部分}
+\label{sec:orgacf5e44}
+在游戏开局后走第一步后，开启一个倒计时，每秒更新一次，通过信号同步到主界面上的倒计时显示，并在倒计时结束时通过信号通知主界面，主界面选择主动投降。投降后，进入单人游戏模式，双方可以操控红黑两方的棋子自己继续下子。
+\subsubsection{规则实施部分}
+\label{sec:orgfac8fc5}
+主要编写了两个方法：判断某个棋盘某方是否被将军，即判断将帅是否被敌方的棋子的攻击；判断某个棋盘某方是否可以走某一步，根据这个棋子的类型，判断是否可以走到目的地，并且走过去之后本方将帅不会处于被攻击的状态。并且，在每次下棋时，检查是否有一方出现被将死的情况。一旦有将军或者将死的情况，则通过信号通知主界面。
+
+为了节省空间，代码中采用了这种方式表示一个棋子：
+
+\begin{verbatim}
+
+0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1 2
++-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+|                       Reserved                      |  Type |S|
++-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+
+\end{verbatim}
+
+其中 \texttt{Type} 从 \texttt{1-7} 表示七种棋子， \texttt{S} 表示为红方的棋子还是黑方的棋子。代码中通过位运算进行判断和操作。
+
+\subsection{NewGameDialog 类}
+\label{sec:org24286fd}
+通过 \texttt{QTabWidget} ，提示用户可以作为主机/客户端或者加载棋盘自己和自己打。在主机页面，通过 \texttt{inputMask} 和正则表达式验证输入的合法性，然后在下面列出当前机器的各个 \texttt{Interface Address} 并通过访问 \texttt{ipecho.net} 获取本机的公网地址以供参考。下面有开始监听和取消按钮，开始监听后，一旦有对手进入，则把 \texttt{QTcpSocket} 交给主界面，然后退出。在客户端页面，类似于主机界面，输入地址和端口，然后连接，连接超时则弹出窗口，连接成功则同样地把 \texttt{QTcpSocket} 交给主界面，然后退出。在加载棋盘单人打页面，则获取到文件路径后传给主界面，主界面读取文件内容并加载到棋盘中，并设置为单人游戏模式。
+
+\section{特别鸣谢}
+\label{sec:org8432c25}
+感谢维基百科提供的中国象棋棋子的矢量图素材。
+感谢 macOS 自带的文字转语音服务和 FFmpeg 音频格式转换软件提供的音频素材。
+\end{document}
