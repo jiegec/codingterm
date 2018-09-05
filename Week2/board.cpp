@@ -730,36 +730,72 @@ void Board::checkStatus() {
   }
 }
 
+int types[] = {TYPE_GENERAL, TYPE_ADVISOR, TYPE_ELEPHANT, TYPE_HORSE,
+               TYPE_CHARIOT, TYPE_CANNON,  TYPE_SOLDIER};
+
 QByteArray Board::dumpBoard() {
-  QJsonObject json;
-  json["renderSide"] = renderSide;
-  json["currentTurn"] = currentTurn;
+  QString result[2] = {"red", "black"};
 
-  QJsonArray boardArray;
-  for (int i = 0; i < 9; i++) {
-    QJsonArray array;
-    for (int j = 0; j < 10; j++) {
-      array.append(board[i][j]);
+  for (int side = 0; side < 2; side++) {
+    for (int type = 0; type < 7; type++) {
+      int count = 0;
+      QString position;
+      for (int i = 0; i < 9; i++) {
+        for (int j = 0; j < 10; j++) {
+          if (board[i][j] == (types[type] | side)) {
+            position += QString(" <%1,%2>").arg(i).arg(j);
+            count++;
+          }
+        }
+      }
+      result[side] += QString("\n%1%2").arg(count).arg(position);
     }
-    boardArray.append(array);
   }
-  json["board"] = boardArray;
 
-  QJsonDocument doc(json);
-
-  return doc.toJson();
+  if (currentTurn == SIDE_RED) {
+    return (result[0] + "\n" + result[1]).toUtf8();
+  } else {
+    return (result[1] + "\n" + result[0]).toUtf8();
+  }
 }
 
 void Board::loadBoard(QByteArray data) {
   singlePlayer = true;
-  QJsonDocument json = QJsonDocument::fromJson(data);
-  renderSide = json["renderSide"].toInt();
-  setCurrentTurn(json["currentTurn"].toInt());
+  QTextStream stream(data);
+  QString side;
+  stream >> side;
 
-  for (int i = 0; i < 9; i++) {
-    QJsonArray array = json["board"].toArray()[i].toArray();
-    for (int j = 0; j < 10; j++) {
-      board[i][j] = array[j].toInt();
+  memset(board, 0, sizeof(board));
+
+  if (side == "red") {
+    currentTurn = SIDE_RED;
+  } else {
+    currentTurn = SIDE_BLACK;
+  }
+
+  for (int type = 0;type < 7;type++) {
+    int count;
+    stream >> count;
+    for (int i = 0;i < count;i++) {
+      int x, y;
+      char temp;
+      stream.skipWhiteSpace();
+      stream >> temp >> x >> temp >> y >> temp;
+      board[x][y] = types[type] | currentTurn;
+    }
+  }
+
+  stream >> side;
+
+  for (int type = 0;type < 7;type++) {
+    int count;
+    stream >> count;
+    for (int i = 0;i < count;i++) {
+      int x, y;
+      char temp;
+      stream.skipWhiteSpace();
+      stream >> temp >> x >> temp >> y >> temp;
+      board[x][y] = types[type] | !currentTurn;
     }
   }
 
