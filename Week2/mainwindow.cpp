@@ -98,7 +98,9 @@ void MainWindow::onSaveGame() {
     QJsonDocument doc(json);
 
     qWarning() << "Sent json" << doc;
-    socket->write(doc.toJson());
+    QByteArray data = doc.toJson();
+    QDataStream stream(socket);
+    stream.writeBytes(data, data.size());
   }
 
   QString fileName = QFileDialog::getSaveFileName(this, tr("Save File"));
@@ -126,12 +128,19 @@ void MainWindow::onUserMove(int fromX, int fromY, int toX, int toY) {
     QJsonDocument doc(json);
 
     qWarning() << "Sent json" << doc;
-    socket->write(doc.toJson());
+    QByteArray data = doc.toJson();
+    QDataStream stream(socket);
+    stream.writeBytes(data, data.size());
   }
 }
 
 void MainWindow::onSocketAvailable() {
-  auto data = socket->readAll();
+  QDataStream stream(socket);
+  char *temp;
+  uint len;
+  stream.readBytes(temp, len);
+  QByteArray data(temp, len);
+  delete[] temp;
   QJsonDocument json = QJsonDocument::fromJson(data);
   qWarning() << "Got json" << json;
   if (json["surrender"].toBool()) {
@@ -213,7 +222,9 @@ void MainWindow::onSurrender() {
     QJsonDocument doc(json);
 
     qWarning() << "Sent json" << doc;
-    socket->write(doc.toJson());
+    QByteArray data = doc.toJson();
+    QDataStream stream(socket);
+    stream.writeBytes(data, data.size());
   }
 
   messageLabel->setText(messageLabel->text() + tr("\nYou have surrendered."));

@@ -563,6 +563,10 @@ bool Board::isMoveValid(int board[9][10], int fromX, int fromY, int toX,
     if (abs(fromX - toX) + abs(fromY - toY) != 1) {
       return false;
     }
+
+    if (toX < 3 || toX > 5 || (toY > 2 && toY < 7)) {
+      return false;
+    }
     break;
   case TYPE_HORSE:
     for (dir = 0; dir < 8; dir++) {
