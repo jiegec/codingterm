@@ -7,7 +7,6 @@
 #include <QMessageBox>
 #include <QMouseEvent>
 #include <QPainter>
-#include <QSvgRenderer>
 #include <cmath>
 
 const int horseStep[8][2] = {{-2, 1}, {-1, 2}, {1, 2},   {2, 1},
@@ -27,6 +26,8 @@ bool inline HAS_CHESS(int value) { return (value & TYPE_MASK) != 0; }
 
 Board::Board(QWidget *parent) : QWidget(parent) {
   setMouseTracking(true);
+
+  memset(renderers, 0, sizeof(renderers));
 
   setRenderSide(SIDE_RED);
   setPlayerSide(SIDE_RED);
@@ -92,7 +93,10 @@ void Board::setInitialBoard() {
   board[8][6] = TYPE_SOLDIER | SIDE_BLACK;
 }
 
-QString Board::getImageFileName(int value) {
+QSvgRenderer *Board::getImageRenderer(int value) {
+  if (renderers[value & TYPE_MASK]) {
+    return renderers[value & TYPE_MASK];
+  }
   QString result = ":/images/Xiangqi_%1_(Trad).svg";
   switch (value & TYPE_MASK) {
   case TYPE_ADVISOR:
@@ -117,11 +121,14 @@ QString Board::getImageFileName(int value) {
     result = result.arg("Soldier");
     break;
   default:
-    result = "";
+    return nullptr;
     break;
   }
 
-  return result;
+  renderers[value & TYPE_MASK] = new QSvgRenderer(this);
+  renderers[value & TYPE_MASK]->load(result);
+
+  return renderers[value & TYPE_MASK];
 }
 
 void Board::paintEvent(QPaintEvent *event) {
@@ -188,10 +195,9 @@ void Board::paintEvent(QPaintEvent *event) {
         element = "black";
       }
 
-      QString fileName = getImageFileName(board[renderI][renderJ]);
-      if (fileName != "") {
-        QSvgRenderer renderer(fileName);
-        renderer.render(&painter, element);
+      QSvgRenderer *renderer = getImageRenderer(board[renderI][renderJ]);
+      if (renderer != nullptr) {
+        renderer->render(&painter, element);
       }
       painter.restore();
 

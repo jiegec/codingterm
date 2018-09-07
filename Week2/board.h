@@ -1,8 +1,9 @@
 #ifndef BOARD_H
 #define BOARD_H
 
-#include <QWidget>
+#include <QSvgRenderer>
 #include <QTimer>
+#include <QWidget>
 
 #define SIDE_RED 0b0
 #define SIDE_BLACK 0b1
@@ -16,7 +17,6 @@
 #define TYPE_HORSE 0b1100
 #define TYPE_SOLDIER 0b1110
 #define TYPE_MASK 0b1110
-
 
 class Board : public QWidget {
   Q_OBJECT
@@ -52,10 +52,11 @@ protected:
   void mouseReleaseEvent(QMouseEvent *event) override;
 
 private:
-  QString getImageFileName(int);
+  QSvgRenderer *getImageRenderer(int);
   bool isDangerForSide(int board[9][10], int side);
   bool isCheckmateForSide(int board[9][10], int side);
-  bool isMoveValid(int board[9][10], int fromX, int fromY, int toX, int toY, int side);
+  bool isMoveValid(int board[9][10], int fromX, int fromY, int toX, int toY,
+                   int side);
   bool getIndexByPos(QPointF position, int &x, int &y);
   void checkStatus();
   void playSound(QString name);
@@ -75,6 +76,8 @@ private:
   int secondsLeft;
 
   bool validPlace[9][10];
+
+  QSvgRenderer *renderers[TYPE_MASK + 1];
 };
 
 #endif
