@@ -844,7 +844,7 @@ void Board::setSinglePlayer(bool value) {
 
 void Board::startTimer() {
   timer.start(1000);
-  secondsLeft = 60;
+  secondsLeft = 20;
   emit timerChanged(secondsLeft);
 }
 
