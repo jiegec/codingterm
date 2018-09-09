@@ -760,6 +760,7 @@ void Board::checkStatus() {
     playSound("check");
   }
   if (isCheckmateForSide(board, currentTurn)) {
+    timer.stop();
     emit onCheckmate(currentTurn);
     playSound("checkmate");
   }

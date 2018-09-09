@@ -27,7 +27,7 @@ NewGameDialog::NewGameDialog(QWidget *parent) : QDialog(parent) {
             }
           });
 
-  network.get(QNetworkRequest(QUrl("http://ipecho.net/plain")));
+  network.get(QNetworkRequest(QUrl("https://ipecho.net/plain")));
 
   cancelButton->setEnabled(false);
   server = nullptr;
