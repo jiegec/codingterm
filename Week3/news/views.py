@@ -9,9 +9,6 @@ from .models import News, Word
 
 # Create your views here.
 
-jieba.initialize()
-
-
 def view_news(request, id):
     context = {
         'news': get_object_or_404(News, id=id)
@@ -25,17 +22,22 @@ headers = {
 
 def scrape_url(url):
     start_time = time.time()
+    print('start to scrape')
     r = requests.get(url, headers=headers)
     print('request', time.time() - start_time)
 
     soup = BeautifulSoup(r.text, 'html.parser')
     print('parse', time.time() - start_time)
 
-    if not soup.find('div', class_='LEFT'):
-        return None 
+    if soup.find('div', class_='LEFT'):
+        title = soup.find('div', class_='LEFT').h1.get_text()
+        content_article = soup.find('div', class_='content-article')
 
-    title = soup.find('div', class_='LEFT').h1.get_text()
-    content_article = soup.find('div', class_='content-article')
+    elif soup.find('div', class_='qq_article'):
+        title = soup.find('div', class_='hd').h1.get_text()
+        content_article = soup.find('div', class_='Cnt-Main-Article-QQ')
+    else:
+        return None
 
     full_body = str(content_article)
 

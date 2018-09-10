@@ -1,17 +1,77 @@
-<form action="{% url 'search' %}" method="GET">
-    <input type="text" name="keyword" id="keyword" value="{{ keyword }}">
-    <label for="keyword">Keyword: </label>
-    <input type="submit" value="Search">
-</form>
-
 {% if news %}
-<div>
-    Search result of {{ keyword }}. Found using {{ time }} secs.
-</div>
-{% for article in news %}
-<div>
-    <a href="{% url 'view_news' article.id %}">{{ article.title }}</a>
-    {{ article.abstract }}
+<form action="{% url 'search' %}" method="GET" class="search-container-result">
+    <input type="text" name="keyword" id="keyword" value="{{ keyword }}" class="search-input-result">
+    <input type="submit" value="Search" class="search-button-result">
+</form>
+<div class="container">
+    <div class="result-info">
+        Search result of {{ keyword }}. Found using {{ time }} secs.
+    </div>
+    {% for article in news %}
+    <div>
+        <a href="{% url 'view_news' article.id %}" class="news-title">{{ article.title }}</a>
+        <a href="{{ article.url }}" class="news-url">{{ article.url }}</a>
+        <div class="news-abstract">
+            {{ article.abstract }}
+        </div>
+    </div>
 </div>
 {% endfor %}
+{% else %}
+<form action="{% url 'search' %}" method="GET" class="search-container-initial">
+    <input type="text" name="keyword" id="keyword" value="{{ keyword }}" class="search-input-initial">
+    <input type="submit" value="Search" class="search-button-initial">
+</form>
 {% endif %}
+
+<style>
+    .search-container-initial {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        align-content: center;
+        justify-content: center;
+        height: 100%;
+    }
+
+    .search-input-initial {
+        width: 40%;
+        margin-bottom: 30px;
+        height: 30px;
+    }
+
+    .search-button-initial {}
+
+    .search-input-result {
+        margin-left: 15%;
+        width: 60%;
+    }
+
+    .search-button-result {
+        display: none;
+    }
+
+    .container {
+        margin-left: 15%;
+        margin-right: 15%;
+    }
+
+    .result-info {
+        color: #808080;
+        font-size: small;
+    }
+
+    .news-title {
+        font-size: 18px;
+    }
+
+    .news-url {
+        font-size: 14px;
+        color: #006621;
+    }
+
+    .news-abstract {
+        line-height: 1.4;
+        word-wrap: break-word;
+    }
+</style>

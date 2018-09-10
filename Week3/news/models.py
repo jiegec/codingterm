@@ -4,7 +4,7 @@ from django.db import models
 
 
 class News(models.Model):
-    url = models.CharField(max_length=100)
+    url = models.CharField(max_length=100, unique=True)
     title = models.CharField(max_length=100)
     abstract = models.CharField(max_length=500)
     full_body = models.TextField()
@@ -14,7 +14,7 @@ class News(models.Model):
 
 
 class Word(models.Model):
-    word = models.CharField(max_length=40)
+    word = models.CharField(max_length=40, unique=True)
     appearance = models.ManyToManyField(News)
 
     def __str__(self):
