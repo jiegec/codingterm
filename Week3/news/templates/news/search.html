@@ -5,6 +5,9 @@
 </form>
 
 {% if news %}
+<div>
+    Search result of {{ keyword }}. Found using {{ time }} secs.
+</div>
 {% for article in news %}
 <div>
     <a href="{% url 'view_news' article.id %}">{{ article.title }}</a>

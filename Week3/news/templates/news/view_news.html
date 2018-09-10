@@ -11,14 +11,14 @@
 <div>
     Words:
     {% for word in news.word_set.all %}
-    {{ word.word }}
+        {{ word.word }}, 
     {% endfor %}
 </div>
 <div>
-    Full body: {{ news.full_body }}
+    Body:
 </div>
 <div>
-    Raw body: {{ news.full_body | safe }}
+    {{ news.full_body | safe }}
 </div>
 {% endif %}
 
