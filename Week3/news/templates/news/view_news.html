@@ -1,0 +1,45 @@
+{% if news %}
+<div>
+    ID: {{ news.id }}
+</div>
+<div>
+    <a href="{{ news.title }}">{{ news.title }}</a>
+</div>
+<div>
+    Abstract: {{ news.abstract }}
+</div>
+<div>
+    Words:
+    {% for word in news.word_set.all %}
+    {{ word.word }}
+    {% endfor %}
+</div>
+<div>
+    Full body: {{ news.full_body }}
+</div>
+<div>
+    Raw body: {{ news.full_body | safe }}
+</div>
+{% endif %}
+
+<style>
+    .content-article .one-p {
+        line-height: 2.2;
+        margin-bottom: 2em;
+        word-break: break-all;
+    }
+
+    .content-article .one-p .desc {
+        color: #9b9ea3;
+        line-height: 20px;
+        text-align: center;
+        display: block;
+        font-size: 14px;
+    }
+
+    .content-article .one-p img.content-picture {
+        max-width: 100%;
+        margin: .6em auto;
+        display: block;
+    }
+</style>

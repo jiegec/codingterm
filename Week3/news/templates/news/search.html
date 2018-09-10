@@ -1,0 +1,14 @@
+<form action="{% url 'search' %}" method="GET">
+    <input type="text" name="keyword" id="keyword" value="{{ keyword }}">
+    <label for="keyword">Keyword: </label>
+    <input type="submit" value="Search">
+</form>
+
+{% if news %}
+{% for article in news %}
+<div>
+    <a href="{% url 'view_news' article.id %}">{{ article.title }}</a>
+    {{ article.abstract }}
+</div>
+{% endfor %}
+{% endif %}

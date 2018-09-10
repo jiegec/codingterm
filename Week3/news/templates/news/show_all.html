@@ -1,0 +1,19 @@
+<div>
+    Showing news from {{ from_index }} to {{ to_index }}
+</div>
+{% if news %}
+{% for article in news %}
+<div>
+    <a href="{% url 'view_news' article.id %}">{{ article.title }}</a>
+    {{ article.abstract }}
+</div>
+{% endfor %}
+{% endif %}
+
+{% if from_index > 0 %}
+<a href="{% url 'show_all' %}?from={{ prev_from_index }}&page={{ page }}">Prev Page</a>
+{% endif %}
+
+{% if next_from_index > from_index %}
+<a href="{% url 'show_all' %}?from={{ next_from_index }}&page={{ page }}">Next Page</a>
+{% endif %}
