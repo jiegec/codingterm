@@ -59,6 +59,7 @@ int main(int argc, char *argv[]) {
   double average = 0;
   for (int i = 0; i < k; i++) {
     average += sum[i];
+    qWarning() << "bucket " << sum[i];
   }
   average /= k;
   double square = 0;
