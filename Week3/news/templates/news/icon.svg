@@ -1,0 +1,9 @@
+<svg viewBox="0 0 40 15" xmlns="http://www.w3.org/2000/svg">
+    <style>
+        .small {
+            font: italic 13px Inconsolata;
+        }
+    </style>
+
+    <text x="5" y="10" class="small">News</text>
+</svg>

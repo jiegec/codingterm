@@ -4,6 +4,7 @@ import requests
 from bs4 import BeautifulSoup
 import jieba
 import time
+import random
 
 from .models import News, Word
 
@@ -12,6 +13,14 @@ from .models import News, Word
 def view_news(request, id):
     context = {
         'news': get_object_or_404(News, id=id)
+    }
+    return render(request, 'news/view_news.html', context)
+
+def feeling_lucky(request):
+    if News.objects.count() == 0:
+        return Http404("No news available")
+    context = {
+        'news' : News.objects.all()[random.randint(0, News.objects.count()-1)]
     }
     return render(request, 'news/view_news.html', context)
 

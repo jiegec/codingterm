@@ -1,26 +1,38 @@
 {% if news %}
+{% include 'news/icon.html' %}
 <form action="{% url 'search' %}" method="GET" class="search-container-result">
     <input type="text" name="keyword" id="keyword" value="{{ keyword }}" class="search-input-result">
-    <input type="submit" value="Search" class="search-button-result">
 </form>
 <div class="container">
     <div class="result-info">
         Search result of {{ keyword }}. Found using {{ time }} secs.
     </div>
-    {% for article in news %}
     <div>
-        <a href="{% url 'view_news' article.id %}" class="news-title">{{ article.title }}</a>
-        <a href="{{ article.url }}" class="news-url">{{ article.url }}</a>
+        {% for article in news %}
+        <div>
+            <a href="{% url 'view_news' article.id %}" class="news-title">{{ article.title }}</a>
+        </div>
+        <div>
+            <a href="{{ article.url }}" class="news-url">{{ article.url }}</a>
+        </div>
         <div class="news-abstract">
             {{ article.abstract }}
         </div>
+        {% endfor %}
     </div>
 </div>
-{% endfor %}
 {% else %}
 <form action="{% url 'search' %}" method="GET" class="search-container-initial">
+    <div class="big-icon">
+        {% include 'news/icon.svg' %}
+    </div>
     <input type="text" name="keyword" id="keyword" value="{{ keyword }}" class="search-input-initial">
-    <input type="submit" value="Search" class="search-button-initial">
+    <div class="button-container">
+        <input type="submit" value="Search" class="search-button-initial">
+        <button class="search-button-initial" type="button" onclick="window.location.href='/news/feeling_lucky'">
+            Feeling Lucky
+        </button>
+    </div>
 </form>
 {% endif %}
 
@@ -40,15 +52,23 @@
         height: 30px;
     }
 
-    .search-button-initial {}
+    .search-button-initial {
+        height: 36px;
+        line-height: 27px;
+        background-color: #f2f2f2;
+        border: 1px solid #f2f2f2;
+        border-radius: 2px;
+        color: #757575;
+        font-weight: bold;
+        text-align: center;
+        margin: 11px 4px;
+        min-width: 100px;
+    }
 
     .search-input-result {
         margin-left: 15%;
         width: 60%;
-    }
-
-    .search-button-result {
-        display: none;
+        height: 30px;
     }
 
     .container {
@@ -73,5 +93,15 @@
     .news-abstract {
         line-height: 1.4;
         word-wrap: break-word;
+    }
+
+    .big-icon {
+        width: 40%;
+    }
+
+    .button-container {
+        display: flex;
+        justify-content: space-between;
+        width: 20%;
     }
 </style>

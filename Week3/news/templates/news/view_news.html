@@ -1,26 +1,12 @@
-{% if news %}
-<div>
-    ID: {{ news.id }}
+{% include 'news/icon.html' %}
+<div class="news-container">
+    <div>
+        <a href="{{ news.url }}" class="news-title">{{ news.title }}</a>
+    </div>
+    <div class="news-body">
+        {{ news.full_body | safe }}
+    </div>
 </div>
-<div>
-    <a href="{{ news.title }}">{{ news.title }}</a>
-</div>
-<div>
-    Abstract: {{ news.abstract }}
-</div>
-<div>
-    Words:
-    {% for word in news.word_set.all %}
-        {{ word.word }}, 
-    {% endfor %}
-</div>
-<div>
-    Body:
-</div>
-<div>
-    {{ news.full_body | safe }}
-</div>
-{% endif %}
 
 <style>
     .content-article .one-p {
@@ -41,5 +27,20 @@
         max-width: 100%;
         margin: .6em auto;
         display: block;
+    }
+
+    .news-title {
+        color: #333;
+        font-size: 26px;
+        margin-top: 20px;
+        margin-bottom: 10px;
+    }
+    
+    .news-container {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        margin-left: 20%;
+        margin-right: 20%;
     }
 </style>
