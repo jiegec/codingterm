@@ -6,6 +6,8 @@ from bs4 import BeautifulSoup
 import jieba
 import time
 import random
+import json
+import re
 
 from .models import News, Word
 
@@ -38,7 +40,7 @@ def scrape_url(url):
     headers = {
         'User-Agent': common_ua[random.randint(0, len(common_ua)-1)],
         'DNT': '1',
-        'Referer': 'https://news.qq.com',
+        'Referer': 'http://news.qq.com',
         'Accept': '*/*',
         'Accept-Encoding': 'gzip, deflate',
     }
@@ -54,6 +56,23 @@ def scrape_url(url):
     if soup.find('div', class_='LEFT'):
         title = soup.find('div', class_='LEFT').h1.get_text()
         content_article = soup.find('div', class_='content-article')
+        if content_article.find('div', class_='PictureWrap'):
+            script_content = content_article.find('script').text
+            json_content = script_content[len('IMGDATA = '):]
+            data = json.loads(json_content)
+            for row in data:
+                if row['type'] == 2:
+                    # image
+                    img = soup.new_tag('img', src=row['value'])
+                    img['class'] = 'content-picture'
+                    content_article.append(img)
+                elif row['type'] == 1:
+                    # text
+                    txt = soup.new_tag('p')
+                    txt['class'] = 'one-p'
+                    txt.string = row['value']
+                    content_article.append(txt)
+
     elif soup.find('div', class_='qq_article'):
         title = soup.find('div', class_='hd').h1.get_text()
         content_article = soup.find('div', class_='Cnt-Main-Article-QQ')
@@ -88,21 +107,21 @@ def scrape_url(url):
     words = list(jieba.cut_for_search(orig_content_text))
     words.extend(jieba.cut_for_search(title))
     print('jieba', time.time() - start_time)
+
     word_objs = []
     not_exists = []
     for word in set(words):
-        try:
-            word_obj = Word.objects.get(word=word)
-            word_objs.append(word_obj)
-        except Word.DoesNotExist:
-            not_exists.append(word)
-
-    with transaction.atomic():
-        for word in not_exists:
-            word_obj = Word(word=word)
-            word_obj.save()
-            word_objs.append(word_obj)
-        news.word_set.add(*word_objs)
+        if word.strip() != '':
+            try:
+                word_obj = Word.objects.get(word=word)
+                word_objs.append(word_obj)
+            except Word.DoesNotExist:
+                not_exists.append(word)
+    for word in not_exists:
+        word_obj = Word(word=word)
+        word_obj.save()
+        word_objs.append(word_obj)
+    news.word_set.add(*word_objs)
     print('db', time.time() - start_time)
 
     return news.id
@@ -160,17 +179,20 @@ def search(request):
                 if word.strip() != '':
                     word_obj = Word.objects.get(word=word)
                     for news in word_obj.appearance.all():
+                        number = sum(1 for _ in re.finditer(re.escape(word), news.full_body))
+                        number = number + sum(1 for _ in re.finditer(re.escape(word), news.title)) * 10
                         if news.id in count:
-                            count[news.id] = count[news.id] + 1
+                            count[news.id] = count[news.id] + number
                         else:
-                            count[news.id] = 1
+                            count[news.id] = number
             except Word.DoesNotExist:
                 pass
         sorted_count = sorted(count.items(), key=lambda kv: -kv[1])
         news = []
-        for (id, _) in sorted_count:
+        for (id, count) in sorted_count:
             news_obj = News.objects.get(id=id)
             news.append(news_obj)
+            # print(f'{id}: {count}')
 
         paging(request.GET, context, len(news))
         context['news'] = news[context['from_index']:context['to_index']]
