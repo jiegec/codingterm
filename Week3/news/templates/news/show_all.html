@@ -1,19 +1,28 @@
-<div>
-    Showing news from {{ from_index }} to {{ to_index }}. Found using {{ time }} secs.
-</div>
-{% if news %}
-{% for article in news %}
-<div>
-    <a href="{% url 'view_news' article.id %}">{{ article.title }}</a>
-    {{ article.abstract }}
-</div>
-{% endfor %}
-{% endif %}
+{% include 'news/common.html' %}
+{% include 'news/icon.html' %}
+<div class="container">
+    <div class="result-info">
+        Showing news from {{ from_index }} to {{ to_index }}. Found using {{ time }} secs.
+    </div>
+    {% for article in news %}
+    <div class="article-container">
+        <div>
+            <a href="{% url 'view_news' article.id %}" class="news-title">{{ article.title }}</a>
+        </div>
+        <div>
+            <a href="{{ article.url }}" class="news-url">{{ article.url }}</a>
+        </div>
+        <div class="news-abstract">
+            {{ article.abstract }}
+        </div>
+    </div>
+    {% endfor %}
 
-{% if from_index > 0 %}
-<a href="{% url 'show_all' %}?from={{ prev_from_index }}&page={{ page }}">Prev Page</a>
-{% endif %}
+    {% if from_index > 0 %}
+    <a href="{% url 'show_all' %}?from={{ prev_from_index }}&page={{ page }}">Prev Page</a>
+    {% endif %}
 
-{% if next_from_index > from_index %}
-<a href="{% url 'show_all' %}?from={{ next_from_index }}&page={{ page }}">Next Page</a>
-{% endif %}
+    {% if next_from_index > from_index %}
+    <a href="{% url 'show_all' %}?from={{ next_from_index }}&page={{ page }}">Next Page</a>
+    {% endif %}
+</div>

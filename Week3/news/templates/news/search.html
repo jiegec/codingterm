@@ -1,4 +1,5 @@
-{% if news %}
+{% include 'news/common.html' %}
+{% if keyword %}
 {% include 'news/icon.html' %}
 <form action="{% url 'search' %}" method="GET" class="search-container-result">
     <input type="text" name="keyword" id="keyword" value="{{ keyword }}" class="search-input-result">
@@ -7,8 +8,8 @@
     <div class="result-info">
         Search result of {{ keyword }}. Found using {{ time }} secs.
     </div>
-    <div>
-        {% for article in news %}
+    {% for article in news %}
+    <div class="article-container">
         <div>
             <a href="{% url 'view_news' article.id %}" class="news-title">{{ article.title }}</a>
         </div>
@@ -18,8 +19,16 @@
         <div class="news-abstract">
             {{ article.abstract }}
         </div>
-        {% endfor %}
     </div>
+    {% endfor %}
+
+    {% if from_index > 0 %}
+    <a href="{% url 'show_all' %}?from={{ prev_from_index }}&page={{ page }}">Prev Page</a>
+    {% endif %}
+
+    {% if next_from_index > from_index %}
+    <a href="{% url 'show_all' %}?from={{ next_from_index }}&page={{ page }}">Next Page</a>
+    {% endif %}
 </div>
 {% else %}
 <form action="{% url 'search' %}" method="GET" class="search-container-initial">
@@ -35,73 +44,3 @@
     </div>
 </form>
 {% endif %}
-
-<style>
-    .search-container-initial {
-        display: flex;
-        flex-direction: column;
-        align-items: center;
-        align-content: center;
-        justify-content: center;
-        height: 100%;
-    }
-
-    .search-input-initial {
-        width: 40%;
-        margin-bottom: 30px;
-        height: 30px;
-    }
-
-    .search-button-initial {
-        height: 36px;
-        line-height: 27px;
-        background-color: #f2f2f2;
-        border: 1px solid #f2f2f2;
-        border-radius: 2px;
-        color: #757575;
-        font-weight: bold;
-        text-align: center;
-        margin: 11px 4px;
-        min-width: 100px;
-    }
-
-    .search-input-result {
-        margin-left: 15%;
-        width: 60%;
-        height: 30px;
-    }
-
-    .container {
-        margin-left: 15%;
-        margin-right: 15%;
-    }
-
-    .result-info {
-        color: #808080;
-        font-size: small;
-    }
-
-    .news-title {
-        font-size: 18px;
-    }
-
-    .news-url {
-        font-size: 14px;
-        color: #006621;
-    }
-
-    .news-abstract {
-        line-height: 1.4;
-        word-wrap: break-word;
-    }
-
-    .big-icon {
-        width: 40%;
-    }
-
-    .button-container {
-        display: flex;
-        justify-content: space-between;
-        width: 20%;
-    }
-</style>

@@ -1,46 +1,15 @@
+{% include 'news/common.html' %}
 {% include 'news/icon.html' %}
 <div class="news-container">
     <div>
-        <a href="{{ news.url }}" class="news-title">{{ news.title }}</a>
+        <a href="{{ news.url }}" class="news-title-big">{{ news.title }}</a>
     </div>
     <div class="news-body">
         {{ news.full_body | safe }}
     </div>
+    <form action="{% url 'scrape' %}" method="POST">
+        {% csrf_token %}
+        <input type="text" name="url" id="url" value="{{ news.url }}" hidden>
+        <input type="submit" value="Re-scrape">
+    </form>
 </div>
-
-<style>
-    .content-article .one-p {
-        line-height: 2.2;
-        margin-bottom: 2em;
-        word-break: break-all;
-    }
-
-    .content-article .one-p .desc {
-        color: #9b9ea3;
-        line-height: 20px;
-        text-align: center;
-        display: block;
-        font-size: 14px;
-    }
-
-    .content-article .one-p img.content-picture {
-        max-width: 100%;
-        margin: .6em auto;
-        display: block;
-    }
-
-    .news-title {
-        color: #333;
-        font-size: 26px;
-        margin-top: 20px;
-        margin-bottom: 10px;
-    }
-    
-    .news-container {
-        display: flex;
-        flex-direction: column;
-        align-items: center;
-        margin-left: 20%;
-        margin-right: 20%;
-    }
-</style>

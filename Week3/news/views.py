@@ -1,5 +1,6 @@
 from django.shortcuts import render, get_object_or_404, redirect
 from django.http import HttpResponse
+from django.db import transaction
 import requests
 from bs4 import BeautifulSoup
 import jieba
@@ -10,26 +11,32 @@ from .models import News, Word
 
 # Create your views here.
 
+
 def view_news(request, id):
     context = {
         'news': get_object_or_404(News, id=id)
     }
     return render(request, 'news/view_news.html', context)
 
+
 def feeling_lucky(request):
     if News.objects.count() == 0:
         return Http404("No news available")
     context = {
-        'news' : News.objects.all()[random.randint(0, News.objects.count()-1)]
+        'news': News.objects.all()[random.randint(0, News.objects.count()-1)]
     }
     return render(request, 'news/view_news.html', context)
 
 
-headers = {
-    'User-Agent': 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_13_6) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/70.0.3538.9 Safari/537.36'
-}
-
 def scrape_url(url):
+    headers = {
+        'User-Agent': 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_13_6) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/70.0.3538.9 Safari/537.36',
+        'DNT': '1',
+        'Referer': 'https://news.qq.com',
+        'Accept': '*/*',
+        'Accept-Encoding': 'gzip, deflate',
+    }
+
     start_time = time.time()
     print('start to scrape')
     r = requests.get(url, headers=headers)
@@ -51,13 +58,15 @@ def scrape_url(url):
     full_body = str(content_article)
 
     # remove embedded videos
-    [x.extract() for x in content_article.findAll('script')]
+    [x.extract() for x in content_article.find_all('script')]
+    [x.extract() for x in content_article.find_all('style')]
+    [x.extract() for x in content_article.find_all('div', class_='rv-js-root')]
     orig_content_text = ''.join(content_article.strings)
     # remove image desc
-    [x.extract() for x in content_article.findAll('i', class_='desc')]
+    [x.extract() for x in content_article.find_all('i', class_='desc')]
 
     content_text = ''.join(content_article.strings)
-    abstract = content_text[:200]
+    abstract = content_text[:200].strip()
     try:
         news = News.objects.get(url=url)
         news.delete()
@@ -71,18 +80,24 @@ def scrape_url(url):
     words.extend(jieba.cut_for_search(title))
     print('jieba', time.time() - start_time)
     word_objs = []
+    not_exists = []
     for word in set(words):
         try:
             word_obj = Word.objects.get(word=word)
             word_objs.append(word_obj)
         except Word.DoesNotExist:
+            not_exists.append(word)
+
+    with transaction.atomic():
+        for word in not_exists:
             word_obj = Word(word=word)
             word_obj.save()
             word_objs.append(word_obj)
-    news.word_set.add(*word_objs)
+        news.word_set.add(*word_objs)
     print('db', time.time() - start_time)
 
     return news.id
+
 
 def scrape(request):
     if request.method == 'GET':
@@ -94,6 +109,32 @@ def scrape(request):
             return redirect('view_news', id=result)
         else:
             return redirect('scrape')
+
+def paging(params, context, count):
+    from_index = 0
+    page = 10
+
+    if 'from' in params:
+        from_index = int(params['from'])
+    if 'page' in params:
+        page = int(params['page'])
+
+    to_index = from_index + page
+    prev_from_index = 0
+    if from_index > page:
+        prev_from_index = from_index - page
+
+    next_from_index = from_index + page
+    if to_index >= count:
+        # no more entries
+        to_index = count
+        next_from_index = from_index
+
+    context['from_index'] = from_index
+    context['to_index'] = to_index
+    context['page'] = page
+    context['prev_from_index'] = prev_from_index
+    context['next_from_index'] = next_from_index
 
 
 def search(request):
@@ -121,43 +162,21 @@ def search(request):
         for (id, _) in sorted_count:
             news_obj = News.objects.get(id=id)
             news.append(news_obj)
-        context['news'] = news
+
+        paging(request.GET, context, len(news))
+        context['news'] = news[context['from_index']:context['to_index']]
+        context['time'] = time.time() - start_time
     else:
         context['keyword'] = ''
 
-    context['time'] = time.time() - start_time
     return render(request, 'news/search.html', context)
 
 
 def show_all(request):
     start_time = time.time()
 
-    from_index = 0
-    page = 10
-
-    if 'from' in request.GET:
-        from_index = int(request.GET['from'])
-    if 'page' in request.GET:
-        page = int(request.GET['page'])
-
-    to_index = from_index + page
-    prev_from_index = 0
-    if from_index > page:
-        prev_from_index = from_index - page
-
-    next_from_index = from_index + page
-    if to_index >= News.objects.all().count():
-        # no more entries
-        to_index = News.objects.all().count()
-        next_from_index = from_index
-
-    context = {
-        'from_index': from_index,
-        'to_index': to_index,
-        'page': page,
-        'prev_from_index': prev_from_index,
-        'next_from_index': next_from_index,
-        'news': News.objects.all()[from_index:to_index],
-        'time': time.time() - start_time
-    }
+    context = {}
+    paging(request.GET, context, News.objects.count())
+    context['news'] = News.objects.all()[context['from_index']:context['to_index']]
+    context['time'] = time.time() - start_time
     return render(request, 'news/show_all.html', context)

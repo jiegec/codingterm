@@ -1,6 +1,5 @@
 <form action="{% url 'scrape' %}" method="POST">
     {% csrf_token %}
     <input type="text" name="url" id="url">
-    <label for="url">Url: </label>
     <input type="submit" value="Scrape">
 </form>
