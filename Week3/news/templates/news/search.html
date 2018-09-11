@@ -1,6 +1,7 @@
 {% include 'news/common.html' %}
 {% if keyword %}
 {% include 'news/icon.html' %}
+{% load tz %}
 <form action="{% url 'search' %}" method="GET" class="search-container-result">
     <input type="text" name="keyword" id="keyword" value="{{ keyword }}" class="search-input-result">
 </form>
@@ -15,6 +16,9 @@
         </div>
         <div>
             <a href="{{ article.url }}" class="news-url">{{ article.url }}</a>
+            {% if article.pub_date %}
+            {{ article.pub_date | timezone:"Asia/Shanghai" }}
+            {% endif %}
         </div>
         <div class="news-abstract">
             {{ article.abstract }}

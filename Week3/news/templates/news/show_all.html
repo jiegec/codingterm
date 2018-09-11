@@ -1,5 +1,6 @@
 {% include 'news/common.html' %}
 {% include 'news/icon.html' %}
+{% load tz %}
 <div class="container">
     <div class="result-info">
         Showing news from {{ from_index }} to {{ to_index }}. Found using {{ time }} secs.
@@ -11,6 +12,9 @@
         </div>
         <div>
             <a href="{{ article.url }}" class="news-url">{{ article.url }}</a>
+            {% if article.pub_date %}
+            {{ article.pub_date | timezone:"Asia/Shanghai" }}
+            {% endif %}
         </div>
         <div class="news-abstract">
             {{ article.abstract }}

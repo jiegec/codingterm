@@ -49,7 +49,7 @@ def scrape_url(url):
     }
 
     start_time = time.time()
-    print('start to scrape')
+    print(f'scraping {url}')
     r = requests.get(url, headers=headers)
     print('request', time.time() - start_time)
 
@@ -85,8 +85,12 @@ def scrape_url(url):
         return None
 
     pub_date = None
+    pubtime = re.search(r'pubtime:\'([0-9]{4}-[0-9]{2}-[0-9]{2} [0-9]{2}:[0-9]{2})\'', r.text)
     if soup.find('meta', {'name': '_pubtime'}):
         date = parse_datetime(soup.find('meta', {'name': '_pubtime'})['content'])
+        pub_date = pytz.timezone('Asia/Shanghai').localize(date)
+    elif pubtime:
+        date = parse_datetime(f'{pubtime.group(1)}:00')
         pub_date = pytz.timezone('Asia/Shanghai').localize(date)
 
     full_body = str(content_article)
