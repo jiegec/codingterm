@@ -10,7 +10,7 @@ import time
 import random
 import json
 import re
-
+import math
 
 from .models import News, Word
 
@@ -71,6 +71,8 @@ def scrape_url(url):
                     img = soup.new_tag('img', src=row['value'])
                     img['class'] = 'content-picture'
                     txt.append(img)
+                    if 'desc' in row:
+                        txt.append(row['desc'])
                     content_article.append(txt)
                 elif row['type'] == 1:
                     # text
@@ -196,11 +198,21 @@ def search(request):
         context['keyword'] = keyword
         words = jieba.cut_for_search(keyword)
         count = dict()
-        for word in words:
+        news_count = News.objects.count()
+        for word in set(words):
             try:
                 if word.strip() != '':
                     word_obj = Word.objects.get(word=word)
                     all_news = word_obj.appearance.all()
+                    num_appearance = len(all_news)
+                    if num_appearance == 0:
+                        # no appearance
+                        pass
+                    idf = math.log(float(news_count) / num_appearance)
+                    if idf < 0.5:
+                        # ignore stop words
+                        pass
+                    regexp = re.compile(re.escape(word))
                     if from_time:
                         context['from_time'] = from_time
                         all_news = all_news.filter(pub_date__gte=pytz.timezone('Asia/Shanghai').localize(from_time))
@@ -208,15 +220,15 @@ def search(request):
                         context['to_time'] = to_time
                         all_news = all_news.filter(pub_date__lte=pytz.timezone('Asia/Shanghai').localize(to_time))
                     for news in all_news:
-                        number = sum(1 for _ in re.finditer(
-                            re.escape(word), news.full_body))
-                        number = number + \
-                            sum(1 for _ in re.finditer(
-                                re.escape(word), news.title)) * 10
+                        coef = sum(1 for _ in regexp.finditer(news.full_body))
+                        coef = coef + \
+                            sum(1 for _ in regexp.finditer(news.title)) * 10
+                        tf = math.log(1 + coef)
+                        coef = tf * idf
                         if news.id in count:
-                            count[news.id] = count[news.id] + number
+                            count[news.id] = count[news.id] + coef
                         else:
-                            count[news.id] = number
+                            count[news.id] = coef
             except Word.DoesNotExist:
                 pass
         sorted_count = sorted(count.items(), key=lambda kv: -kv[1])
