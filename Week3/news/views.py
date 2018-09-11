@@ -63,9 +63,12 @@ def scrape_url(url):
             for row in data:
                 if row['type'] == 2:
                     # image
+                    txt = soup.new_tag('p')
+                    txt['class'] = 'one-p'
                     img = soup.new_tag('img', src=row['value'])
                     img['class'] = 'content-picture'
-                    content_article.append(img)
+                    txt.append(img)
+                    content_article.append(txt)
                 elif row['type'] == 1:
                     # text
                     txt = soup.new_tag('p')

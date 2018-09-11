@@ -58,6 +58,7 @@
 .news-abstract {
     line-height: 1.4;
     word-wrap: break-word;
+    min-height: 30px;
 }
 
 .big-icon {
@@ -103,4 +104,18 @@
     align-items: center;
     margin-left: 20%;
     margin-right: 20%;
+}
+
+.next-page,
+.prev-page {
+    height: 36px;
+    line-height: 27px;
+    background-color: #f2f2f2;
+    border: 1px solid #f2f2f2;
+    border-radius: 2px;
+    color: #757575;
+    font-weight: bold;
+    text-align: center;
+    margin: 11px 8px;
+    min-width: 130px;
 }

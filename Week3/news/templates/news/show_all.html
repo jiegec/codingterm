@@ -19,10 +19,10 @@
     {% endfor %}
 
     {% if from_index > 0 %}
-    <a href="{% url 'show_all' %}?from={{ prev_from_index }}&page={{ page }}">Prev Page</a>
+    <a href="{% url 'show_all' %}?from={{ prev_from_index }}&page={{ page }}" class="prev-page">Prev Page</a>
     {% endif %}
 
     {% if next_from_index > from_index %}
-    <a href="{% url 'show_all' %}?from={{ next_from_index }}&page={{ page }}">Next Page</a>
+    <a href="{% url 'show_all' %}?from={{ next_from_index }}&page={{ page }}" class="next-page">Next Page</a>
     {% endif %}
 </div>
