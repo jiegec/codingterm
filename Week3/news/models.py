@@ -7,6 +7,7 @@ class News(models.Model):
     url = models.CharField(max_length=100, unique=True)
     title = models.CharField(max_length=100)
     abstract = models.CharField(max_length=500)
+    pub_date = models.DateTimeField(null=True)
     full_body = models.TextField()
 
     def __str__(self):

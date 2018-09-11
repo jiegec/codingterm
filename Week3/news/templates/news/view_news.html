@@ -1,9 +1,15 @@
 {% include 'news/common.html' %}
 {% include 'news/icon.html' %}
+{% load tz %}
 <div class="news-container">
     <div>
         <a href="{{ news.url }}" class="news-title-big">{{ news.title }}</a>
     </div>
+    {% if news.pub_date %}
+    <div>
+        {{ news.pub_date | timezone:"Asia/Shanghai" }}
+    </div>
+    {% endif %}
     <div class="news-body">
         {{ news.full_body | safe }}
     </div>

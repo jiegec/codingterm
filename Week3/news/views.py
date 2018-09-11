@@ -1,6 +1,8 @@
 from django.shortcuts import render, get_object_or_404, redirect
 from django.http import HttpResponse
 from django.db import transaction
+from django.utils.dateparse import parse_datetime
+import pytz
 import requests
 from bs4 import BeautifulSoup
 import jieba
@@ -8,6 +10,7 @@ import time
 import random
 import json
 import re
+
 
 from .models import News, Word
 
@@ -75,12 +78,16 @@ def scrape_url(url):
                     txt['class'] = 'one-p'
                     txt.string = row['value']
                     content_article.append(txt)
-
     elif soup.find('div', class_='qq_article'):
         title = soup.find('div', class_='hd').h1.get_text()
         content_article = soup.find('div', class_='Cnt-Main-Article-QQ')
     else:
         return None
+
+    pub_date = None
+    if soup.find('meta', {'name': '_pubtime'}):
+        date = parse_datetime(soup.find('meta', {'name': '_pubtime'})['content'])
+        pub_date = pytz.timezone('Asia/Shanghai').localize(date)
 
     full_body = str(content_article)
 
@@ -101,9 +108,10 @@ def scrape_url(url):
         news.title = title
         news.abstract = abstract
         news.full_body = full_body
+        news.pub_date = pub_date
     except News.DoesNotExist:
         news = News(url=url, title=title,
-                    abstract=abstract, full_body=full_body)
+                    abstract=abstract, full_body=full_body, pub_date=pub_date)
         pass
     news.save()
 
@@ -140,6 +148,7 @@ def scrape(request):
             return redirect('view_news', id=result)
         else:
             return redirect('scrape')
+
 
 def paging(params, context, count):
     from_index = 0
@@ -182,8 +191,11 @@ def search(request):
                 if word.strip() != '':
                     word_obj = Word.objects.get(word=word)
                     for news in word_obj.appearance.all():
-                        number = sum(1 for _ in re.finditer(re.escape(word), news.full_body))
-                        number = number + sum(1 for _ in re.finditer(re.escape(word), news.title)) * 10
+                        number = sum(1 for _ in re.finditer(
+                            re.escape(word), news.full_body))
+                        number = number + \
+                            sum(1 for _ in re.finditer(
+                                re.escape(word), news.title)) * 10
                         if news.id in count:
                             count[news.id] = count[news.id] + number
                         else:
