@@ -29,8 +29,14 @@ def feeling_lucky(request):
 
 
 def scrape_url(url):
+    common_ua = [
+        'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_11_6) AppleWebKit/601.7.7 (KHTML, like Gecko) Version/9.1.2 Safari/601.7.7',
+        'Mozilla/5.0 (Windows NT 6.1; WOW64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/48.0.2564.109 Safari/537.36',
+        'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/63.0.3239.132 Safari/537.36',
+        'Mozilla/5.0 (Windows NT 10.0; WOW64; rv:56.0) Gecko/20100101 Firefox/56.0',
+        'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/62.0.3202.89 Safari/537.36']
     headers = {
-        'User-Agent': 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_13_6) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/70.0.3538.9 Safari/537.36',
+        'User-Agent': common_ua[random.randint(0, len(common_ua)-1)],
         'DNT': '1',
         'Referer': 'https://news.qq.com',
         'Accept': '*/*',
@@ -48,7 +54,6 @@ def scrape_url(url):
     if soup.find('div', class_='LEFT'):
         title = soup.find('div', class_='LEFT').h1.get_text()
         content_article = soup.find('div', class_='content-article')
-
     elif soup.find('div', class_='qq_article'):
         title = soup.find('div', class_='hd').h1.get_text()
         content_article = soup.find('div', class_='Cnt-Main-Article-QQ')
@@ -69,11 +74,15 @@ def scrape_url(url):
     abstract = content_text[:200].strip()
     try:
         news = News.objects.get(url=url)
-        news.delete()
+        news.word_set.clear()
+        news.url = url
+        news.title = title
+        news.abstract = abstract
+        news.full_body = full_body
     except News.DoesNotExist:
+        news = News(url=url, title=title,
+                    abstract=abstract, full_body=full_body)
         pass
-    news = News(url=url, title=title,
-                abstract=abstract, full_body=full_body)
     news.save()
 
     words = list(jieba.cut_for_search(orig_content_text))

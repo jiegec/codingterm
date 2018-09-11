@@ -9,11 +9,17 @@ import requests
 from bs4 import BeautifulSoup
 import time
 
-for kind in ['sports', 'finance', 'house', 'tech', 'auto', 'digi', 'fashion']:
+for kind in ['tech', 'auto', 'digi', 'fashion', 'sports', 'finance']:
     try:
+        common_ua = [
+            'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_11_6) AppleWebKit/601.7.7 (KHTML, like Gecko) Version/9.1.2 Safari/601.7.7',
+            'Mozilla/5.0 (Windows NT 6.1; WOW64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/48.0.2564.109 Safari/537.36',
+            'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/63.0.3239.132 Safari/537.36',
+            'Mozilla/5.0 (Windows NT 10.0; WOW64; rv:56.0) Gecko/20100101 Firefox/56.0',
+            'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/62.0.3202.89 Safari/537.36']
         url = f'http://news.qq.com/ninja/timeline_{kind}tab_newsindex.htm'
         headers = {
-            'User-Agent': 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_13_6) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/70.0.3538.9 Safari/537.36',
+            'User-Agent': common_ua[random.randint(0, len(common_ua)-1)],
             'DNT': '1',
             'Referer': 'http://news.qq.com',
             'Accept': '*/*',
@@ -34,8 +40,12 @@ for kind in ['sports', 'finance', 'house', 'tech', 'auto', 'digi', 'fashion']:
                 views.scrape_url(url)
                 time.sleep(timeout)
                 timeout = 2
+            except KeyboardInterrupt:
+                break
             except:
                 timeout = timeout * 2
                 pass
+    except KeyboardInterrupt:
+        break
     except:
         pass
