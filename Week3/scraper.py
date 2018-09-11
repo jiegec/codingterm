@@ -9,8 +9,9 @@ import requests
 from bs4 import BeautifulSoup
 import time
 import random
+from news.models import News
 
-for kind in ['tech', 'auto', 'digi', 'fashion', 'sports', 'finance']:
+for kind in ['major', 'ent', 'tech', 'auto', 'digi', 'fashion', 'sports', 'finance']:
     try:
         common_ua = [
             'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_11_6) AppleWebKit/601.7.7 (KHTML, like Gecko) Version/9.1.2 Safari/601.7.7',
@@ -35,16 +36,22 @@ for kind in ['tech', 'auto', 'digi', 'fashion', 'sports', 'finance']:
         urls = [x['href'] for x in links]
         print(f'Got {len(urls)} links')
         for url in urls:
-            timeout = 2
             try:
-                print(f'scraping {url}')
-                views.scrape_url(url)
-                time.sleep(timeout)
+                print(f'Scraping {url}')
+                News.objects.get(url=url)
+                print(f'Already scraped {url}, ignoring')
+                # already scraped
+            except News.DoesNotExist:
                 timeout = 2
-            except KeyboardInterrupt:
-                break
-            except:
-                timeout = timeout * 2
+                try:
+                    views.scrape_url(url)
+                    time.sleep(timeout)
+                    timeout = 2
+                except KeyboardInterrupt:
+                    break
+                except:
+                    timeout = timeout * 2
+                    pass
                 pass
     except KeyboardInterrupt:
         break

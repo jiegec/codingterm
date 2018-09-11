@@ -1,14 +1,35 @@
 {% include 'news/common.html' %}
 {% if keyword %}
-{% include 'news/icon.html' %}
 {% load tz %}
-<form action="{% url 'search' %}" method="GET" class="search-container-result">
-    <input type="text" name="keyword" id="keyword" value="{{ keyword }}" class="search-input-result">
-</form>
+<div class="header">
+    {% include 'news/icon.html' %}
+    <form action="{% url 'search' %}" method="GET" class="search-container-result">
+        <div>
+            <input type="text" name="keyword" id="keyword" value="{{ keyword }}" class="search-input-result">
+        </div>
+        <div class="time-container">
+            <label for="from_time">Time from: </label>
+            <input type="text" name="from_time" id="from_time" value="{{ from_time_text }}" placeholder="yyyy-mm-dd hh:mm:ss">
+            <label for="to_time">To: </label>
+            <input type="text" name="to_time" id="to_time" value="{{ to_time_text }}" placeholder="yyyy-mm-dd hh:mm:ss">
+        </div>
+        <input type="submit" style="display:none">
+    </form>
+</div>
 <div class="container">
     <div class="result-info">
-        Search result of {{ keyword }}. Found using {{ time }} secs.
+        Search result of {{ keyword }}
+        {% if from_time or to_time %}
+        with time
+        {% if from_time %}
+        from {{ from_time }} 
+        {% endif %}
+        {% if to_time %}
+        to {{ to_time }} 
+        {% endif %}
+        {% endif %}. Found using {{ time }} secs.
     </div>
+
     {% for article in news %}
     <div class="article-container">
         <div>

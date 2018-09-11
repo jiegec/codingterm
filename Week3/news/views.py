@@ -186,6 +186,12 @@ def search(request):
 
     context = {}
     if 'keyword' in request.GET:
+        from_time = None
+        to_time = None
+        if 'from_time' in request.GET:
+            from_time = parse_datetime(request.GET['from_time'])
+        if 'to_time' in request.GET:
+            to_time = parse_datetime(request.GET['to_time'])
         keyword = request.GET['keyword']
         context['keyword'] = keyword
         words = jieba.cut_for_search(keyword)
@@ -194,7 +200,14 @@ def search(request):
             try:
                 if word.strip() != '':
                     word_obj = Word.objects.get(word=word)
-                    for news in word_obj.appearance.all():
+                    all_news = word_obj.appearance.all()
+                    if from_time:
+                        context['from_time'] = from_time
+                        all_news = all_news.filter(pub_date__gte=pytz.timezone('Asia/Shanghai').localize(from_time))
+                    if to_time:
+                        context['to_time'] = to_time
+                        all_news = all_news.filter(pub_date__lte=pytz.timezone('Asia/Shanghai').localize(to_time))
+                    for news in all_news:
                         number = sum(1 for _ in re.finditer(
                             re.escape(word), news.full_body))
                         number = number + \
@@ -215,6 +228,10 @@ def search(request):
 
         paging(request.GET, context, len(news))
         context['news'] = news[context['from_index']:context['to_index']]
+        if 'from_time' in request.GET:
+            context['from_time_text'] = request.GET['from_time']
+        if 'to_time' in request.GET:
+            context['to_time_text'] = request.GET['to_time']
         context['time'] = time.time() - start_time
     else:
         context['keyword'] = ''
