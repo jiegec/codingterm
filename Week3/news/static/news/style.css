@@ -68,7 +68,7 @@
 .button-container {
     display: flex;
     justify-content: space-between;
-    width: 20%;
+    width: 30%;
 }
 
 .content-article .one-p {
@@ -134,4 +134,9 @@
 .time-container>label,
 .time-container>input {
     margin-right: 5px;
+}
+
+
+.news-body {
+    max-width: 100%;
 }
