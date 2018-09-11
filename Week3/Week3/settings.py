@@ -25,7 +25,8 @@ SECRET_KEY = 'f)a!dxb*jo142%nch+*__#8%k(ocvv-6kj#0xokun)s@s=^tgu'
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = []
+# FAKE QQ WEBSITE
+ALLOWED_HOSTS = ['new.qq.com']
 
 
 # Application definition
