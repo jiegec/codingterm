@@ -27,16 +27,17 @@ def view_news(request, id):
     context['time'] = time.time() - start_time
     return render(request, 'news/view_news.html', context)
 
+
 def similar_news(request, id):
     start_time = time.time()
     show_news = get_object_or_404(News, id=id)
     context = {}
     news_count = News.objects.count()
-    threshold = math.ceil(news_count / math.exp(7.0))  # idf threshold
+    threshold = math.ceil(news_count / math.exp(4.0))  # idf threshold
     word_ids = set(show_news.word_set.values_list('id', flat=True))
     # find large idf words
-    #high_appearance_words = Word.objects.annotate(
-        #news_count=Count('appearance')).filter(appearance=show_news, news_count__lte=threshold, news_count__gte=2).values_list('id', flat=True)
+    # high_appearance_words = Word.objects.annotate(
+    # news_count=Count('appearance')).filter(appearance=show_news, news_count__lte=threshold, news_count__gte=2).values_list('id', flat=True)
     #high_appearance_words = list(high_appearance_words)
     content_article = BeautifulSoup(show_news.full_body, 'html.parser')
     [x.extract() for x in content_article.find_all('script')]
@@ -51,22 +52,30 @@ def similar_news(request, id):
     high_appearance_words = tags
     weight = {}
     # Only one db query
-    query = Q(word__word=high_appearance_words[0])
-    for word in high_appearance_words[1:]:
-        query |= Q(word__word=word)
+    query = Q()
+    for word in high_appearance_words:
+        count = Word.objects.get(word=word).appearance.count()
+        if count <= threshold:
+            query |= Q(word__word=word)
+            print(word)
     query = News.objects.filter(query)
     news_ids = query.values_list('id', flat=True)
-    related_news = News.objects.in_bulk(list(news_ids))
-    related_news = list(related_news.values())
+    #related_news = News.objects.in_bulk(list(news_ids))
+    #related_news = list(related_news.values())
     print('before', time.time() - start_time)
+    print(len(news_ids))
     for news in news_ids:
         if news != show_news.id:
+            intersect = Word.objects.filter(Q(appearance=show_news) | Q(
+                appearance=news)).annotate(count=Count('id')).filter(count=2).count()
+            union = Word.objects.filter(
+                Q(appearance=show_news) | Q(appearance=news)).count()
             #intersect = Word.objects.filter(Q(appearance=show_news) & Q(appearance=news)).count()
             #union = Word.objects.filter(Q(appearance=show_news) | Q(appearance=news)).count()
-            current_word_ids = set(Word.objects.filter(appearance=news).values_list('id', flat=True))
-            weight[news] = float(
-                len(word_ids & current_word_ids)) / len(word_ids | current_word_ids)
-            #weight[news] = float(intersect) / union
+            #current_word_ids = set(Word.objects.filter(appearance=news).values_list('id', flat=True))
+            # weight[news] = float(
+            # len(word_ids & current_word_ids)) / len(word_ids | current_word_ids)
+            weight[news] = float(intersect) / union
 
     print('after', time.time() - start_time)
     sorted_weight = sorted(weight.items(), key=lambda kv: kv[1], reverse=True)
@@ -89,7 +98,9 @@ def feeling_lucky(request):
     }
     return render(request, 'news/view_news.html', context)
 
+
 s = requests.Session()
+
 
 def scrape_url(url):
     common_ua = [
@@ -286,10 +297,11 @@ def search(request):
                         all_news = all_news.filter(pub_date__lte=pytz.timezone(
                             'Asia/Shanghai').localize(to_time))
                     for news in all_news:
-                        coef = sum(1 for _ in regexp.finditer(news.full_body))
-                        coef = coef + \
-                            sum(1 for _ in regexp.finditer(news.title)) * 10
-                        tf = math.log(1 + coef)
+                        tf = math.log(
+                            1 + sum(1 for _ in regexp.finditer(news.full_body)))
+                        tf = tf + \
+                            math.log(
+                                1+sum(1 for _ in regexp.finditer(news.title)) * 10)
                         coef = tf * idf
                         if news.id in count:
                             count[news.id] = count[news.id] + coef
@@ -303,8 +315,10 @@ def search(request):
         for (id, count) in sorted_count[context['from_index']:context['to_index']]:
             news_obj = News.objects.get(id=id)
             for word in words:
-                news_obj.title = str(news_obj.title).replace(word, f'<em>{word}</em>')
-                news_obj.abstract = str(news_obj.abstract).replace(word, f'<em>{word}</em>')
+                news_obj.title = str(news_obj.title).replace(
+                    word, f'<em>{word}</em>')
+                news_obj.abstract = str(news_obj.abstract).replace(
+                    word, f'<em>{word}</em>')
             news.append(news_obj)
             # print(f'{id}: {count}')
 
@@ -325,7 +339,6 @@ def show_all(request):
 
     context = {}
     paging(request.GET, context, News.objects.count())
-    context['news'] = News.objects.all()[context['from_index']
-                                       :context['to_index']]
+    context['news'] = News.objects.all()[context['from_index']                                         :context['to_index']]
     context['time'] = time.time() - start_time
     return render(request, 'news/show_all.html', context)
