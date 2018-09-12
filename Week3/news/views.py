@@ -1,6 +1,6 @@
 from django.shortcuts import render, get_object_or_404, redirect
 from django.http import HttpResponse
-from django.db import transaction
+from django.db import transaction, connection
 from django.utils.dateparse import parse_datetime
 import pytz
 import requests
@@ -203,8 +203,7 @@ def search(request):
             try:
                 if word.strip() != '':
                     word_obj = Word.objects.get(word=word)
-                    all_news = word_obj.appearance.all()
-                    num_appearance = len(all_news)
+                    num_appearance = word_obj.appearance.count()
                     if num_appearance == 0:
                         # no appearance
                         pass
@@ -213,6 +212,7 @@ def search(request):
                         # ignore stop words
                         pass
                     regexp = re.compile(re.escape(word))
+                    all_news = word_obj.appearance.all()
                     if from_time:
                         context['from_time'] = from_time
                         all_news = all_news.filter(pub_date__gte=pytz.timezone('Asia/Shanghai').localize(from_time))
@@ -233,13 +233,13 @@ def search(request):
                 pass
         sorted_count = sorted(count.items(), key=lambda kv: -kv[1])
         news = []
-        for (id, count) in sorted_count:
+        paging(request.GET, context, len(sorted_count))
+        for (id, count) in sorted_count[context['from_index']:context['to_index']]:
             news_obj = News.objects.get(id=id)
             news.append(news_obj)
             # print(f'{id}: {count}')
 
-        paging(request.GET, context, len(news))
-        context['news'] = news[context['from_index']:context['to_index']]
+        context['news'] = news
         if 'from_time' in request.GET:
             context['from_time_text'] = request.GET['from_time']
         if 'to_time' in request.GET:
@@ -247,6 +247,8 @@ def search(request):
         context['time'] = time.time() - start_time
     else:
         context['keyword'] = ''
+
+    print(connection.queries)
 
     return render(request, 'news/search.html', context)
 
