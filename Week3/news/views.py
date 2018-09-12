@@ -248,8 +248,6 @@ def search(request):
     else:
         context['keyword'] = ''
 
-    print(connection.queries)
-
     return render(request, 'news/search.html', context)
 
 

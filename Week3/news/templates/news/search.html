@@ -19,13 +19,14 @@
 <div class="container">
     <div class="result-info">
         Search result of {{ keyword }}
+        index from {{ from_index }} to {{ to_index }}
         {% if from_time or to_time %}
         with time
         {% if from_time %}
-        from {{ from_time }} 
+        from {{ from_time }}
         {% endif %}
         {% if to_time %}
-        to {{ to_time }} 
+        to {{ to_time }}
         {% endif %}
         {% endif %}. Found using {{ time }} secs.
     </div>
@@ -48,11 +49,13 @@
     {% endfor %}
 
     {% if from_index > 0 %}
-    <a href="{% url 'show_all' %}?from={{ prev_from_index }}&page={{ page }}" class="prev-page">Prev Page</a>
+    <a href="{% url 'search' %}?keyword={{ keyword }}&from={{ prev_from_index }}&page={{ page }}&from_time={{ from_time_text }}&to_time={{ to_time_text }}"
+        class="prev-page">Prev Page</a>
     {% endif %}
 
     {% if next_from_index > from_index %}
-    <a href="{% url 'show_all' %}?from={{ next_from_index }}&page={{ page }}" class="next-page">Next Page</a>
+    <a href="{% url 'search' %}?keyword={{ keyword }}&from={{ next_from_index }}&page={{ page }}&from_time={{ from_time_text }}&to_time={{ to_time_text }}"
+        class="next-page">Next Page</a>
     {% endif %}
 </div>
 {% else %}
