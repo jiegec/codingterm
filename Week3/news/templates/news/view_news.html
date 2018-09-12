@@ -15,11 +15,9 @@
         <div class="news-body">
             {{ news.full_body | safe }}
         </div>
-        <form action="{% url 'scrape' %}" method="POST">
-            {% csrf_token %}
-            <input type="text" name="url" id="url" value="{{ news.url }}" hidden>
-            <input type="submit" value="Re-scrape">
-        </form>
+        <div>
+            <h1> You might also want to see: </h1>
+        </div>
         {% for article in similar_news %}
         <div class="article-container">
             <div>
@@ -36,5 +34,10 @@
             </div>
         </div>
         {% endfor %}
+        <form action="{% url 'scrape' %}" method="POST">
+            {% csrf_token %}
+            <input type="text" name="url" id="url" value="{{ news.url }}" hidden>
+            <input type="submit" value="Re-scrape">
+        </form>
     </div>
 </body>

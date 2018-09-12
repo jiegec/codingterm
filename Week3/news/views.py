@@ -25,34 +25,31 @@ def view_news(request, id):
     context['news'] = show_news
     count = {}
     news_count = News.objects.count()
-    threshold = news_count / math.exp(6.0)  # idf threshold
+    threshold = news_count / math.exp(7.0)  # idf threshold
+    word_ids = set(show_news.word_set.values_list('id', flat=True))
     # find large idf words
     high_appearance_words = Word.objects.annotate(
-        news_count=Count('appearance')).filter(news_count__lte=math.ceil(threshold+1), appearance=show_news)[:20]
+        news_count=Count('appearance')).filter(news_count__lte=math.ceil(threshold+1), news_count__gte=2, appearance=show_news)
+    weight = {}
+    news_ids = set()
     for word in high_appearance_words:
-        num_appearance = word.news_count
-        print(f'{word} {num_appearance}')
-        idf = math.log(float(news_count) / num_appearance)
-        regexp = re.compile(re.escape(word.word))
-        all_news = word.appearance.all()
-        for news in all_news:
-            if news.id != show_news.id:
-                coef = sum(1 for _ in regexp.finditer(news.full_body))
-                coef = coef + \
-                    sum(1 for _ in regexp.finditer(news.title)) * 10
-                tf = math.log(1 + coef)
-                coef = tf * idf
-                if news.id in count:
-                    count[news.id] = count[news.id] + coef
-                else:
-                    count[news.id] = coef
-    sorted_count = sorted(count.items(), key=lambda kv: -kv[1])
+        print(f'{word.word}')
+        news_ids |= set(word.appearance.values_list('id', flat=True))
+    related_news = News.objects.in_bulk(list(news_ids))
+    for news in related_news.values():
+        if news.id != show_news.id:
+            current_word_ids = set(news.word_set.values_list('id', flat=True))
+            weight[news.id] = float(
+                len(word_ids & current_word_ids)) / len(word_ids | current_word_ids)
+            print(f'{news.title} {weight[news.id]}')
+
+    sorted_weight = sorted(weight.items(), key=lambda kv: -kv[1])
     similar_news = []
-    paging(request.GET, context, len(sorted_count))
-    for (id, count) in sorted_count[:3]:
+    paging(request.GET, context, len(sorted_weight))
+    for (id, weight) in sorted_weight[:3]:
         news_obj = News.objects.get(id=id)
         similar_news.append(news_obj)
-        print(f'{id}: {count}')
+        print(f'{news_obj.title}: {weight}')
     context['similar_news'] = similar_news
     context['time'] = time.time() - start_time
     print('result', time.time() - start_time)
@@ -299,6 +296,7 @@ def show_all(request):
 
     context = {}
     paging(request.GET, context, News.objects.count())
-    context['news'] = News.objects.all()[context['from_index']:context['to_index']]
+    context['news'] = News.objects.all()[context['from_index']
+                                       :context['to_index']]
     context['time'] = time.time() - start_time
     return render(request, 'news/show_all.html', context)
