@@ -15,11 +15,11 @@
         <div class="news-body">
             {{ news.full_body | safe }}
         </div>
-        <iframe src="{% url 'similar_news' news.id %}" class="similar-news-page-container" scrolling="no" />
         <form action="{% url 'scrape' %}" method="POST">
             {% csrf_token %}
             <input type="text" name="url" id="url" value="{{ news.url }}" hidden>
             <input type="submit" value="Re-scrape">
         </form>
+        <iframe src="{% url 'similar_news' news.id %}" class="similar-news-page-container" scrolling="no" />
     </div>
 </body>
