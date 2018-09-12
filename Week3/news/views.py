@@ -30,36 +30,41 @@ def similar_news(request, id):
     start_time = time.time()
     show_news = get_object_or_404(News, id=id)
     context = {}
-    context['news'] = show_news
-    count = {}
     news_count = News.objects.count()
-    threshold = news_count / math.exp(7.0)  # idf threshold
+    threshold = math.ceil(news_count / math.exp(7.0))  # idf threshold
     word_ids = set(show_news.word_set.values_list('id', flat=True))
     # find large idf words
     high_appearance_words = Word.objects.annotate(
-        news_count=Count('appearance')).filter(news_count__lte=math.ceil(threshold+1), news_count__gte=2, appearance=show_news)
+        news_count=Count('appearance')).filter(appearance=show_news, news_count__lte=threshold, news_count__gte=2).values_list('id', flat=True)
+    high_appearance_words = list(high_appearance_words)
     weight = {}
-    news_ids = set()
-    for word in high_appearance_words:
-        print(f'{word.word}')
-        news_ids |= set(word.appearance.values_list('id', flat=True))
+    # Only one db query
+    news_ids = []
+    first_news_ids_query = None
+    for word_id in high_appearance_words:
+        word = Word.objects.get(id=word_id)
+        if first_news_ids_query:
+            news_ids.append(word.appearance.all())
+        else:
+            first_news_ids_query = word.appearance.all()
+    query = first_news_ids_query.union(*news_ids)
+    news_ids = query.values_list('id', flat=True)
     related_news = News.objects.in_bulk(list(news_ids))
     for news in related_news.values():
         if news.id != show_news.id:
             current_word_ids = set(news.word_set.values_list('id', flat=True))
             weight[news.id] = float(
                 len(word_ids & current_word_ids)) / len(word_ids | current_word_ids)
-            print(f'{news.title} {weight[news.id]}')
 
-    sorted_weight = sorted(weight.items(), key=lambda kv: -kv[1])
+    sorted_weight = sorted(weight.items(), key=lambda kv: kv[1], reverse=True)
     similar_news = []
-    paging(request.GET, context, len(sorted_weight))
+    print('best news:')
     for (id, weight) in sorted_weight[:3]:
         news_obj = News.objects.get(id=id)
         similar_news.append(news_obj)
         print(f'{news_obj.title}: {weight}')
     context['similar_news'] = similar_news
-    context['time'] = time.time() - start_time
+    print(connection.queries)
     print('result', time.time() - start_time)
     return render(request, 'news/similar_news.html', context)
 
