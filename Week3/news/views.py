@@ -42,11 +42,11 @@ def similar_news(request, id):
     news_ids = []
     first_news_ids_query = None
     for word_id in high_appearance_words:
-        word = Word.objects.get(id=word_id)
+        query = News.objects.filter(word=word_id)
         if first_news_ids_query:
-            news_ids.append(word.appearance.all())
+            news_ids.append(query)
         else:
-            first_news_ids_query = word.appearance.all()
+            first_news_ids_query = query
     query = first_news_ids_query.union(*news_ids)
     news_ids = query.values_list('id', flat=True)
     related_news = News.objects.in_bulk(list(news_ids))
