@@ -2,11 +2,12 @@ from django.shortcuts import render, get_object_or_404, redirect
 from django.http import HttpResponse
 from django.db import transaction, connection
 from django.utils.dateparse import parse_datetime
-from django.db.models import Count
+from django.db.models import Count, Q
 import pytz
 import requests
 from bs4 import BeautifulSoup
 import jieba
+from jieba.analyse import extract_tags
 import time
 import random
 import json
@@ -34,28 +35,40 @@ def similar_news(request, id):
     threshold = math.ceil(news_count / math.exp(7.0))  # idf threshold
     word_ids = set(show_news.word_set.values_list('id', flat=True))
     # find large idf words
-    high_appearance_words = Word.objects.annotate(
-        news_count=Count('appearance')).filter(appearance=show_news, news_count__lte=threshold, news_count__gte=2).values_list('id', flat=True)
-    high_appearance_words = list(high_appearance_words)
+    #high_appearance_words = Word.objects.annotate(
+        #news_count=Count('appearance')).filter(appearance=show_news, news_count__lte=threshold, news_count__gte=2).values_list('id', flat=True)
+    #high_appearance_words = list(high_appearance_words)
+    content_article = BeautifulSoup(show_news.full_body, 'html.parser')
+    [x.extract() for x in content_article.find_all('script')]
+    [x.extract() for x in content_article.find_all('style')]
+    [x.extract() for x in content_article.find_all('div', class_='rv-js-root')]
+    orig_content_text = ''.join(content_article.strings)
+    # remove image desc
+    [x.extract() for x in content_article.find_all('i', class_='desc')]
+
+    content_text = ''.join(content_article.strings)
+    tags = extract_tags(f'{show_news.title} {content_text}', topK=10)
+    high_appearance_words = tags
     weight = {}
     # Only one db query
-    news_ids = []
-    first_news_ids_query = None
-    for word_id in high_appearance_words:
-        query = News.objects.filter(word=word_id)
-        if first_news_ids_query:
-            news_ids.append(query)
-        else:
-            first_news_ids_query = query
-    query = first_news_ids_query.union(*news_ids)
+    query = Q(word__word=high_appearance_words[0])
+    for word in high_appearance_words[1:]:
+        query |= Q(word__word=word)
+    query = News.objects.filter(query)
     news_ids = query.values_list('id', flat=True)
     related_news = News.objects.in_bulk(list(news_ids))
-    for news in related_news.values():
-        if news.id != show_news.id:
-            current_word_ids = set(news.word_set.values_list('id', flat=True))
-            weight[news.id] = float(
+    related_news = list(related_news.values())
+    print('before', time.time() - start_time)
+    for news in news_ids:
+        if news != show_news.id:
+            #intersect = Word.objects.filter(Q(appearance=show_news) & Q(appearance=news)).count()
+            #union = Word.objects.filter(Q(appearance=show_news) | Q(appearance=news)).count()
+            current_word_ids = set(Word.objects.filter(appearance=news).values_list('id', flat=True))
+            weight[news] = float(
                 len(word_ids & current_word_ids)) / len(word_ids | current_word_ids)
+            #weight[news] = float(intersect) / union
 
+    print('after', time.time() - start_time)
     sorted_weight = sorted(weight.items(), key=lambda kv: kv[1], reverse=True)
     similar_news = []
     print('best news:')
@@ -64,7 +77,6 @@ def similar_news(request, id):
         similar_news.append(news_obj)
         print(f'{news_obj.title}: {weight}')
     context['similar_news'] = similar_news
-    print(connection.queries)
     print('result', time.time() - start_time)
     return render(request, 'news/similar_news.html', context)
 
