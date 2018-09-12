@@ -2,6 +2,7 @@ from django.shortcuts import render, get_object_or_404, redirect
 from django.http import HttpResponse
 from django.db import transaction, connection
 from django.utils.dateparse import parse_datetime
+from django.db.models import Count
 import pytz
 import requests
 from bs4 import BeautifulSoup
@@ -18,9 +19,43 @@ from .models import News, Word
 
 
 def view_news(request, id):
-    context = {
-        'news': get_object_or_404(News, id=id)
-    }
+    start_time = time.time()
+    show_news = get_object_or_404(News, id=id)
+    context = {}
+    context['news'] = show_news
+    count = {}
+    news_count = News.objects.count()
+    threshold = news_count / math.exp(6.0)  # idf threshold
+    # find large idf words
+    high_appearance_words = Word.objects.annotate(
+        news_count=Count('appearance')).filter(news_count__lte=math.ceil(threshold+1), appearance=show_news)[:20]
+    for word in high_appearance_words:
+        num_appearance = word.news_count
+        print(f'{word} {num_appearance}')
+        idf = math.log(float(news_count) / num_appearance)
+        regexp = re.compile(re.escape(word.word))
+        all_news = word.appearance.all()
+        for news in all_news:
+            if news.id != show_news.id:
+                coef = sum(1 for _ in regexp.finditer(news.full_body))
+                coef = coef + \
+                    sum(1 for _ in regexp.finditer(news.title)) * 10
+                tf = math.log(1 + coef)
+                coef = tf * idf
+                if news.id in count:
+                    count[news.id] = count[news.id] + coef
+                else:
+                    count[news.id] = coef
+    sorted_count = sorted(count.items(), key=lambda kv: -kv[1])
+    similar_news = []
+    paging(request.GET, context, len(sorted_count))
+    for (id, count) in sorted_count[:3]:
+        news_obj = News.objects.get(id=id)
+        similar_news.append(news_obj)
+        print(f'{id}: {count}')
+    context['similar_news'] = similar_news
+    context['time'] = time.time() - start_time
+    print('result', time.time() - start_time)
     return render(request, 'news/view_news.html', context)
 
 
@@ -87,9 +122,11 @@ def scrape_url(url):
         return None
 
     pub_date = None
-    pubtime = re.search(r'pubtime:\'([0-9]{4}-[0-9]{2}-[0-9]{2} [0-9]{2}:[0-9]{2})\'', r.text)
+    pubtime = re.search(
+        r'pubtime:\'([0-9]{4}-[0-9]{2}-[0-9]{2} [0-9]{2}:[0-9]{2})\'', r.text)
     if soup.find('meta', {'name': '_pubtime'}):
-        date = parse_datetime(soup.find('meta', {'name': '_pubtime'})['content'])
+        date = parse_datetime(
+            soup.find('meta', {'name': '_pubtime'})['content'])
         pub_date = pytz.timezone('Asia/Shanghai').localize(date)
     elif pubtime:
         date = parse_datetime(f'{pubtime.group(1)}:00')
@@ -107,8 +144,10 @@ def scrape_url(url):
 
     content_text = ''.join(content_article.strings)
     abstract = content_text[:200].strip()
+    # FIXME: use get_or_insert()?
     try:
         news = News.objects.get(url=url)
+        # FIXME: Don't clear, and use word_set.set() instead?
         news.word_set.clear()
         news.url = url
         news.title = title
@@ -127,6 +166,7 @@ def scrape_url(url):
 
     word_objs = []
     not_exists = []
+    # FIXME: use exists?
     for word in set(words):
         if word.strip() != '':
             try:
@@ -134,6 +174,7 @@ def scrape_url(url):
                 word_objs.append(word_obj)
             except Word.DoesNotExist:
                 not_exists.append(word)
+    # FIXME: use bulk_insert for better performance
     for word in not_exists:
         word_obj = Word(word=word)
         word_obj.save()
@@ -209,16 +250,18 @@ def search(request):
                         pass
                     idf = math.log(float(news_count) / num_appearance)
                     if idf < 0.5:
-                        # ignore stop words
-                        pass
+                        # handle stop words
+                        idf = 0.01
                     regexp = re.compile(re.escape(word))
                     all_news = word_obj.appearance.all()
                     if from_time:
                         context['from_time'] = from_time
-                        all_news = all_news.filter(pub_date__gte=pytz.timezone('Asia/Shanghai').localize(from_time))
+                        all_news = all_news.filter(pub_date__gte=pytz.timezone(
+                            'Asia/Shanghai').localize(from_time))
                     if to_time:
                         context['to_time'] = to_time
-                        all_news = all_news.filter(pub_date__lte=pytz.timezone('Asia/Shanghai').localize(to_time))
+                        all_news = all_news.filter(pub_date__lte=pytz.timezone(
+                            'Asia/Shanghai').localize(to_time))
                     for news in all_news:
                         coef = sum(1 for _ in regexp.finditer(news.full_body))
                         coef = coef + \
