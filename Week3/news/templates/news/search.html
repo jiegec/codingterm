@@ -34,7 +34,7 @@
     {% for article in news %}
     <div class="article-container">
         <div>
-            <a href="{% url 'view_news' article.id %}" class="news-title">{{ article.title }}</a>
+            <a href="{% url 'view_news' article.id %}" class="news-title">{{ article.title | safe }}</a>
         </div>
         <div>
             <a href="{{ article.url }}" class="news-url">{{ article.url }}</a>
@@ -43,7 +43,7 @@
             {% endif %}
         </div>
         <div class="news-abstract">
-            {{ article.abstract }}
+            {{ article.abstract | safe }}
         </div>
     </div>
     {% endfor %}

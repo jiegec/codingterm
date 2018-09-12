@@ -248,10 +248,10 @@ def search(request):
             to_time = parse_datetime(request.GET['to_time'])
         keyword = request.GET['keyword']
         context['keyword'] = keyword
-        words = jieba.cut_for_search(keyword)
+        words = set(jieba.cut_for_search(keyword))
         count = dict()
         news_count = News.objects.count()
-        for word in set(words):
+        for word in words:
             try:
                 if word.strip() != '':
                     word_obj = Word.objects.get(word=word)
@@ -290,6 +290,9 @@ def search(request):
         paging(request.GET, context, len(sorted_count))
         for (id, count) in sorted_count[context['from_index']:context['to_index']]:
             news_obj = News.objects.get(id=id)
+            for word in words:
+                news_obj.title = str(news_obj.title).replace(word, f'<em>{word}</em>')
+                news_obj.abstract = str(news_obj.abstract).replace(word, f'<em>{word}</em>')
             news.append(news_obj)
             # print(f'{id}: {count}')
 
