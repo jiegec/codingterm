@@ -5,11 +5,31 @@ django.setup()
 
 from news import views
 import sys
-import requests
 from bs4 import BeautifulSoup
 import time
 import random
 from news.models import News
+
+import requests
+import logging
+
+# Enabling debugging at http.client level (requests->urllib3->http.client)
+# you will see the REQUEST, including HEADERS and DATA, and RESPONSE with HEADERS but without DATA.
+# the only thing missing will be the response.body which is not logged.
+try:  # for Python 3
+    from http.client import HTTPConnection
+except ImportError:
+    from httplib import HTTPConnection
+HTTPConnection.debuglevel = 1
+
+# you need to initialize logging, otherwise you will not see anything from requests
+logging.basicConfig()
+logging.getLogger().setLevel(logging.DEBUG)
+requests_log = logging.getLogger("urllib3")
+requests_log.setLevel(logging.DEBUG)
+requests_log.propagate = True
+
+s = requests.Session()
 
 for kind in ['ent', 'sports', 'house', 'tech', 'auto', 'digi', 'fashion', 'astro', 'gamezone', 'cul', 'edu']:
     try:
@@ -26,11 +46,12 @@ for kind in ['ent', 'sports', 'house', 'tech', 'auto', 'digi', 'fashion', 'astro
             'Referer': 'http://news.qq.com',
             'Accept': '*/*',
             'Accept-Encoding': 'gzip, deflate',
+            'Accept-Language': 'zh-CH,zh;q=0.9,en;q=0.8',
             'X-Requested-With': 'XMLHttpRequest'
         }
 
         print(f'start to pull list from {url}')
-        r = requests.get(url, headers=headers)
+        r = s.get(url, headers=headers)
         soup = BeautifulSoup(r.text, 'html.parser')
         links = soup.find_all('a', class_='linkto')
         urls = [x['href'] for x in links]

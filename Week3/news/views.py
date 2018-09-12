@@ -23,6 +23,14 @@ def view_news(request, id):
     show_news = get_object_or_404(News, id=id)
     context = {}
     context['news'] = show_news
+    context['time'] = time.time() - start_time
+    return render(request, 'news/view_news.html', context)
+
+def similar_news(request, id):
+    start_time = time.time()
+    show_news = get_object_or_404(News, id=id)
+    context = {}
+    context['news'] = show_news
     count = {}
     news_count = News.objects.count()
     threshold = news_count / math.exp(7.0)  # idf threshold
@@ -53,7 +61,7 @@ def view_news(request, id):
     context['similar_news'] = similar_news
     context['time'] = time.time() - start_time
     print('result', time.time() - start_time)
-    return render(request, 'news/view_news.html', context)
+    return render(request, 'news/similar_news.html', context)
 
 
 def feeling_lucky(request):
@@ -64,6 +72,7 @@ def feeling_lucky(request):
     }
     return render(request, 'news/view_news.html', context)
 
+s = requests.Session()
 
 def scrape_url(url):
     common_ua = [
@@ -82,7 +91,7 @@ def scrape_url(url):
 
     start_time = time.time()
     print(f'scraping {url}')
-    r = requests.get(url, headers=headers)
+    r = s.get(url, headers=headers)
     print('request', time.time() - start_time)
 
     soup = BeautifulSoup(r.text, 'html.parser')

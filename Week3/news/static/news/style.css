@@ -107,6 +107,12 @@
     margin-right: 20%;
 }
 
+.similar-news-container {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
+
 .next-page,
 .prev-page {
     height: 36px;
@@ -137,7 +143,12 @@
     margin-right: 5px;
 }
 
-
 .news-body {
     max-width: 100%;
+}
+
+.similar-news-page-container {
+    height: 100%;
+    width: 100%;
+    border: none;
 }

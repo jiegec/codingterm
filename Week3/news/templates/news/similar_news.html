@@ -1,0 +1,24 @@
+{% include 'news/common.html' %}
+{% load tz %}
+<base target="_parent">
+<div class="similar-news-container">
+    <div>
+        <h1> You might also want to see: </h1>
+    </div>
+    {% for article in similar_news %}
+    <div class="article-container">
+        <div>
+            <a href="{% url 'view_news' article.id %}" class="news-title">{{ article.title }}</a>
+        </div>
+        <div>
+            <a href="{{ article.url }}" class="news-url">{{ article.url }}</a>
+            {% if article.pub_date %}
+            {{ article.pub_date | timezone:"Asia/Shanghai" }}
+            {% endif %}
+        </div>
+        <div class="news-abstract">
+            {{ article.abstract }}
+        </div>
+    </div>
+    {% endfor %}
+</div>
