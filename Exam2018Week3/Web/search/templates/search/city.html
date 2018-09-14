@@ -1,0 +1,18 @@
+{{city.name}}
+{{city.chinese}}
+{{city.province}}
+{{city.perfecture}}
+{{city.founded}}
+
+<div>
+    Children:
+    {% for city in children %}
+    <div>
+        English Name:
+        <a href="/search/city?city={{city.name}}">
+            {{city.name}}
+        </a>
+        Chinese Name: {{city.chinese}}
+    </div>
+    {% endfor %}
+</div>

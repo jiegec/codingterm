@@ -1,0 +1,19 @@
+<form action="{% url 'search_name' %}" method="GET">
+    <label>Province:</label>
+    <input type="text" name="province" value="{{province}}">
+    <input type="submit" value="Search">
+</form>
+
+<div>
+    Cities found: {{ cities_len }}
+</div>
+
+{% for city in cities %}
+<div>
+    English Name:
+    <a href="/search/city?city={{city.name}}">
+        {{city.name}}
+    </a>
+    Chinese Name: {{city.chinese}}
+</div>
+{% endfor %}
