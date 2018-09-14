@@ -13,6 +13,7 @@ import random
 import json
 import re
 import math
+import pprofile
 
 from .models import News, Word
 
@@ -66,17 +67,17 @@ def similar_news(request, id):
     print(len(news_ids))
     for news in news_ids:
         if news != show_news.id:
-            intersect = Word.objects.filter(Q(appearance=show_news) | Q(
-                appearance=news)).annotate(count=Count('id')).filter(count=2).count()
-            union = Word.objects.filter(
-                Q(appearance=show_news) | Q(appearance=news)).count()
+            #intersect = Word.objects.filter(Q(appearance=show_news) | Q(
+                #appearance=news)).annotate(count=Count('id')).filter(count=2).count()
+            #union = Word.objects.filter(
+                #Q(appearance=show_news) | Q(appearance=news)).count()
             #intersect = Word.objects.filter(Q(appearance=show_news) & Q(appearance=news)).count()
             #union = Word.objects.filter(Q(appearance=show_news) | Q(appearance=news)).count()
-            #current_word_ids = set(Word.objects.filter(appearance=news).values_list('id', flat=True))
-            # weight[news] = float(
-            # len(word_ids & current_word_ids)) / len(word_ids | current_word_ids)
-            if intersect < union:
-                weight[news] = float(intersect) / union
+            current_word_ids = set(Word.objects.filter(appearance=news).values_list('id', flat=True))
+            weight[news] = float(
+                len(word_ids & current_word_ids)) / len(word_ids | current_word_ids)
+            #if intersect < union:
+                #weight[news] = float(intersect) / union
 
     print('after', time.time() - start_time)
     sorted_weight = sorted(weight.items(), key=lambda kv: kv[1], reverse=True)
@@ -162,6 +163,10 @@ def scrape_url(url):
     if soup.find('meta', {'name': '_pubtime'}):
         date = parse_datetime(
             soup.find('meta', {'name': '_pubtime'})['content'])
+        pub_date = pytz.timezone('Asia/Shanghai').localize(date)
+    elif soup.find('meta', {'name': 'apub:time'}):
+        date = parse_datetime(
+            soup.find('meta', {'name': 'apub:time'})['content'])
         pub_date = pytz.timezone('Asia/Shanghai').localize(date)
     elif pubtime:
         date = parse_datetime(f'{pubtime.group(1)}:00')

@@ -48,15 +48,15 @@ def go_scrape_links(urls):
             print(f'Already scraped {url}, ignoring')
             # already scraped
         except News.DoesNotExist:
-            timeout = 2
+            timeout = 1
             try:
                 views.scrape_url(url)
                 time.sleep(timeout)
-                timeout = 2
+                timeout = 1
             except KeyboardInterrupt:
                 raise
             except:
-                timeout = timeout * 2
+                timeout = timeout * 1
                 pass
             pass
 
@@ -84,9 +84,11 @@ if True:
         pass
 
 if True:
+#for day in range(1, 10):
     for site in ['news', 'ent', 'sports', 'finance', 'tech', 'games', 'auto', 'edu', 'house']:
         try:
             url = f'http://roll.news.qq.com/interface/cpcroll.php?callback=rollback&site={site}&mode=1&cata=&date={time.strftime("%Y-%m-%d")}&page=1&_={int(time.time()*1000)}'
+            #url = f'http://roll.news.qq.com/interface/cpcroll.php?callback=rollback&site={site}&mode=1&cata=&date=2018-08-0{day}&page=1&_={int(time.time()*1000)}'
             headers = {
                 'User-Agent': common_ua[random.randint(0, len(common_ua)-1)],
                 'DNT': '1',
