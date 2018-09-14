@@ -75,7 +75,8 @@ def similar_news(request, id):
             #current_word_ids = set(Word.objects.filter(appearance=news).values_list('id', flat=True))
             # weight[news] = float(
             # len(word_ids & current_word_ids)) / len(word_ids | current_word_ids)
-            weight[news] = float(intersect) / union
+            if intersect < union:
+                weight[news] = float(intersect) / union
 
     print('after', time.time() - start_time)
     sorted_weight = sorted(weight.items(), key=lambda kv: kv[1], reverse=True)
@@ -298,7 +299,7 @@ def search(request):
                             'Asia/Shanghai').localize(to_time))
                     for news in all_news:
                         tf = math.log(
-                            1 + sum(1 for _ in regexp.finditer(news.full_body)))
+                            1 + sum(1 for _ in regexp.finditer(news.abstract)))
                         tf = tf + \
                             math.log(
                                 1+sum(1 for _ in regexp.finditer(news.title)) * 10)
