@@ -276,12 +276,14 @@ def search(request):
             from_time = parse_datetime(request.GET['from_time'])
             if not from_time:
                 from_time = parse_date(request.GET['from_time'])
-                from_time = datetime.combine(from_time, datetime.min.time())
+                if from_time:
+                    from_time = datetime.combine(from_time, datetime.min.time())
         if 'to_time' in request.GET:
             to_time = parse_datetime(request.GET['to_time'])
             if not to_time:
                 to_time = parse_date(request.GET['to_time'])
-                to_time = datetime.combine(to_time, datetime.max.time())
+                if to_time:
+                    to_time = datetime.combine(to_time, datetime.max.time())
         keyword = request.GET['keyword']
         context['keyword'] = keyword
         words = set(jieba.cut_for_search(keyword))

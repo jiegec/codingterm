@@ -1,0 +1,24 @@
+{{ error }}
+<form action="{% url 'register' %}" method="POST">
+    {% csrf_token %}
+    <div>
+        <label>Username: </label>
+        <input type="text" name="username">
+    </div>
+    <div>
+        <label>Password: </label>
+        <input type="password" name="password">
+    </div>
+    <div>
+        <label>Password Repeart: </label>
+        <input type="password" name="password-repeat">
+    </div>
+    <div>
+        <label>User type:</label>
+        <input type="radio" id="user" name="kind" checked value="user">
+        <label for="user">User</label>
+        <input type="radio" id="admin" name="kind" value="admin">
+        <label for="admin">Admin</label>
+    </div>
+    <input type="submit" value="Register">
+</form>

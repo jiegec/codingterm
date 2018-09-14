@@ -1,0 +1,28 @@
+{% if user.kind == 'user' %}
+<div>
+    You are a ordinary user.
+    Your name is {{ user.name }} and password is {{ user.password }}.
+</div>
+{% else %}
+<div>
+    You are admin.
+    Your name is {{ user.name }} and password is {{ user.password }}.
+</div>
+<div>
+    All Users:
+    {% for user in all_users %}
+    <div>
+        Name: {{ user.name }} Password: {{ user.password }}
+        <form action="{% url 'delete_user'%}" method="POST">
+            {% csrf_token %}
+            <input type="text" name="name" value="{{ user.name }}" style="display:none">
+            <input type="submit" value="Delete User">
+        </form>
+    </div>
+    {% endfor %}
+</div>
+{% endif %}
+<form action="{% url 'logout' %}" method="POST">
+    {% csrf_token %}
+    <input type="submit" value="Logout">
+</form>
