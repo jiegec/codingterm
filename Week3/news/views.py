@@ -1,7 +1,7 @@
 from django.shortcuts import render, get_object_or_404, redirect
 from django.http import HttpResponse
 from django.db import transaction, connection
-from django.utils.dateparse import parse_datetime
+from django.utils.dateparse import parse_date, parse_datetime
 from django.db.models import Count, Q
 import pytz
 import requests
@@ -14,6 +14,7 @@ import json
 import re
 import math
 import pprofile
+from datetime import datetime
 
 from .models import News, Word
 
@@ -273,8 +274,14 @@ def search(request):
         to_time = None
         if 'from_time' in request.GET:
             from_time = parse_datetime(request.GET['from_time'])
+            if not from_time:
+                from_time = parse_date(request.GET['from_time'])
+                from_time = datetime.combine(from_time, datetime.min.time())
         if 'to_time' in request.GET:
             to_time = parse_datetime(request.GET['to_time'])
+            if not to_time:
+                to_time = parse_date(request.GET['to_time'])
+                to_time = datetime.combine(to_time, datetime.max.time())
         keyword = request.GET['keyword']
         context['keyword'] = keyword
         words = set(jieba.cut_for_search(keyword))
@@ -333,6 +340,7 @@ def search(request):
             context['from_time_text'] = request.GET['from_time']
         if 'to_time' in request.GET:
             context['to_time_text'] = request.GET['to_time']
+        context['total'] = len(sorted_count)
         context['time'] = time.time() - start_time
     else:
         context['keyword'] = ''
@@ -347,4 +355,5 @@ def show_all(request):
     paging(request.GET, context, News.objects.count())
     context['news'] = News.objects.all()[context['from_index']                                         :context['to_index']]
     context['time'] = time.time() - start_time
+    context['total'] = News.objects.count()
     return render(request, 'news/show_all.html', context)

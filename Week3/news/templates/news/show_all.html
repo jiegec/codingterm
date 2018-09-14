@@ -3,7 +3,7 @@
 {% load tz %}
 <div class="container">
     <div class="result-info">
-        Showing news from {{ from_index }} to {{ to_index }}. Found using {{ time }} secs.
+        Showing news from {{ from_index }} to {{ to_index }} with a total of {{ total }}. Found using {{ time }} secs.
     </div>
     {% for article in news %}
     <div class="article-container">
